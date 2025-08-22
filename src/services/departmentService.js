@@ -1,39 +1,29 @@
-const departmentModel = require("../models/departmentModel");
+import * as departmentModel from "../models/departmentModel.js";
 
-async function getAllDepartments(filters = {}) {
+export async function getAllDepartments(filters = {}) {
   return await departmentModel.getAllDepartments(filters);
 }
 
-async function getDepartmentByID(id) {
+export async function getDepartmentByID(id) {
   return await departmentModel.getDepartmentByID(id);
 }
 
-async function createDepartment(departmentData) {
+export async function createDepartment(departmentData) {
   return await departmentModel.createDepartment(departmentData);
 }
 
-async function deleteDepartmentsByIDs(ids) {
+export async function deleteDepartmentsByIDs(ids) {
   return await departmentModel.deleteDepartmentsByIDs(ids);
 }
 
-async function updateFullDepartment(id, departmentData) {
+export async function updateFullDepartment(id, departmentData) {
   return await departmentModel.updateFullDepartment(id, departmentData);
 }
 
-async function updateDepartmentPartial(id, fieldsToUpdate) {
+export async function updateDepartmentPartial(id, fieldsToUpdate) {
   return await departmentModel.updateDepartmentPartial(id, fieldsToUpdate);
 }
 
-async function deleteDepartmentByID(id) {
+export async function deleteDepartmentByID(id) {
   return await departmentModel.deleteDepartmentByID(id);
 }
-
-module.exports = {
-  getAllDepartments,
-  getDepartmentByID,
-  createDepartment,
-  deleteDepartmentsByIDs,
-  updateFullDepartment,
-  updateDepartmentPartial,
-  deleteDepartmentByID,
-};

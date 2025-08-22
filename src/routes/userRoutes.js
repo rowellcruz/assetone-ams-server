@@ -1,8 +1,9 @@
-const express = require('express');
+import express from 'express';
+import * as userController from '../controllers/userController.js';
+import authenticate from '../middlewares/authMiddleware.js';
+import asyncHandler from '../utils/asyncHandler.js';
+
 const router = express.Router();
-const userController = require('../controllers/userController');
-const authenticate = require('../middlewares/authMiddleware');
-const asyncHandler = require('../utils/asyncHandler');
 
 router.get('/', authenticate, asyncHandler(userController.getUsers));
 router.get('/me', authenticate, asyncHandler(userController.getMe));
@@ -13,4 +14,4 @@ router.put('/:id', authenticate, asyncHandler(userController.replaceUser));
 router.patch('/:id', authenticate, asyncHandler(userController.updateUserPartial));
 router.delete('/:id', authenticate, asyncHandler(userController.deleteUserByID));
 
-module.exports = router;
+export default router;

@@ -1,8 +1,9 @@
-const express = require('express');
+import express from 'express';
+import * as subLocationController from '../controllers/subLocationController.js';
+import asyncHandler from '../utils/asyncHandler.js';
+import authenticate from '../middlewares/authMiddleware.js';
+
 const router = express.Router();
-const subLocationController = require('../controllers/subLocationController');
-const asyncHandler = require('../utils/asyncHandler');
-const authenticate = require('../middlewares/authMiddleware');
 
 router.get('/', authenticate, asyncHandler(subLocationController.getSubLocations));
 router.get('/:id', authenticate, asyncHandler(subLocationController.getSubLocationByID));
@@ -12,4 +13,4 @@ router.post('/bulk-delete', authenticate, asyncHandler(subLocationController.del
 router.patch('/:id', authenticate, asyncHandler(subLocationController.updateSubLocationPartial));
 router.delete('/:id', authenticate, asyncHandler(subLocationController.deleteSubLocationByID));
 
-module.exports = router;
+export default router;

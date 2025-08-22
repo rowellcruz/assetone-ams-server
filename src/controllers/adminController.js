@@ -1,6 +1,6 @@
-const adminService = require("../services/adminService");
+import * as adminService from "../services/adminService.js";
 
-async function resetUserPassword(req, res) {
+export async function resetUserPassword(req, res) {
   try {
     const { userId, tempPassword, adminId } = req.body;
     await adminService.resetPasswordForUser(userId, tempPassword, adminId);
@@ -9,5 +9,3 @@ async function resetUserPassword(req, res) {
     res.status(400).json({ error: err.message });
   }
 }
-
-module.exports = { resetUserPassword };

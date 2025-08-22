@@ -1,9 +1,10 @@
-const express = require('express');
+import express from 'express';
+import { getCompletionRequests } from '../controllers/completionRequestController.js';
+import asyncHandler from '../utils/asyncHandler.js';
+import authenticate from '../middlewares/authMiddleware.js';
+
 const router = express.Router();
-const completionRequestController = require('../controllers/completionRequestController');
-const asyncHandler = require('../utils/asyncHandler');
-const authenticate = require('../middlewares/authMiddleware');
 
-router.get('/', authenticate, asyncHandler(completionRequestController.getCompletionRequests));
+router.get('/', authenticate, asyncHandler(getCompletionRequests));
 
-module.exports = router;
+export default router;

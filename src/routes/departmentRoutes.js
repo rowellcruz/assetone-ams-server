@@ -1,8 +1,9 @@
-const express = require('express');
+import express from 'express';
+import * as departmentController from '../controllers/departmentController.js';
+import asyncHandler from '../utils/asyncHandler.js';
+import authenticate from '../middlewares/authMiddleware.js';
+
 const router = express.Router();
-const departmentController = require('../controllers/departmentController');
-const asyncHandler = require('../utils/asyncHandler');
-const authenticate = require('../middlewares/authMiddleware');
 
 router.get('/', authenticate, asyncHandler(departmentController.getDepartments));
 router.get('/:id', authenticate, asyncHandler(departmentController.getDepartmentByID));
@@ -12,5 +13,4 @@ router.put('/:id', authenticate, asyncHandler(departmentController.replaceDepart
 router.patch('/:id', authenticate, asyncHandler(departmentController.updateDepartmentPartial));
 router.delete('/:id', authenticate, asyncHandler(departmentController.deleteDepartmentByID));
 
-
-module.exports = router;
+export default router;

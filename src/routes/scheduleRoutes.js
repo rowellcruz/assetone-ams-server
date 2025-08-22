@@ -1,8 +1,9 @@
-const express = require('express');
+import express from 'express';
+import * as scheduleController from '../controllers/scheduleController.js';
+import asyncHandler from '../utils/asyncHandler.js';
+import authenticate from '../middlewares/authMiddleware.js';
+
 const router = express.Router();
-const scheduleController = require('../controllers/scheduleController');
-const asyncHandler = require('../utils/asyncHandler');
-const authenticate = require('../middlewares/authMiddleware');
 
 router.get('/details', authenticate, asyncHandler(scheduleController.getSchedules));
 router.get('/full', authenticate, asyncHandler(scheduleController.getScheduleOccurrencesWithTemplate));
@@ -10,4 +11,4 @@ router.post('/:id/start', authenticate, asyncHandler(scheduleController.startSch
 router.post('/:id/complete', authenticate, asyncHandler(scheduleController.completeScheduleOccurrence));
 router.post('/:id/skip', authenticate, asyncHandler(scheduleController.skipScheduleOccurrence));
 
-module.exports = router;
+export default router;

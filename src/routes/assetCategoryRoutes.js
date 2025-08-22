@@ -1,8 +1,9 @@
-const express = require('express');
+import express from 'express';
+import * as assetCategoryController from '../controllers/assetCategoryController.js';
+import asyncHandler from '../utils/asyncHandler.js';
+import authenticate from '../middlewares/authMiddleware.js';
+
 const router = express.Router();
-const assetCategoryController = require('../controllers/assetCategoryController');
-const asyncHandler = require('../utils/asyncHandler');
-const authenticate = require('../middlewares/authMiddleware');
 
 router.get('/', authenticate, asyncHandler(assetCategoryController.getAssetCategories));
 router.get('/:id', authenticate, asyncHandler(assetCategoryController.getAssetCategoryByID));
@@ -12,4 +13,4 @@ router.put('/:id', authenticate, asyncHandler(assetCategoryController.replaceAss
 router.patch('/:id', authenticate, asyncHandler(assetCategoryController.updateAssetCategoryPartial));
 router.delete('/:id', authenticate, asyncHandler(assetCategoryController.deleteAssetCategoryByID));
 
-module.exports = router;
+export default router;

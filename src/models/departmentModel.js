@@ -1,59 +1,57 @@
-const db = require('../config/db');
+import db from '../config/db.js';
 
 async function getAllDepartments(filters) {
-  const [rows] = await db.query('SELECT * FROM departments');
+  const { rows } = await db.query('SELECT * FROM departments');
   return rows;
 }
 
 async function getDepartmentByID(id) {
-  const [rows] = await db.query('SELECT * FROM departments WHERE id = ?', [id]);
+  const { rows } = await db.query('SELECT * FROM departments WHERE id = $1', [id]);
   return rows[0];
 }
 
 async function createDepartment(departmentData) {
   const { name, created_by, updated_by } = departmentData;
-  const [result] = await db.query(
-    "INSERT INTO departments (name, created_by, updated_by) VALUES (?, ?, ?)",
+  const { rows } = await db.query(
+    "INSERT INTO departments (name, created_by, updated_by) VALUES ($1, $2, $3) RETURNING id",
     [name, created_by, updated_by]
   );
-  return { id: result.insertId, ...departmentData };
+  return { id: rows[0].id, ...departmentData };
 }
 
 async function deleteDepartmentsByIDs(ids) {
   if (ids.length === 0) return;
-  const placeholders = ids.map(() => "?").join(", ");
+  const placeholders = ids.map((_, i) => `$${i + 1}`).join(", ");
   await db.query(`DELETE FROM departments WHERE id IN (${placeholders})`, ids);
 }
 
 async function updateFullDepartment(id, departmentData) {
   const { name, updated_by } = departmentData;
-  const [result] = await db.query(
-    "UPDATE departments SET name = ?, updated_by = ? WHERE id = ?",
+  const { rowCount } = await db.query(
+    "UPDATE departments SET name = $1, updated_by = $2 WHERE id = $3",
     [name, updated_by, id]
   );
-  return result.affectedRows > 0 ? { id, ...departmentData } : null;
+  return rowCount > 0 ? { id, ...departmentData } : null;
 }
 
 async function updateDepartmentPartial(id, fields) {
   const keys = Object.keys(fields);
   if (keys.length === 0) return null;
-
-  const updates = keys.map((key) => `${key} = ?`).join(", ");
-  const values = keys.map((key) => fields[key]);
-
-  const [result] = await db.query(`UPDATE departments SET ${updates} WHERE id = ?`, [
+  const updates = keys.map((key, i) => `${key} = $${i + 1}`).join(", ");
+  const values = Object.values(fields);
+  const { rowCount } = await db.query(`UPDATE departments SET ${updates} WHERE id = $${keys.length + 1}`, [
     ...values,
     id,
   ]);
-  return result.affectedRows > 0 ? { id, ...fields } : null;
+  return rowCount > 0 ? { id, ...fields } : null;
 }
 
 async function deleteDepartmentByID(id) {
-  const [result] = await db.query("DELETE FROM departments WHERE id = ?", [id]);
-  return result.affectedRows > 0;
+  const { rowCount } = await db.query("DELETE FROM departments WHERE id = $1", [id]);
+  return rowCount > 0;
 }
 
-module.exports = {
+export {
   getAllDepartments,
   getDepartmentByID,
   createDepartment,

@@ -1,27 +1,34 @@
-const express = require('express');
-const cors = require('cors');
+import express from 'express';
+import cors from 'cors';
+
+import userRoutes from './routes/userRoutes.js';
+import assetRoutes from './routes/assetRoutes.js';
+import assetUnitRoutes from './routes/assetUnitRoutes.js';
+import assetCategoryRoutes from './routes/assetCategoryRoutes.js';
+import scheduleTemplateRoutes from './routes/scheduleTemplateRoutes.js';
+import scheduleRoutes from './routes/scheduleRoutes.js';
+import completionRequestRoutes from './routes/completionRequestRoutes.js';
+import departmentRoutes from './routes/departmentRoutes.js';
+import locationRoutes from './routes/locationRoutes.js';
+import subLocationRoutes from './routes/subLocationRoutes.js';
+import vendorRoutes from './routes/vendorRoutes.js';
+import authRoutes from './routes/authRoutes.js';
+import adminRoutes from './routes/adminRoutes.js';
+
+import errorHandler from './middlewares/errorHandler.js';
+
 const app = express();
-const userRoutes = require('./routes/userRoutes');
-const assetRoutes = require('./routes/assetRoutes');
-const assetUnitRoutes = require('./routes/assetUnitRoutes');
-const assetCategoryRoutes = require('./routes/assetCategoryRoutes');
-const scheduleTemplateRoutes = require('./routes/scheduleTemplateRoutes');
-const scheduleRoutes = require('./routes/scheduleRoutes');
-const completionRequestRoutes = require('./routes/completionRequestRoutes');
-const departmentRoutes = require('./routes/departmentRoutes');
-const locationRoutes = require('./routes/locationRoutes');
-const subLocationRoutes = require('./routes/subLocationRoutes');
-const vendorRoutes = require('./routes/vendorRoutes');
-const authRoutes = require('./routes/authRoutes');
-const adminRoutes = require('./routes/adminRoutes');
-const errorHandler = require("./middlewares/errorHandler");
 
 app.use(cors({
-  origin: ["http://localhost:5173", "https://assetone-ams-client.vercel.app"],
+  origin: [
+    "http://localhost:5173",
+    "https://assetone-ams-client.vercel.app"
+  ],
   credentials: true
 }));
 
 app.use(express.json());
+
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/users', userRoutes);
@@ -35,6 +42,7 @@ app.use('/api/departments', departmentRoutes);
 app.use('/api/locations', locationRoutes);
 app.use('/api/sub-locations', subLocationRoutes);
 app.use('/api/vendors', vendorRoutes);
+
 app.use(errorHandler);
 
-module.exports = app;
+export default app;

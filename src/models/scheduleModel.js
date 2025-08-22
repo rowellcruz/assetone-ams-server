@@ -1,4 +1,4 @@
-const db = require("../config/db");
+import db from "../config/db.js";
 
 async function getAllSchedules(filters = {}) {
   let query = "SELECT * FROM schedule_occurrences";
@@ -6,7 +6,7 @@ async function getAllSchedules(filters = {}) {
   const values = [];
 
   if (filters.status) {
-    conditions.push("status = ?");
+    conditions.push(`status = $${values.length + 1}`);
     values.push(filters.status);
   }
 
@@ -14,12 +14,12 @@ async function getAllSchedules(filters = {}) {
     query += " WHERE " + conditions.join(" AND ");
   }
 
-  const [rows] = await db.execute(query, values);
+  const { rows } = await db.query(query, values);
   return rows;
 }
 
 async function getScheduleOccurrenceByID(id) {
-  const [rows] = await db.execute("SELECT * FROM schedule_occurrences WHERE id = ?", [id]);
+  const { rows } = await db.query("SELECT * FROM schedule_occurrences WHERE id = $1", [id]);
   return rows[0] || null;
 }
 
@@ -82,7 +82,7 @@ async function getAllScheduleOccurrencesWithTemplate(filters = {}) {
   const values = [];
 
   if (filters.templateId) {
-    conditions.push(`template_id = ?`);
+    conditions.push(`template_id = $${values.length + 1}`);
     values.push(filters.templateId);
   }
 
@@ -90,19 +90,18 @@ async function getAllScheduleOccurrencesWithTemplate(filters = {}) {
     query += ` WHERE ` + conditions.join(" AND ");
   }
 
-  // FINAL ORDER BY (use alias, not so.)
   query += ` ORDER BY scheduled_date IS NULL, scheduled_date ASC`;
 
-  const [rows] = await db.execute(query, values);
+  const { rows } = await db.query(query, values);
   return rows;
 }
 
 async function createSchedule(template_id, start_date) {
-  const [result] = await db.execute(
-    "INSERT INTO schedule_occurrences (template_id, scheduled_date) VALUES (?, ?)",
+  const { rows } = await db.query(
+    "INSERT INTO schedule_occurrences (template_id, scheduled_date) VALUES ($1, $2) RETURNING id",
     [template_id, start_date]
   );
-  return { id: result.insertId, template_id, scheduled_date: start_date };
+  return { id: rows[0].id, template_id, scheduled_date: start_date };
 }
 
 async function updateScheduleOccurrencePartial(id, fieldsToUpdate) {
@@ -111,32 +110,32 @@ async function updateScheduleOccurrencePartial(id, fieldsToUpdate) {
 
   if (keys.length === 0) return null;
 
-  const setClause = keys.map((key) => `${key} = ?`).join(", ");
-  const query = `UPDATE schedule_occurrences SET ${setClause} WHERE id = ?`;
+  const setClause = keys.map((key, i) => `${key} = $${i + 1}`).join(", ");
+  const query = `UPDATE schedule_occurrences SET ${setClause} WHERE id = $${keys.length + 1}`;
 
-  await db.execute(query, [...values, id]);
+  await db.query(query, [...values, id]);
   return getScheduleOccurrenceByID(id);
 }
 
 async function deleteScheduleOccurrenceByID(id) {
-  const [result] = await db.execute(
-    "DELETE FROM schedule_occurrences WHERE id = ?",
+  const { rowCount } = await db.query(
+    "DELETE FROM schedule_occurrences WHERE id = $1",
     [id]
   );
-  return result.affectedRows > 0;
+  return rowCount > 0;
 }
 
 async function deleteScheduleOccurrencesByIDs(ids) {
   if (!Array.isArray(ids) || ids.length === 0) return 0;
-  const placeholders = ids.map(() => "?").join(", ");
-  const [result] = await db.execute(
+  const placeholders = ids.map((_, i) => `$${i + 1}`).join(", ");
+  const { rowCount } = await db.query(
     `DELETE FROM schedule_occurrences WHERE id IN (${placeholders})`,
     ids
   );
-  return result.affectedRows;
+  return rowCount;
 }
 
-module.exports = {
+export {
   getAllSchedules,
   getAllScheduleOccurrencesWithTemplate,
   getScheduleOccurrenceByID,

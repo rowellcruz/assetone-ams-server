@@ -1,39 +1,29 @@
-const assetUnitModel = require("../models/assetUnitModel");
+import * as assetUnitModel from "../models/assetUnitModel.js";
 
-async function getAllAssetUnits(filters = {}) {
+export async function getAllAssetUnits(filters = {}) {
   return await assetUnitModel.getAllAssetUnits(filters);
 }
 
-async function getAssetUnitByID(id) {
+export async function getAssetUnitByID(id) {
   return await assetUnitModel.getAssetUnitByID(id);
 }
 
-async function getAssetUnitsByAssetID(assetId) {
+export async function getAssetUnitsByAssetID(assetId) {
   return await assetUnitModel.getAllAssetUnits({ assetId });
 }
 
-async function createAssetUnit(assetUnitData) {
+export async function createAssetUnit(assetUnitData) {
   return await assetUnitModel.createAssetUnit(assetUnitData);
 }
 
-async function updateAssetUnitPartial(id, fieldsToUpdate) {
+export async function updateAssetUnitPartial(id, fieldsToUpdate) {
   return await assetUnitModel.updateAssetUnitPartial(id, fieldsToUpdate);
 }
 
-async function deleteAssetUnitByID(id) {
+export async function deleteAssetUnitByID(id) {
   return await assetUnitModel.deleteAssetUnitByID(id);
 }
 
-async function deleteAssetUnitsByIDs(ids) {
+export async function deleteAssetUnitsByIDs(ids) {
   return await assetUnitModel.deleteAssetUnitsByIDs(ids);
 }
-
-module.exports = {
-  getAllAssetUnits,
-  getAssetUnitByID,
-  getAssetUnitsByAssetID,
-  createAssetUnit,
-  updateAssetUnitPartial,
-  deleteAssetUnitByID,
-  deleteAssetUnitsByIDs,
-};

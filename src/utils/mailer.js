@@ -1,4 +1,4 @@
-const nodemailer = require("nodemailer");
+import nodemailer from "nodemailer";
 
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
@@ -10,7 +10,7 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-async function sendTempPassword(toEmail, tempPassword) {
+export async function sendTempPassword(toEmail, tempPassword) {
   await transporter.sendMail({
     from: '"AssetONE Support" <cruzrowellt11@gmail.com>',
     to: toEmail,
@@ -18,5 +18,3 @@ async function sendTempPassword(toEmail, tempPassword) {
     html: `<p>Your temporary password is: <strong>${tempPassword}</strong></p><p>Please change it after logging in.</p>`,
   });
 }
-
-module.exports = { sendTempPassword };

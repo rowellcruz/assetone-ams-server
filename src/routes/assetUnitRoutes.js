@@ -1,8 +1,9 @@
-const express = require('express');
+import express from 'express';
+import * as assetUnitsController from '../controllers/assetUnitController.js';
+import asyncHandler from '../utils/asyncHandler.js';
+import authenticate from '../middlewares/authMiddleware.js';
+
 const router = express.Router();
-const assetUnitsController = require('../controllers/assetUnitController');
-const asyncHandler = require('../utils/asyncHandler');
-const authenticate = require('../middlewares/authMiddleware');
 
 router.get('/', authenticate, asyncHandler(assetUnitsController.getAssetUnits));
 router.get('/:id', authenticate, asyncHandler(assetUnitsController.getAssetUnitByID));
@@ -12,4 +13,4 @@ router.post('/bulk-delete', authenticate, asyncHandler(assetUnitsController.dele
 router.patch('/:id', authenticate, asyncHandler(assetUnitsController.updateAssetUnitPartial));
 router.delete('/:id', authenticate, asyncHandler(assetUnitsController.deleteAssetUnitByID));
 
-module.exports = router;
+export default router;

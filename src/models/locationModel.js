@@ -1,10 +1,10 @@
-const db = require('../config/db');
+import db from '../config/db.js';
 
 async function getAllLocations() {
-  const [locations] = await db.query('SELECT * FROM locations');
+  const { rows: locations } = await db.query('SELECT * FROM locations');
 
   for (const loc of locations) {
-    const [subs] = await db.query('SELECT * FROM sub_locations WHERE location_id = ?', [loc.id]);
+    const { rows: subs } = await db.query('SELECT * FROM sub_locations WHERE location_id = $1', [loc.id]);
     loc.sublocations = subs;
   }
 
@@ -12,11 +12,11 @@ async function getAllLocations() {
 }
 
 async function getLocationByID(id) {
-  const [locations] = await db.query('SELECT * FROM locations WHERE id = ?', [id]);
+  const { rows: locations } = await db.query('SELECT * FROM locations WHERE id = $1', [id]);
   const location = locations[0];
   if (!location) return null;
 
-  const [subs] = await db.query('SELECT * FROM sub_locations WHERE location_id = ?', [id]);
+  const { rows: subs } = await db.query('SELECT * FROM sub_locations WHERE location_id = $1', [id]);
   location.sublocations = subs;
 
   return location;
@@ -24,90 +24,81 @@ async function getLocationByID(id) {
 
 async function createLocation(locationData) {
   const { name, created_by, updated_by, sublocations = [] } = locationData;
-
-  const conn = await db.getConnection();
+  const client = await db.connect();
   try {
-    await conn.beginTransaction();
+    await client.query('BEGIN');
 
-    const [result] = await conn.query(
-      "INSERT INTO locations (name, created_by, updated_by) VALUES (?, ?, ?)",
+    const { rows } = await client.query(
+      "INSERT INTO locations (name, created_by, updated_by) VALUES ($1, $2, $3) RETURNING id",
       [name, created_by, updated_by]
     );
 
-    const locationId = result.insertId;
+    const locationId = rows[0].id;
 
     for (const sub of sublocations) {
-      await conn.query(
-        "INSERT INTO sub_locations (location_id, name, created_by, updated_by) VALUES (?, ?, ?, ?)",
+      await client.query(
+        "INSERT INTO sub_locations (location_id, name, created_by, updated_by) VALUES ($1, $2, $3, $4)",
         [locationId, sub, created_by, updated_by]
       );
     }
 
-    await conn.commit();
+    await client.query('COMMIT');
     return { id: locationId, name, sublocations };
 
   } catch (err) {
-    await conn.rollback();
+    await client.query('ROLLBACK');
     throw err;
   } finally {
-    conn.release();
+    client.release();
   }
 }
 
 async function deleteLocationsByIDs(ids) {
   if (ids.length === 0) return;
-  const placeholders = ids.map(() => "?").join(", ");
-
-  const conn = await db.getConnection();
+  const placeholders = ids.map((_, i) => `$${i + 1}`).join(", ");
+  const client = await db.connect();
   try {
-    await conn.beginTransaction();
-
-    // Delete sub_locations first
-    await conn.query(`DELETE FROM sub_locations WHERE location_id IN (${placeholders})`, ids);
-
-    // Then delete main locations
-    await conn.query(`DELETE FROM locations WHERE id IN (${placeholders})`, ids);
-
-    await conn.commit();
+    await client.query('BEGIN');
+    await client.query(`DELETE FROM sub_locations WHERE location_id IN (${placeholders})`, ids);
+    await client.query(`DELETE FROM locations WHERE id IN (${placeholders})`, ids);
+    await client.query('COMMIT');
   } catch (err) {
-    await conn.rollback();
+    await client.query('ROLLBACK');
     throw err;
   } finally {
-    conn.release();
+    client.release();
   }
 }
 
 async function updateFullLocation(id, locationData) {
   const { name, updated_by, sublocations } = locationData;
-
-  const conn = await db.getConnection();
+  const client = await db.connect();
   try {
-    await conn.beginTransaction();
-
-    const [result] = await conn.query(
-      "UPDATE locations SET name = ?, updated_by = ? WHERE id = ?",
+    await client.query('BEGIN');
+    const { rowCount } = await client.query(
+      "UPDATE locations SET name = $1, updated_by = $2 WHERE id = $3",
       [name, updated_by, id]
     );
 
     if (sublocations) {
-      await conn.query("DELETE FROM sub_locations WHERE location_id = ?", [id]);
+      await client.query("DELETE FROM sub_locations WHERE location_id = $1", [id]);
 
       for (const sub of sublocations) {
-        await conn.query(
-          "INSERT INTO sub_locations (location_id, name, created_by, updated_by) VALUES (?, ?, ?, ?)",
+        await client.query(
+          "INSERT INTO sub_locations (location_id, name, created_by, updated_by) VALUES ($1, $2, $3, $4)",
           [id, sub, updated_by, updated_by]
         );
       }
     }
 
-    await conn.commit();
-    return result.affectedRows > 0 ? { id, name, sublocations } : null;
+    await client.query('COMMIT');
+    return rowCount > 0 ? { id, name, sublocations } : null;
 
   } catch (err) {
-    await conn.rollback();
+    await client.query('ROLLBACK');
     throw err;
   } finally {
-    conn.release();
+    client.release();
   }
 }
 
@@ -115,33 +106,34 @@ async function updateLocationPartial(id, fields) {
   const keys = Object.keys(fields);
   if (keys.length === 0) return null;
 
-  const updates = keys.map((key) => `${key} = ?`).join(", ");
-  const values = keys.map((key) => fields[key]);
+  const setClause = keys.map((key, i) => `${key} = $${i + 1}`).join(", ");
+  const values = Object.values(fields);
 
-  const [result] = await db.query(`UPDATE locations SET ${updates} WHERE id = ?`, [
+  const { rowCount } = await db.query(`UPDATE locations SET ${setClause} WHERE id = $${keys.length + 1}`, [
     ...values,
     id,
   ]);
-  return result.affectedRows > 0 ? { id, ...fields } : null;
+
+  return rowCount > 0 ? { id, ...fields } : null;
 }
 
 async function deleteLocationByID(id) {
-  const conn = await db.getConnection();
+  const client = await db.connect();
   try {
-    await conn.beginTransaction();
-    await conn.query("DELETE FROM sub_locations WHERE location_id = ?", [id]);
-    const [result] = await conn.query("DELETE FROM locations WHERE id = ?", [id]);
-    await conn.commit();
-    return result.affectedRows > 0;
+    await client.query('BEGIN');
+    await client.query("DELETE FROM sub_locations WHERE location_id = $1", [id]);
+    const { rowCount } = await client.query("DELETE FROM locations WHERE id = $1", [id]);
+    await client.query('COMMIT');
+    return rowCount > 0;
   } catch (err) {
-    await conn.rollback();
+    await client.query('ROLLBACK');
     throw err;
   } finally {
-    conn.release();
+    client.release();
   }
 }
 
-module.exports = {
+export {
   getAllLocations,
   getLocationByID,
   createLocation,

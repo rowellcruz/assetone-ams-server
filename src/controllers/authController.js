@@ -1,6 +1,6 @@
-const authService = require("../services/authService");
+import * as authService from "../services/authService.js";
 
-async function login(req, res) {
+export async function login(req, res) {
   const { email, password } = req.body;
 
   try {
@@ -15,7 +15,7 @@ async function login(req, res) {
   }
 }
 
-async function requestPasswordReset(req, res) {
+export async function requestPasswordReset(req, res) {
   try {
     const { email } = req.body;
     await authService.handlePasswordResetRequest(email);
@@ -25,6 +25,3 @@ async function requestPasswordReset(req, res) {
     res.status(500).json({ message: "If the email exists, a password reset link has been sent." });
   }
 }
-
-
-module.exports = { login, requestPasswordReset };

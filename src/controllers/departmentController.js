@@ -1,16 +1,15 @@
-const departmentService = require("../services/departmentService");
+import * as departmentService from "../services/departmentService.js";
 
-const getDepartments = async (req, res) => {
+export const getDepartments = async (req, res) => {
   const filters = {
     departmentId: req.query.departmentId,
-    // More filters if needed
   };
 
   const departments = await departmentService.getAllDepartments(filters);
   res.json(departments);
 };
 
-const getDepartmentByID = async (req, res) => {
+export const getDepartmentByID = async (req, res) => {
   const { id } = req.params;
   const department = await departmentService.getDepartmentByID(id);
   if (!department) {
@@ -20,12 +19,12 @@ const getDepartmentByID = async (req, res) => {
   res.json(department);
 };
 
-const createDepartment = async (req, res) => {
+export const createDepartment = async (req, res) => {
   const createdDepartment = await departmentService.createDepartment(req.body);
   res.status(201).json(createdDepartment);
 };
 
-const deleteDepartmentsByIDs = async (req, res) => {
+export const deleteDepartmentsByIDs = async (req, res) => {
   const { ids } = req.body;
   if (!Array.isArray(ids) || ids.length === 0) {
     res.status(400);
@@ -35,7 +34,7 @@ const deleteDepartmentsByIDs = async (req, res) => {
   res.json({ message: "Departments deleted successfully" });
 };
 
-const replaceDepartment = async (req, res) => {
+export const replaceDepartment = async (req, res) => {
   const { id } = req.params;
   const updatedDepartment = await departmentService.updateFullDepartment(id, req.body);
   if (!updatedDepartment) {
@@ -45,7 +44,7 @@ const replaceDepartment = async (req, res) => {
   res.json(updatedDepartment);
 };
 
-const updateDepartmentPartial = async (req, res) => {
+export const updateDepartmentPartial = async (req, res) => {
   const { id } = req.params;
   const updatedDepartment = await departmentService.updateDepartmentPartial(id, req.body);
   if (!updatedDepartment) {
@@ -55,7 +54,7 @@ const updateDepartmentPartial = async (req, res) => {
   res.json(updatedDepartment);
 };
 
-const deleteDepartmentByID = async (req, res) => {
+export const deleteDepartmentByID = async (req, res) => {
   const { id } = req.params;
   const deleted = await departmentService.deleteDepartmentByID(id);
   if (!deleted) {
@@ -63,14 +62,4 @@ const deleteDepartmentByID = async (req, res) => {
     throw new Error("Department not found");
   }
   res.json({ message: "Department deleted successfully" });
-};
-
-module.exports = {
-  getDepartments,
-  getDepartmentByID,
-  createDepartment,
-  deleteDepartmentsByIDs,
-  replaceDepartment,
-  updateDepartmentPartial,
-  deleteDepartmentByID,
 };

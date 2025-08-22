@@ -1,9 +1,9 @@
-const userModel = require("../models/userModel");
-const resetModel = require('../models/resetRequestModel');
-const bcrypt = require("bcrypt");
-const { generateToken } = require("../utils/tokenUtils");
+import * as userModel from "../models/userModel.js";
+import * as resetModel from "../models/resetRequestModel.js";
+import bcrypt from "bcrypt";
+import { generateToken } from "../utils/tokenUtils.js";
 
-async function login(email, password) {
+export async function login(email, password) {
   const user = await userModel.getUserDataByEmail(email);
   if (!user) throw new Error("Invalid email or password");
 
@@ -14,7 +14,7 @@ async function login(email, password) {
   return { token, user };
 }
 
-async function handlePasswordResetRequest(email) {
+export async function handlePasswordResetRequest(email) {
   const user = await userModel.getUserDataByEmail(email);
 
   if (!user) {
@@ -30,5 +30,3 @@ async function handlePasswordResetRequest(email) {
 
   await resetModel.create(user.id);
 }
-
-module.exports = { login, handlePasswordResetRequest };

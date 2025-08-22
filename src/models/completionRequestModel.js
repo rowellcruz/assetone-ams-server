@@ -1,4 +1,4 @@
-const db = require("../config/db");
+import db from "../config/db.js";
 
 async function getAllCompletionRequests(filters = {}) {
   let query = "SELECT * FROM completion_requests";
@@ -6,7 +6,7 @@ async function getAllCompletionRequests(filters = {}) {
   const values = [];
 
   if (filters.status) {
-    conditions.push("status = ?");
+    conditions.push(`status = $${values.length + 1}`);
     values.push(filters.status);
   }
 
@@ -14,10 +14,8 @@ async function getAllCompletionRequests(filters = {}) {
     query += " WHERE " + conditions.join(" AND ");
   }
 
-  const [rows] = await db.execute(query, values);
+  const { rows } = await db.query(query, values);
   return rows;
 }
 
-module.exports = {
-  getAllCompletionRequests,
-};
+export { getAllCompletionRequests };

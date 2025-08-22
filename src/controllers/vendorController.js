@@ -1,15 +1,12 @@
-const vendorService = require("../services/vendorService");
+import * as vendorService from "../services/vendorService.js";
 
-const getVendors = async (req, res) => {
-  const filters = {
-    // Optional: Add filters like name, created_by, etc.
-  };
-
+export const getVendors = async (req, res) => {
+  const filters = {};
   const vendors = await vendorService.getAllVendors(filters);
   res.json(vendors);
 };
 
-const getVendorByID = async (req, res) => {
+export const getVendorByID = async (req, res) => {
   const { id } = req.params;
   const vendor = await vendorService.getVendorByID(id);
   if (!vendor) {
@@ -19,9 +16,8 @@ const getVendorByID = async (req, res) => {
   res.json(vendor);
 };
 
-const createVendor = async (req, res) => {
+export const createVendor = async (req, res) => {
   const { offers = [], ...vendorData } = req.body;
-
   const createdVendor = await vendorService.createVendor(vendorData);
 
   if (offers.length > 0) {
@@ -31,7 +27,7 @@ const createVendor = async (req, res) => {
   res.status(201).json({ ...createdVendor, offers });
 };
 
-const deleteVendorsByIDs = async (req, res) => {
+export const deleteVendorsByIDs = async (req, res) => {
   const { ids } = req.body;
   if (!Array.isArray(ids) || ids.length === 0) {
     res.status(400);
@@ -41,7 +37,7 @@ const deleteVendorsByIDs = async (req, res) => {
   res.json({ message: "Vendors deleted successfully" });
 };
 
-const replaceVendor = async (req, res) => {
+export const replaceVendor = async (req, res) => {
   const { id } = req.params;
   const { offers = [], ...vendorData } = req.body;
 
@@ -56,7 +52,7 @@ const replaceVendor = async (req, res) => {
   res.json({ ...updatedVendor, offers });
 };
 
-const updateVendorPartial = async (req, res) => {
+export const updateVendorPartial = async (req, res) => {
   const { id } = req.params;
   const updatedVendor = await vendorService.updateVendorPartial(id, req.body);
   if (!updatedVendor) {
@@ -66,7 +62,7 @@ const updateVendorPartial = async (req, res) => {
   res.json(updatedVendor);
 };
 
-const deleteVendorByID = async (req, res) => {
+export const deleteVendorByID = async (req, res) => {
   const { id } = req.params;
   const deleted = await vendorService.deleteVendorByID(id);
   if (!deleted) {
@@ -74,14 +70,4 @@ const deleteVendorByID = async (req, res) => {
     throw new Error("Vendor not found");
   }
   res.json({ message: "Vendor deleted successfully" });
-};
-
-module.exports = {
-  getVendors,
-  getVendorByID,
-  createVendor,
-  deleteVendorsByIDs,
-  replaceVendor,
-  updateVendorPartial,
-  deleteVendorByID,
 };

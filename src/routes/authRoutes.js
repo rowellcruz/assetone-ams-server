@@ -1,8 +1,9 @@
-const express = require('express');
+import express from 'express';
+import { login, requestPasswordReset } from '../controllers/authController.js';
+
 const router = express.Router();
-const authController = require('../controllers/authController');
 
-router.post('/login', authController.login);
-router.post('/request-password-reset', authController.requestPasswordReset);
+router.post('/login', login);
+router.post('/request-password-reset', requestPasswordReset);
 
-module.exports = router;
+export default router;

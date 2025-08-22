@@ -1,9 +1,9 @@
-const bcrypt = require("bcrypt");
-const userModel = require("../models/userModel");
-const resetModel = require("../models/resetRequestModel");
-const mailer = require("../utils/mailer");
+import * as bcrypt from "bcrypt";
+import * as userModel from "../models/userModel.js";
+import * as resetModel from "../models/resetRequestModel.js";
+import * as mailer from "../utils/mailer.js";
 
-async function resetPasswordForUser(userId, tempPassword, adminId) {
+export async function resetPasswordForUser(userId, tempPassword, adminId) {
   const hashed = await bcrypt.hash(tempPassword, 10);
 
   await userModel.updatePassword(userId, hashed);
@@ -12,5 +12,3 @@ async function resetPasswordForUser(userId, tempPassword, adminId) {
   const user = await userModel.getUserDataById(userId);
   await mailer.sendTempPassword(user.email, tempPassword);
 }
-
-module.exports = { resetPasswordForUser };

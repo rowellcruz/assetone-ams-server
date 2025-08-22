@@ -1,16 +1,15 @@
-const assetCategoryService = require("../services/assetCategoryService");
+import * as assetCategoryService from "../services/assetCategoryService.js";
 
-const getAssetCategories = async (req, res) => {
+export const getAssetCategories = async (req, res) => {
   const filters = {
     departmentId: req.query.departmentId,
-    // More filters for categories if needed
   };
 
   const categories = await assetCategoryService.getAllAssetCategories(filters);
   res.json(categories);
 };
 
-const getAssetCategoryByID = async (req, res) => {
+export const getAssetCategoryByID = async (req, res) => {
   const { id } = req.params;
   const user = await assetCategoryService.getAssetCategoryByID(id);
   if (!user) {
@@ -20,14 +19,12 @@ const getAssetCategoryByID = async (req, res) => {
   res.json(user);
 };
 
-const createAssetCategory = async (req, res) => {
-  const createdAssetCategory = await assetCategoryService.createAssetCategory(
-    req.body
-  );
+export const createAssetCategory = async (req, res) => {
+  const createdAssetCategory = await assetCategoryService.createAssetCategory(req.body);
   res.status(201).json(createdAssetCategory);
 };
 
-const deleteAssetCategoriesByIDs = async (req, res) => {
+export const deleteAssetCategoriesByIDs = async (req, res) => {
   const { ids } = req.body;
   if (!Array.isArray(ids) || ids.length === 0) {
     res.status(400);
@@ -37,7 +34,7 @@ const deleteAssetCategoriesByIDs = async (req, res) => {
   res.json({ message: "Asset categories deleted successfully" });
 };
 
-const replaceAssetCategory = async (req, res) => {
+export const replaceAssetCategory = async (req, res) => {
   const { id } = req.params;
   const updatedUser = await assetCategoryService.updateFullAssetCategory(id, req.body);
   if (!updatedUser) {
@@ -47,7 +44,7 @@ const replaceAssetCategory = async (req, res) => {
   res.json(updatedUser);
 };
 
-const updateAssetCategoryPartial = async (req, res) => {
+export const updateAssetCategoryPartial = async (req, res) => {
   const { id } = req.params;
   const updatedUser = await assetCategoryService.updateAssetCategoryPartial(id, req.body);
   if (!updatedUser) {
@@ -57,7 +54,7 @@ const updateAssetCategoryPartial = async (req, res) => {
   res.json(updatedUser);
 };
 
-const deleteAssetCategoryByID = async (req, res) => {
+export const deleteAssetCategoryByID = async (req, res) => {
   const { id } = req.params;
   const deleted = await assetCategoryService.deleteAssetCategoryByID(id);
   if (!deleted) {
@@ -65,14 +62,4 @@ const deleteAssetCategoryByID = async (req, res) => {
     throw new Error("Asset category not found");
   }
   res.json({ message: "Asset category deleted successfully" });
-};
-
-module.exports = { 
-  getAssetCategories, 
-  getAssetCategoryByID,
-  createAssetCategory,
-  deleteAssetCategoriesByIDs,
-  replaceAssetCategory,
-  updateAssetCategoryPartial,
-  deleteAssetCategoryByID,
 };

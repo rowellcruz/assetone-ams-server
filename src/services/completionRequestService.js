@@ -1,9 +1,5 @@
-const completionRequestModel = require("../models/completionRequestModel");
+import * as completionRequestModel from "../models/completionRequestModel.js";
 
-async function getAllCompletionRequests(filters = {}) {
+export async function getAllCompletionRequests(filters = {}) {
   return await completionRequestModel.getAllCompletionRequests(filters);
 }
-
-module.exports = {
-  getAllCompletionRequests,
-};

@@ -1,26 +1,24 @@
-const scheduleService = require("../services/scheduleService");
+import * as scheduleService from "../services/scheduleService.js";
 
-const getSchedules = async (req, res) => {
+export const getSchedules = async (req, res) => {
   const filters = {
     status: req.query.status,
-    // Add more filters if needed
   };
 
   const schedules = await scheduleService.getAllSchedules(filters);
   res.json(schedules);
 };
 
-const getScheduleOccurrencesWithTemplate = async (req, res) => {
+export const getScheduleOccurrencesWithTemplate = async (req, res) => {
   const filters = {
     status: req.query.status,
-    // Add more filters if needed
   };
 
   const schedules = await scheduleService.getAllScheduleOccurrencesWithTemplate(filters);
   res.json(schedules);
 };
 
-const startScheduleOccurrence = async (req, res) => {
+export const startScheduleOccurrence = async (req, res) => {
   const { id } = req.params;
   const { started_by } = req.body;
 
@@ -34,7 +32,7 @@ const startScheduleOccurrence = async (req, res) => {
   res.json(updated);
 };
 
-const completeScheduleOccurrence = async (req, res) => {
+export const completeScheduleOccurrence = async (req, res) => {
   const { id } = req.params;
   const { completed_by } = req.body;
 
@@ -48,7 +46,7 @@ const completeScheduleOccurrence = async (req, res) => {
   res.json(updated);
 };
 
-const skipScheduleOccurrence = async (req, res) => {
+export const skipScheduleOccurrence = async (req, res) => {
   const { id } = req.params;
   const { skipped_by, reason } = req.body;
 
@@ -60,13 +58,4 @@ const skipScheduleOccurrence = async (req, res) => {
   }
 
   res.json(updated);
-};
-
-
-module.exports = {
-  getSchedules,
-  getScheduleOccurrencesWithTemplate,
-  startScheduleOccurrence,
-  completeScheduleOccurrence,
-  skipScheduleOccurrence,
 };

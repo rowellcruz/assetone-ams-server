@@ -1,15 +1,15 @@
-const db = require("../config/db");
+import db from "../config/db.js";
 
 async function getAllAssetUnits(filters = {}) {
   let query = `
     SELECT 
-    au.*, 
-    d.name AS department_name,
-    CONCAT(l.name, ' - ', sl.name) AS full_location_name,
-    CONCAT(u.first_name, ' ', u.last_name) AS assigned_user_name,
-    CONCAT(cu.first_name, ' ', cu.last_name) AS created_by_name,
-    CONCAT(uu.first_name, ' ', uu.last_name) AS updated_by_name,
-    CONCAT(du.first_name, ' ', du.last_name) AS deleted_by_name
+      au.*, 
+      d.name AS department_name,
+      l.name || ' - ' || sl.name AS full_location_name,
+      u.first_name || ' ' || u.last_name AS assigned_user_name,
+      cu.first_name || ' ' || cu.last_name AS created_by_name,
+      uu.first_name || ' ' || uu.last_name AS updated_by_name,
+      du.first_name || ' ' || du.last_name AS deleted_by_name
     FROM asset_units au
     LEFT JOIN departments d ON au.department_id = d.id
     LEFT JOIN sub_locations sl ON au.sub_location_id = sl.id
@@ -18,12 +18,13 @@ async function getAllAssetUnits(filters = {}) {
     LEFT JOIN users cu ON au.created_by = cu.id
     LEFT JOIN users uu ON au.updated_by = uu.id
     LEFT JOIN users du ON au.deleted_by = du.id
-`;
+  `;
+
   const conditions = [];
   const values = [];
 
   if (filters.assetId) {
-    conditions.push("asset_id = ?");
+    conditions.push(`asset_id = $1`);
     values.push(filters.assetId);
   }
 
@@ -31,14 +32,12 @@ async function getAllAssetUnits(filters = {}) {
     query += " WHERE " + conditions.join(" AND ");
   }
 
-  const [rows] = await db.execute(query, values);
+  const { rows } = await db.query(query, values);
   return rows;
 }
 
 async function getAssetUnitByID(id) {
-  const [rows] = await db.execute("SELECT * FROM asset_units WHERE id = ?", [
-    id,
-  ]);
+  const { rows } = await db.query("SELECT * FROM asset_units WHERE id = $1", [id]);
   return rows[0] || null;
 }
 
@@ -55,10 +54,10 @@ async function createAssetUnit(data) {
     updated_by,
   } = data;
 
-  const [result] = await db.execute(
+  const { rows } = await db.query(
     `INSERT INTO asset_units 
       (asset_id, brand, serial_number, unit_tag, sub_location_id, department_id, vendor_id, is_legacy, created_by, updated_by) 
-     VALUES (?, ?, ?, ?, ?, ?, ?, 1, ?, ?)`,
+     VALUES ($1,$2,$3,$4,$5,$6,$7,1,$8,$9) RETURNING id`,
     [
       asset_id,
       brand,
@@ -73,7 +72,7 @@ async function createAssetUnit(data) {
   );
 
   return {
-    id: result.insertId,
+    id: rows[0].id,
     asset_id,
     brand,
     serial_number,
@@ -93,31 +92,26 @@ async function updateAssetUnitPartial(id, fieldsToUpdate) {
 
   if (keys.length === 0) return null;
 
-  const setClause = keys.map((key) => `${key} = ?`).join(", ");
-  const query = `UPDATE asset_units SET ${setClause} WHERE id = ?`;
+  const setClause = keys.map((key, i) => `${key} = $${i + 1}`).join(", ");
+  const query = `UPDATE asset_units SET ${setClause} WHERE id = $${keys.length + 1}`;
 
-  await db.execute(query, [...values, id]);
+  await db.query(query, [...values, id]);
   return getAssetUnitByID(id);
 }
 
 async function deleteAssetUnitByID(id) {
-  const [result] = await db.execute("DELETE FROM asset_units WHERE id = ?", [
-    id,
-  ]);
-  return result.affectedRows > 0;
+  const { rowCount } = await db.query("DELETE FROM asset_units WHERE id = $1", [id]);
+  return rowCount > 0;
 }
 
 async function deleteAssetUnitsByIDs(ids) {
   if (!Array.isArray(ids) || ids.length === 0) return 0;
-  const placeholders = ids.map(() => "?").join(", ");
-  const [result] = await db.execute(
-    `DELETE FROM asset_units WHERE id IN (${placeholders})`,
-    ids
-  );
-  return result.affectedRows;
+  const placeholders = ids.map((_, i) => `$${i + 1}`).join(", ");
+  const { rowCount } = await db.query(`DELETE FROM asset_units WHERE id IN (${placeholders})`, ids);
+  return rowCount;
 }
 
-module.exports = {
+export {
   getAllAssetUnits,
   getAssetUnitByID,
   createAssetUnit,

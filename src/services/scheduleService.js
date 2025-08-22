@@ -1,20 +1,20 @@
-const scheduleModel = require("../models/scheduleModel");
-const scheduleTemplateModel = require("../models/scheduleTemplateModel");
-const scheduleAssetsModel = require("../models/scheduleAssetsModel");
-const scheduleTechnicianModel = require("../models/scheduleTechnicianModel");
+import * as scheduleModel from "../models/scheduleModel.js";
+import * as scheduleTemplateModel from "../models/scheduleTemplateModel.js";
+import * as scheduleAssetsModel from "../models/scheduleAssetsModel.js";
+import * as scheduleTechnicianModel from "../models/scheduleTechnicianModel.js";
 
-async function getAllSchedules(filters = {}) {
+export async function getAllSchedules(filters = {}) {
   return await scheduleModel.getAllSchedules(filters);
 }
 
-async function getAllScheduleOccurrencesWithTemplate(filters = {}) {
+export async function getAllScheduleOccurrencesWithTemplate(filters = {}) {
   const occurrences = await scheduleModel.getAllScheduleOccurrencesWithTemplate(filters);
 
   const enrichedOccurrences = await Promise.all(
     occurrences.map(async (occurrence) => {
       const assets = occurrence.is_unplanned
-      ? []
-      : await scheduleAssetsModel.getAssignedAssetsForOccurrence(occurrence.template_id);
+        ? []
+        : await scheduleAssetsModel.getAssignedAssetsForOccurrence(occurrence.template_id);
       const technicians = await scheduleTechnicianModel.getScheduleTechniciansByOccurenceId(occurrence.id);
       return {
         ...occurrence,
@@ -27,7 +27,7 @@ async function getAllScheduleOccurrencesWithTemplate(filters = {}) {
   return enrichedOccurrences;
 }
 
-async function updateScheduleOccurrencePartial(id, fieldsToUpdate) {
+export async function updateScheduleOccurrencePartial(id, fieldsToUpdate) {
   const occurrence = await scheduleModel.getScheduleOccurrenceByID(id);
   if (!occurrence) throw new Error("Schedule not found");
 
@@ -43,7 +43,7 @@ async function updateScheduleOccurrencePartial(id, fieldsToUpdate) {
   );
 }
 
-async function startScheduleOccurrence(id, startedBy) {
+export async function startScheduleOccurrence(id, startedBy) {
   const occurrence = await scheduleModel.getScheduleOccurrenceByID(id);
   if (!occurrence) throw new Error("Schedule not found");
 
@@ -61,7 +61,7 @@ async function startScheduleOccurrence(id, startedBy) {
   return updated;
 }
 
-async function completeScheduleOccurrence(id, completedBy) {
+export async function completeScheduleOccurrence(id, completedBy) {
   const occurrence = await scheduleModel.getScheduleOccurrenceByID(id);
   if (!occurrence) throw new Error("Schedule not found");
 
@@ -86,7 +86,7 @@ async function completeScheduleOccurrence(id, completedBy) {
   return updated;
 }
 
-async function skipScheduleOccurrence(id, skippedBy, reason) {
+export async function skipScheduleOccurrence(id, skippedBy, reason) {
   const occurrence = await scheduleModel.getScheduleOccurrenceByID(id);
   if (!occurrence) throw new Error("Schedule not found");
 
@@ -108,7 +108,7 @@ async function skipScheduleOccurrence(id, skippedBy, reason) {
   return updated;
 }
 
-async function generateNextScheduleOccurrence(templateId, previousDate, frequency_value, frequency_unit) {
+export async function generateNextScheduleOccurrence(templateId, previousDate, frequency_value, frequency_unit) {
   let nextDate = new Date(previousDate);
 
   switch (frequency_unit) {
@@ -127,12 +127,3 @@ async function generateNextScheduleOccurrence(templateId, previousDate, frequenc
 
   return await scheduleModel.createSchedule(templateId, nextDate);
 }
-
-module.exports = {
-  getAllSchedules,
-  getAllScheduleOccurrencesWithTemplate,
-  updateScheduleOccurrencePartial,
-  startScheduleOccurrence,
-  completeScheduleOccurrence,
-  skipScheduleOccurrence,
-};

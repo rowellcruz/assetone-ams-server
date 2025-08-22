@@ -1,6 +1,6 @@
-const jwt = require("jsonwebtoken");
+import jwt from "jsonwebtoken";
 
-function authenticate(req, res, next) {
+export default function authenticate(req, res, next) {
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -21,5 +21,3 @@ function authenticate(req, res, next) {
     next(err);
   }
 }
-
-module.exports = authenticate;

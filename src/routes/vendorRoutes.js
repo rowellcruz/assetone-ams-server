@@ -1,8 +1,9 @@
-const express = require("express");
+import express from "express";
+import * as vendorController from "../controllers/vendorController.js";
+import asyncHandler from "../utils/asyncHandler.js";
+import authenticate from "../middlewares/authMiddleware.js";
+
 const router = express.Router();
-const vendorController = require("../controllers/vendorController");
-const asyncHandler = require('../utils/asyncHandler');
-const authenticate = require("../middlewares/authMiddleware");
 
 router.get("/", authenticate, asyncHandler(vendorController.getVendors));
 router.get("/:id", authenticate, asyncHandler(vendorController.getVendorByID));
@@ -12,4 +13,4 @@ router.put("/:id", authenticate, asyncHandler(vendorController.replaceVendor));
 router.patch("/:id", authenticate, asyncHandler(vendorController.updateVendorPartial));
 router.delete("/:id", authenticate, asyncHandler(vendorController.deleteVendorByID));
 
-module.exports = router;
+export default router;

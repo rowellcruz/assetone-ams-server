@@ -1,39 +1,29 @@
-const assetModel = require("../models/assetModel");
+import * as assetModel from "../models/assetModel.js";
 
-async function getAllAssets(filters = {}) {
+export async function getAllAssets(filters = {}) {
   return await assetModel.getAllAssets(filters);
 }
 
-async function getAssetByID(id) {
+export async function getAssetByID(id) {
   return await assetModel.getAssetByID(id);
 }
 
-async function getAssetsByCategoryID(categoryId) {
+export async function getAssetsByCategoryID(categoryId) {
   return await assetModel.getAllAssets({ categoryId });
 }
 
-async function createAsset(assetData) {
+export async function createAsset(assetData) {
   return await assetModel.createAsset(assetData);
 }
 
-async function updateAssetPartial(id, fieldsToUpdate) {
+export async function updateAssetPartial(id, fieldsToUpdate) {
   return await assetModel.updateAssetPartial(id, fieldsToUpdate);
 }
 
-async function deleteAssetByID(id) {
+export async function deleteAssetByID(id) {
   return await assetModel.deleteAssetByID(id);
 }
 
-async function deleteAssetsByIDs(ids) {
+export async function deleteAssetsByIDs(ids) {
   return await assetModel.deleteAssetsByIDs(ids);
 }
-
-module.exports = {
-  getAllAssets,
-  getAssetByID,
-  getAssetsByCategoryID,
-  createAsset,
-  updateAssetPartial,
-  deleteAssetByID,
-  deleteAssetsByIDs,
-};

@@ -1,12 +1,12 @@
-const db = require("../config/db");
-const assetModel = require("./assetModel");
+import db from "../config/db.js";
+import * as assetModel from "./assetModel.js";
 
 async function getAssignedAssetsForOccurrence(templateId) {
-  const [units] = await db.execute(`
+  const { rows: units } = await db.query(`
     SELECT sa.asset_unit_id, au.asset_id, au.brand
     FROM schedule_template_assets AS sa
     JOIN asset_units AS au ON sa.asset_unit_id = au.id
-    WHERE sa.schedule_template_id = ?
+    WHERE sa.schedule_template_id = $1
   `, [templateId]);
 
   const enriched = await Promise.all(units.map(async (unit) => {
@@ -22,8 +22,8 @@ async function getAssignedAssetsForOccurrence(templateId) {
 
 async function assignAssets(template_id, asset_unit_ids) {
   const insertPromises = asset_unit_ids.map((asset_unit_id) =>
-    db.execute(
-      "INSERT INTO schedule_template_assets (schedule_template_id, asset_unit_id) VALUES (?, ?)",
+    db.query(
+      "INSERT INTO schedule_template_assets (schedule_template_id, asset_unit_id) VALUES ($1, $2)",
       [template_id, asset_unit_id]
     )
   );
@@ -33,7 +33,7 @@ async function assignAssets(template_id, asset_unit_ids) {
   return { template_id, asset_unit_ids };
 }
 
-module.exports = {
+export {
   getAssignedAssetsForOccurrence,
   assignAssets,
 };
