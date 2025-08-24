@@ -19,28 +19,28 @@ export async function getVendorByID(id) {
 }
 
 export async function createVendor(vendorData) {
-  return await vendorModel.createVendor(vendorData);
+  return vendorModel.createVendor(vendorData);
 }
 
 export async function deleteVendorsByIDs(ids) {
-  return await vendorModel.deleteVendorsByIDs(ids);
+  return vendorModel.deleteVendorsByIDs(ids);
 }
 
 export async function updateFullVendor(id, vendorData) {
-  return await vendorModel.updateFullVendor(id, vendorData);
+  return vendorModel.updateFullVendor(id, vendorData);
 }
 
 export async function updateVendorPartial(id, fieldsToUpdate) {
-  return await vendorModel.updateVendorPartial(id, fieldsToUpdate);
+  return vendorModel.updateVendorPartial(id, fieldsToUpdate);
 }
 
 export async function deleteVendorByID(id) {
-  return await vendorModel.deleteVendorByID(id);
+  return vendorModel.deleteVendorByID(id);
 }
 
-export async function setVendorOffers(vendorId, categoryIds) {
+export async function setVendorOffers(vendorId, assetIds) {
   await vendorModel.clearVendorOffers(vendorId);
-  if (categoryIds.length > 0) {
-    await vendorModel.insertVendorOffers(vendorId, categoryIds);
+  if (Array.isArray(assetIds) && assetIds.length > 0) {
+    await vendorModel.insertVendorOffers(vendorId, assetIds);
   }
 }

@@ -1,11 +1,7 @@
 import db from "../config/db.js";
 
 async function getAllAssets(filters = {}) {
-  let query = `
-    SELECT a.*, c.name AS category_name
-    FROM assets a
-    LEFT JOIN asset_categories c ON a.category_id = c.id
-  `;
+  let query = `SELECT * FROM assets`;
 
   const conditions = [];
   const values = [];
@@ -29,12 +25,12 @@ async function getAssetByID(id) {
 }
 
 async function createAsset(data) {
-  const { type, category_id, created_by, updated_by } = data;
+  const { type, created_by, updated_by } = data;
   const { rows } = await db.query(
-    "INSERT INTO assets (type, category_id, created_by, updated_by) VALUES ($1, $2, $3, $4) RETURNING id",
-    [type, category_id, created_by, updated_by]
+    "INSERT INTO assets (type, created_by, updated_by) VALUES ($1, $2, $3) RETURNING id",
+    [type, created_by, updated_by]
   );
-  return { id: rows[0].id, type, category_id, created_by, updated_by };
+  return { id: rows[0].id, type, created_by, updated_by };
 }
 
 async function updateAssetPartial(id, fieldsToUpdate) {
@@ -58,7 +54,10 @@ async function deleteAssetByID(id) {
 async function deleteAssetsByIDs(ids) {
   if (!Array.isArray(ids) || ids.length === 0) return 0;
   const placeholders = ids.map((_, i) => `$${i + 1}`).join(", ");
-  const { rowCount } = await db.query(`DELETE FROM assets WHERE id IN (${placeholders})`, ids);
+  const { rowCount } = await db.query(
+    `DELETE FROM assets WHERE id IN (${placeholders})`,
+    ids
+  );
   return rowCount;
 }
 

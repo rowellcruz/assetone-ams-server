@@ -18,19 +18,21 @@ import adminRoutes from './routes/adminRoutes.js';
 import errorHandler from './middlewares/errorHandler.js';
 
 const app = express();
+const allowedOrigins = process.env.CLIENT_URLS.split(",");
 
 app.use(cors({
-  origin: [
-    "http://localhost:5173",
-    "https://assetone-ams-client.vercel.app"
-  ],
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
   credentials: true
 }));
 
 app.use(express.json());
 
-app.get('/', (req, res) => res.send('Server is running'));
-app.get('/api', (req, res) => res.send('API is running'));
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/users', userRoutes);
