@@ -7,6 +7,10 @@ export async function getAllSchedules(filters = {}) {
   return await scheduleModel.getAllSchedules(filters);
 }
 
+export async function getScheduleOccurrenceByTemplateId(id) {
+  return await scheduleModel.getScheduleOccurrenceByTemplateId(id);
+}
+
 export async function getAllScheduleOccurrencesWithTemplate(filters = {}) {
   const occurrences = await scheduleModel.getAllScheduleOccurrencesWithTemplate(filters);
 

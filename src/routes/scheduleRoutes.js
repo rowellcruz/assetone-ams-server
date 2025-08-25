@@ -6,6 +6,7 @@ import authenticate from '../middlewares/authMiddleware.js';
 const router = express.Router();
 
 router.get('/details', authenticate, asyncHandler(scheduleController.getSchedules));
+router.get('/:id', authenticate, asyncHandler(scheduleController.getScheduleOccurrencesByTemplateId));
 router.get('/full', authenticate, asyncHandler(scheduleController.getScheduleOccurrencesWithTemplate));
 router.post('/:id/start', authenticate, asyncHandler(scheduleController.startScheduleOccurrence));
 router.post('/:id/complete', authenticate, asyncHandler(scheduleController.completeScheduleOccurrence));

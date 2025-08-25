@@ -23,6 +23,11 @@ async function getScheduleOccurrenceByID(id) {
   return rows[0] || null;
 }
 
+async function getScheduleOccurrenceByTemplateId(id) {
+  const { rows } = await db.query("SELECT * FROM schedule_occurrences WHERE template_id = $1", [id]);
+  return rows[0] || null;
+}
+
 async function getAllScheduleOccurrencesWithTemplate(filters = {}) {
   let query = `
     SELECT * FROM (
@@ -139,6 +144,7 @@ export {
   getAllSchedules,
   getAllScheduleOccurrencesWithTemplate,
   getScheduleOccurrenceByID,
+  getScheduleOccurrenceByTemplateId,
   createSchedule,
   updateScheduleOccurrencePartial,
   deleteScheduleOccurrenceByID,

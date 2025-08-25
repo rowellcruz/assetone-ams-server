@@ -9,6 +9,13 @@ export const getSchedules = async (req, res) => {
   res.json(schedules);
 };
 
+export const getScheduleOccurrencesByTemplateId = async (req, res) => {
+  const { id } = req.params;
+
+  const schedules = await scheduleService.getScheduleOccurrencesByTemplateId(id);
+  res.json(schedules);
+};
+
 export const getScheduleOccurrencesWithTemplate = async (req, res) => {
   const filters = {
     status: req.query.status,

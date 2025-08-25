@@ -34,10 +34,10 @@ async function createScheduleTemplate(data) {
     frequency_value,
     frequency_unit,
     start_date,
-    status,
     expiration_date,
     created_by,
     updated_by,
+    updated_at
   } = data;
 
   const { rows } = await db.query(
@@ -48,10 +48,10 @@ async function createScheduleTemplate(data) {
       frequency_value,
       frequency_unit,
       start_date,
-      status,
       expiration_date,
       created_by,
-      updated_by
+      updated_by,
+      updated_at
     ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING id`,
     [
       title,
@@ -60,10 +60,10 @@ async function createScheduleTemplate(data) {
       frequency_value,
       frequency_unit,
       start_date,
-      status,
       expiration_date,
       created_by,
       updated_by,
+      updated_at
     ]
   );
   return { id: rows[0].id, ...data };

@@ -1,5 +1,6 @@
 import * as scheduleTemplateModel from "../models/scheduleTemplateModel.js";
 import * as scheduleModel from "../models/scheduleModel.js";
+import * as scheduleAssetsModel from "../models/scheduleAssetsModel.js";
 
 export async function getAllScheduleTemplates(filters = {}) {
   return await scheduleTemplateModel.getAllScheduleTemplates(filters);
@@ -17,7 +18,7 @@ export async function createScheduleTemplate(scheduleTemplateData) {
   }
 
   if (scheduleTemplateData.asset_unit_ids) {
-    await scheduleModel.assignAssets(createdTemplate.id, scheduleTemplateData.asset_unit_ids);
+    await scheduleAssetsModel.assignAssets(createdTemplate.id, scheduleTemplateData.asset_unit_ids);
   }
 
   return createdTemplate;
