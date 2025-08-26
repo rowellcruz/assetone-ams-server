@@ -11,7 +11,7 @@ export const getScheduleTemplates = async (req, res) => {
 
 export const getScheduleTemplateByID = async (req, res) => {
   const { id } = req.params;
-  const scheduleTemplate = await scheduleTemplateService.getScheduleTemplateByID(id);
+  const scheduleTemplate = await scheduleTemplateService.getScheduleTemplatesByID(id);
   if (!scheduleTemplate) {
     res.status(404);
     throw new Error("Schedule template not found");

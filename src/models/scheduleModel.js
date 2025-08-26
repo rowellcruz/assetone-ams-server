@@ -19,13 +19,19 @@ async function getAllSchedules(filters = {}) {
 }
 
 async function getScheduleOccurrenceByID(id) {
-  const { rows } = await db.query("SELECT * FROM schedule_occurrences WHERE id = $1", [id]);
+  const { rows } = await db.query(
+    "SELECT * FROM schedule_occurrences WHERE id = $1",
+    [id]
+  );
   return rows[0] || null;
 }
 
 async function getScheduleOccurrenceByTemplateId(id) {
-  const { rows } = await db.query("SELECT * FROM schedule_occurrences WHERE template_id = $1", [id]);
-  return rows[0] || null;
+  const { rows } = await db.query(
+    "SELECT * FROM schedule_occurrences WHERE template_id = $1",
+    [id]
+  );
+  return rows;
 }
 
 async function getAllScheduleOccurrencesWithTemplate(filters = {}) {
@@ -116,7 +122,9 @@ async function updateScheduleOccurrencePartial(id, fieldsToUpdate) {
   if (keys.length === 0) return null;
 
   const setClause = keys.map((key, i) => `${key} = $${i + 1}`).join(", ");
-  const query = `UPDATE schedule_occurrences SET ${setClause} WHERE id = $${keys.length + 1}`;
+  const query = `UPDATE schedule_occurrences SET ${setClause} WHERE id = $${
+    keys.length + 1
+  }`;
 
   await db.query(query, [...values, id]);
   return getScheduleOccurrenceByID(id);

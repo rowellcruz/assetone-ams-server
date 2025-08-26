@@ -1,12 +1,16 @@
 import db from "../config/db.js";
 
 async function getAllScheduleTemplates(filters = {}) {
-  let query = "SELECT * FROM schedule_templates";
+  let query = `
+    SELECT st.*, a.type as asset_type
+    FROM schedule_templates st
+    LEFT JOIN assets a ON st.asset_id = a.id
+  `;
   const conditions = [];
   const values = [];
 
   if (filters.type) {
-    conditions.push(`type = $${values.length + 1}`);
+    conditions.push(`st.type = $${values.length + 1}`);
     values.push(filters.type);
   }
 
@@ -20,7 +24,10 @@ async function getAllScheduleTemplates(filters = {}) {
 
 async function getScheduleTemplatesByID(id) {
   const { rows } = await db.query(
-    "SELECT * FROM schedule_templates WHERE id = $1",
+    `SELECT st.*, a.type as asset_type
+     FROM schedule_templates st
+     JOIN assets a ON st.asset_id = a.id
+     WHERE st.id = $1`,
     [id]
   );
   return rows[0] || null;
@@ -28,6 +35,7 @@ async function getScheduleTemplatesByID(id) {
 
 async function createScheduleTemplate(data) {
   const {
+    asset_id,
     title,
     description,
     type,
@@ -37,11 +45,12 @@ async function createScheduleTemplate(data) {
     expiration_date,
     created_by,
     updated_by,
-    updated_at
+    updated_at,
   } = data;
 
   const { rows } = await db.query(
     `INSERT INTO schedule_templates (
+    asset_id,
       title,
       description,
       type,
@@ -52,8 +61,9 @@ async function createScheduleTemplate(data) {
       created_by,
       updated_by,
       updated_at
-    ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING id`,
+    ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) RETURNING id`,
     [
+      asset_id,
       title,
       description,
       type,
@@ -63,7 +73,7 @@ async function createScheduleTemplate(data) {
       expiration_date,
       created_by,
       updated_by,
-      updated_at
+      updated_at,
     ]
   );
   return { id: rows[0].id, ...data };
@@ -76,7 +86,9 @@ async function updateScheduleTemplatesPartial(id, fieldsToUpdate) {
   if (keys.length === 0) return null;
 
   const setClause = keys.map((key, i) => `${key} = $${i + 1}`).join(", ");
-  const query = `UPDATE schedule_templates SET ${setClause} WHERE id = $${keys.length + 1}`;
+  const query = `UPDATE schedule_templates SET ${setClause} WHERE id = $${
+    keys.length + 1
+  }`;
 
   await db.query(query, [...values, id]);
   return getScheduleTemplatesByID(id);

@@ -12,17 +12,15 @@ export const getSchedules = async (req, res) => {
 export const getScheduleOccurrencesByTemplateId = async (req, res) => {
   const { id } = req.params;
 
-  const schedules = await scheduleService.getScheduleOccurrencesByTemplateId(id);
+  const schedules = await scheduleService.getScheduleByTemplateId(id);
   res.json(schedules);
 };
 
-export const getScheduleOccurrencesWithTemplate = async (req, res) => {
-  const filters = {
-    status: req.query.status,
-  };
+export const getAssignedAssetsByTemplateId = async (req, res) => {
+  const { id } = req.params;
 
-  const schedules = await scheduleService.getAllScheduleOccurrencesWithTemplate(filters);
-  res.json(schedules);
+  const assets = await scheduleService.getAssignedAssetsByTemplateId(id);
+  res.json(assets);
 };
 
 export const startScheduleOccurrence = async (req, res) => {
@@ -44,6 +42,19 @@ export const completeScheduleOccurrence = async (req, res) => {
   const { completed_by } = req.body;
 
   const updated = await scheduleService.completeScheduleOccurrence(id, completed_by);
+
+  if (!updated) {
+    res.status(404);
+    throw new Error("Schedule not found");
+  }
+
+  res.json(updated);
+};
+
+export const rejectScheduleOccurrence = async (req, res) => {
+  const { id } = req.params;
+
+  const updated = await scheduleService.rejectScheduleOccurrence(id);
 
   if (!updated) {
     res.status(404);

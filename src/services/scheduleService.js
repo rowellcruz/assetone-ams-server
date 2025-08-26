@@ -7,28 +7,29 @@ export async function getAllSchedules(filters = {}) {
   return await scheduleModel.getAllSchedules(filters);
 }
 
-export async function getScheduleOccurrenceByTemplateId(id) {
-  return await scheduleModel.getScheduleOccurrenceByTemplateId(id);
-}
+export async function getScheduleByTemplateId(templateId) {
+  const occurrences = await scheduleModel.getScheduleOccurrenceByTemplateId(
+    templateId
+  );
 
-export async function getAllScheduleOccurrencesWithTemplate(filters = {}) {
-  const occurrences = await scheduleModel.getAllScheduleOccurrencesWithTemplate(filters);
-
-  const enrichedOccurrences = await Promise.all(
+  const occurrencesWithTechnicians = await Promise.all(
     occurrences.map(async (occurrence) => {
-      const assets = occurrence.is_unplanned
-        ? []
-        : await scheduleAssetsModel.getAssignedAssetsForOccurrence(occurrence.template_id);
-      const technicians = await scheduleTechnicianModel.getScheduleTechniciansByOccurenceId(occurrence.id);
+      const assigned_technicians =
+        await scheduleTechnicianModel.getScheduleTechniciansByOccurrenceId(
+          occurrence.id
+        );
       return {
         ...occurrence,
-        assigned_assets: assets,
-        assigned_technicians: technicians || [],
+        assigned_technicians,
       };
     })
   );
 
-  return enrichedOccurrences;
+  return occurrencesWithTechnicians;
+}
+
+export async function getAssignedAssetsByTemplateId(id) {
+  return await scheduleAssetsModel.getAssignedAssetsByTemplateId(id);
 }
 
 export async function updateScheduleOccurrencePartial(id, fieldsToUpdate) {
@@ -65,13 +66,41 @@ export async function startScheduleOccurrence(id, startedBy) {
   return updated;
 }
 
+export async function rejectScheduleOccurrence(id) {
+  const occurrence = await scheduleModel.getScheduleOccurrenceByID(id);
+  if (!occurrence) throw new Error("Schedule not found");
+
+  const updated = await scheduleModel.updateScheduleOccurrencePartial(id, {
+    status: "in_progress",
+  });
+
+  return updated;
+}
+
 export async function completeScheduleOccurrence(id, completedBy) {
   const occurrence = await scheduleModel.getScheduleOccurrenceByID(id);
   if (!occurrence) throw new Error("Schedule not found");
 
-  const completableStatuses = ["in_progress"];
+  const completableStatuses = ["in_completion_request", "in_progress"];
   if (!completableStatuses.includes(occurrence.status)) {
     throw new Error("Only in-progress schedules can be completed");
+  }
+
+  const template = await scheduleTemplateModel.getScheduleTemplatesByID(
+    occurrence.template_id
+  );
+
+  console.log(occurrence);
+
+  if (!template) throw new Error("Template not found");
+
+  if (template.type === "PM" && template.status === "active") {
+    await generateNextScheduleOccurrence(
+      template.id,
+      occurrence.scheduled_date,
+      template.frequency_value,
+      template.frequency_unit
+    );
   }
 
   const updated = await scheduleModel.updateScheduleOccurrencePartial(id, {
@@ -79,13 +108,6 @@ export async function completeScheduleOccurrence(id, completedBy) {
     completed_at: new Date(),
     completed_by: completedBy,
   });
-
-  const template = await scheduleTemplateModel.getScheduleTemplatesByID(occurrence.template_id);
-  if (!template) throw new Error("Template not found");
-
-  if (template.type === "PM" && template.status === "active") {
-    await generateNextScheduleOccurrence(template.id, occurrence.scheduled_date, template.frequency_value, template.frequency_unit);
-  }
 
   return updated;
 }
@@ -112,7 +134,12 @@ export async function skipScheduleOccurrence(id, skippedBy, reason) {
   return updated;
 }
 
-export async function generateNextScheduleOccurrence(templateId, previousDate, frequency_value, frequency_unit) {
+export async function generateNextScheduleOccurrence(
+  templateId,
+  previousDate,
+  frequency_value,
+  frequency_unit
+) {
   let nextDate = new Date(previousDate);
 
   switch (frequency_unit) {
