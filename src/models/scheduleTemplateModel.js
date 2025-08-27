@@ -25,9 +25,9 @@ async function getAllScheduleTemplates(filters = {}) {
 async function getScheduleTemplatesByID(id) {
   const { rows } = await db.query(
     `SELECT st.*, a.type as asset_type
-     FROM schedule_templates st
-     JOIN assets a ON st.asset_id = a.id
-     WHERE st.id = $1`,
+    FROM schedule_templates st
+    LEFT JOIN assets a ON st.asset_id = a.id
+    WHERE st.id = $1`,
     [id]
   );
   return rows[0] || null;

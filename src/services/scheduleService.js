@@ -48,7 +48,7 @@ export async function updateScheduleOccurrencePartial(id, fieldsToUpdate) {
   );
 }
 
-export async function startScheduleOccurrence(id, startedBy) {
+export async function startScheduleOccurrence(id, startedBy, technicians = []) {
   const occurrence = await scheduleModel.getScheduleOccurrenceByID(id);
   if (!occurrence) throw new Error("Schedule not found");
 
@@ -57,11 +57,19 @@ export async function startScheduleOccurrence(id, startedBy) {
     throw new Error("Only pending or overdue schedules can be started");
   }
 
+  if (!technicians || technicians.length === 0) {
+    throw new Error(
+      "At least one technician must be assigned to start a schedule"
+    );
+  }
+
   const updated = await scheduleModel.updateScheduleOccurrencePartial(id, {
     status: "in_progress",
     started_at: new Date(),
     started_by: startedBy,
   });
+
+  await scheduleTechnicianModel.addTechniciansToOccurrence(id, technicians);
 
   return updated;
 }

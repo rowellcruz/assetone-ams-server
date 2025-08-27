@@ -25,9 +25,13 @@ export const getAssignedAssetsByTemplateId = async (req, res) => {
 
 export const startScheduleOccurrence = async (req, res) => {
   const { id } = req.params;
-  const { started_by } = req.body;
+  const { started_by, technicians } = req.body;
 
-  const updated = await scheduleService.startScheduleOccurrence(id, started_by);
+  const updated = await scheduleService.startScheduleOccurrence(
+    id,
+    started_by,
+    technicians
+  );
 
   if (!updated) {
     res.status(404);
