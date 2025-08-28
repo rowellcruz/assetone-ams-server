@@ -41,6 +41,22 @@ async function getAssetUnitByID(id) {
   return rows[0] || null;
 }
 
+async function getAssetUnitsFromDepartment(id) {
+  const { rows } = await db.query(
+    `SELECT
+       au.id,
+       a.type AS asset_type,
+       au.unit_tag,
+       au.operational_status,
+       au.lifecycle_status
+     FROM asset_units au
+     JOIN assets a ON au.asset_id = a.id
+     WHERE au.department_id = $1;`,
+    [id]
+  );
+  return rows;
+}
+
 async function createAssetUnit(data) {
   const {
     asset_id,
@@ -167,6 +183,7 @@ async function deleteAssetUnitsByIDs(ids) {
 export {
   getAllAssetUnits,
   getAssetUnitByID,
+  getAssetUnitsFromDepartment,
   createAssetUnit,
   updateAssetUnitPartial,
   deleteAssetUnitByID,

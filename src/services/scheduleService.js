@@ -98,8 +98,6 @@ export async function completeScheduleOccurrence(id, completedBy) {
     occurrence.template_id
   );
 
-  console.log(occurrence);
-
   if (!template) throw new Error("Template not found");
 
   if (template.type === "PM" && template.status === "active") {
@@ -116,6 +114,13 @@ export async function completeScheduleOccurrence(id, completedBy) {
     completed_at: new Date(),
     completed_by: completedBy,
   });
+
+  if (template.type === "CM" && template.status === "active") {
+    await scheduleTemplateModel.updateScheduleTemplatesPartial(template.id, {
+      status: "stopped",
+      updated_by: completedBy,
+    });
+  }
 
   return updated;
 }

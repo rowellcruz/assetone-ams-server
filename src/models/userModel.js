@@ -40,6 +40,17 @@ async function getAllUsers(filters = {}) {
   return rows;
 }
 
+async function getUsersFromDepartment(id) {
+  const { rows } = await db.query(
+    `SELECT
+      id, first_name, last_name, role, user_status
+     FROM users
+     WHERE department_id = $1;`,
+    [id]
+  );
+  return rows;
+}
+
 async function getUserDataById(id) {
   const { rows } = await db.query(
     `SELECT
@@ -123,6 +134,7 @@ export {
   getUserDataByEmail,
   getAllUsers,
   getUserDataById,
+  getUsersFromDepartment,
   createUser,
   updateFullUser,
   updateUserPartial,
