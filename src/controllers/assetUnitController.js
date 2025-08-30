@@ -19,6 +19,16 @@ export const getAssetUnitByID = async (req, res) => {
   res.json(assetUnit);
 };
 
+export const getReportedAssetDataById = async (req, res) => {
+  const { id } = req.params;
+  const assetUnit = await assetUnitService.getReportedAssetDataById(id);
+  if (!assetUnit) {
+    res.status(404);
+    throw new Error("Asset unit not found");
+  }
+  res.json(assetUnit);
+};
+
 export const getAssetUnitsByAssetID = async (req, res) => {
   const { id } = req.params;
   const assetUnits = await assetUnitService.getAssetUnitsByAssetID(id);

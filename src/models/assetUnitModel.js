@@ -41,6 +41,14 @@ async function getAssetUnitByID(id) {
   return rows[0] || null;
 }
 
+async function getReportedAssetDataById(id) {
+  const { rows } = await db.query(
+    `SELECT id, unit_tag, sub_location_id
+    FROM asset_units WHERE id = $1`
+    , [id]);
+  return rows[0] || null;
+}
+
 async function getAssetUnitsFromDepartment(id) {
   const { rows } = await db.query(
     `SELECT
@@ -183,6 +191,7 @@ async function deleteAssetUnitsByIDs(ids) {
 export {
   getAllAssetUnits,
   getAssetUnitByID,
+  getReportedAssetDataById,
   getAssetUnitsFromDepartment,
   createAssetUnit,
   updateAssetUnitPartial,

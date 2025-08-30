@@ -8,6 +8,10 @@ export async function getAssetUnitByID(id) {
   return await assetUnitModel.getAssetUnitByID(id);
 }
 
+export async function getReportedAssetDataById(id) {
+  return await assetUnitModel.getReportedAssetDataById(id);
+}
+
 export async function getAssetUnitsByAssetID(assetId) {
   return await assetUnitModel.getAllAssetUnits({ assetId });
 }
