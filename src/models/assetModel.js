@@ -19,6 +19,11 @@ async function getAllAssets(filters = {}) {
   return rows;
 }
 
+async function getPublicAssets() {
+  const { rows } = await db.query("SELECT id, type FROM assets");
+  return rows;
+}
+
 async function getAssetByID(id) {
   const { rows } = await db.query("SELECT * FROM assets WHERE id = $1", [id]);
   return rows[0] || null;
@@ -63,6 +68,7 @@ async function deleteAssetsByIDs(ids) {
 
 export {
   getAllAssets,
+  getPublicAssets,
   getAssetByID,
   createAsset,
   updateAssetPartial,

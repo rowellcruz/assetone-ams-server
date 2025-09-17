@@ -1,84 +1,83 @@
 import db from "../config/db.js";
 
-async function getRequestByData(email, asset_unit_id) {
+async function getIssueReportByData(email, asset_unit_id, type) {
   const { rows } = await db.query(
     `
-    SELECT * 
-    FROM issue_reports 
-    WHERE reporter_email = $1 
-      AND asset_unit_id = $2 
-      AND status != 'resolved'
+    SELECT r.*, ir.*
+    FROM requests r
+    JOIN issue_reports ir ON r.id = ir.request_id
+    WHERE ir.reporter_email = $1
+      AND ir.asset_unit_id = $2
+      AND r.status != 'resolved'
+      AND r.request_type = $3
     `,
-    [email, asset_unit_id]
+    [email, asset_unit_id, type]
   );
   return rows;
 }
 
-async function getRequestsByAssetUnit(asset_unit_id) {
+async function getAssetRequestByData(email, sub_location_id, asset_id, type) {
   const { rows } = await db.query(
     `
-    SELECT * 
-    FROM issue_reports 
-    WHERE asset_unit_id = $1
-      AND status = 'pending'
+    SELECT r.*, ar.*
+    FROM requests r
+    JOIN asset_requests ar ON r.id = ar.request_id
+    WHERE ar.requester_email = $1
+      AND ar.sub_location_id = $2
+      AND ar.asset_id = $3
+      AND r.status != 'resolved'
+      AND r.request_type = $4
     `,
-    [asset_unit_id]
+    [email, sub_location_id, asset_id, type]
   );
   return rows;
 }
 
-async function getIssueReports() {
+async function createRequest(type) {
   const { rows } = await db.query(
-    `
-    SELECT DISTINCT ON (ir.asset_unit_id) 
-       ir.asset_unit_id,
-       ass.type,
-       au.unit_tag,
-       ir.status,
-       ir.created_at
-    FROM issue_reports ir
-    JOIN assets ass ON ir.asset_id = ass.id
-    JOIN asset_units au ON ir.asset_unit_id = au.id
-    WHERE ir.status = 'pending'
-    ORDER BY ir.asset_unit_id, ir.created_at DESC;
-    `
+    "INSERT INTO requests (request_type) VALUES ($1) RETURNING id",
+    [type]
   );
-  return rows;
-}
-
-async function createRequest(data) {
-  const {
-    asset_id,
-    asset_unit_id,
-    reporter_email,
-    description,
-    impact,
-    urgency,
-  } = data;
-  const { rows } = await db.query(
-    "INSERT INTO issue_reports (asset_id, asset_unit_id, reporter_email, description, impact, urgency) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id",
-    [asset_id, asset_unit_id, reporter_email, description, impact, urgency]
-  );
-  return {
-    id: rows[0].id,
-    asset_id,
-    asset_unit_id,
-    reporter_email,
-    description,
-    impact,
-    urgency,
-  };
-}
-
-async function approveIssueReport(id, status) { 
-  const query = `
-    UPDATE issue_reports
-    SET status = $2 WHERE asset_unit_id = $1
-    RETURNING *;
-  `;
-  const { rows } = await db.query(query, [id, status]);
   return rows[0];
 }
 
+async function approveIssueReport(assetUnitId, status, requestType) {
+  const query = `
+    UPDATE requests r
+    SET status = $2
+    FROM issue_reports ir
+    WHERE ir.asset_unit_id = $1
+      AND r.id = ir.request_id
+      AND r.status = 'pending'
+      AND r.request_type = $3
+    RETURNING r.*;
+  `;
+  const { rows } = await db.query(query, [assetUnitId, status, requestType]);
 
-export { getIssueReports, getRequestByData, getRequestsByAssetUnit, createRequest, approveIssueReport };
+  return rows[0] || null;
+}
+
+async function approveAssetRequest(assetId, locationId, status, requestType) {
+  const query = `
+    UPDATE requests r
+    SET status = $3
+    FROM asset_requests ar
+    WHERE ar.asset_id = $1
+      AND ar.sub_location_id = $2
+      AND r.id = ar.request_id
+      AND r.status = 'pending'
+      AND r.request_type = $4
+    RETURNING r.*;
+  `;
+  const { rows } = await db.query(query, [assetId, locationId, status, requestType]);
+
+  return rows[0] || null;
+}
+
+export {
+  getIssueReportByData,
+  getAssetRequestByData,
+  createRequest,
+  approveIssueReport,
+  approveAssetRequest,
+};

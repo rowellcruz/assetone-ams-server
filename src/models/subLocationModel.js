@@ -19,7 +19,15 @@ async function getAllSubLocations(filters = {}) {
 }
 
 async function getSubLocationByID(id) {
-  const { rows } = await db.query("SELECT * FROM sub_locations WHERE id = $1", [id]);
+  const { rows } = await db.query(
+    `
+    SELECT sl.*, l.name AS location_name
+    FROM sub_locations sl
+    JOIN locations l ON sl.location_id = l.id
+    WHERE sl.id = $1
+    `,
+    [id]
+  );
   return rows[0] || null;
 }
 

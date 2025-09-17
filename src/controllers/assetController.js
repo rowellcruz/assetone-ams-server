@@ -9,6 +9,11 @@ export const getAssets = async (req, res) => {
   res.json(assets);
 };
 
+export const getPublicAssets = async (req, res) => {
+  const assets = await assetService.getPublicAssets();
+  res.json(assets);
+};
+
 export const getAssetByID = async (req, res) => {
   const { id } = req.params;
   const asset = await assetService.getAssetByID(id);

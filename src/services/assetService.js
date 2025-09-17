@@ -4,6 +4,10 @@ export async function getAllAssets(filters = {}) {
   return await assetModel.getAllAssets(filters);
 }
 
+export async function getPublicAssets() {
+  return await assetModel.getPublicAssets();
+}
+
 export async function getAssetByID(id) {
   return await assetModel.getAssetByID(id);
 }

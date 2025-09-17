@@ -1,13 +1,13 @@
 import * as requestService from "../services/requestService.js";
 
-export const getIssueReports = async (req, res) => {
-  const reports = await requestService.getIssueReports(req.body);
+export const getMaintenanceRequests = async (req, res) => {
+  const reports = await requestService.getMaintenanceRequests(req.body);
   res.status(201).json(reports);
 };
 
-export const getRequestsByAssetUnit = async (req, res) => {
+export const getIssueReportsByAssetUnit = async (req, res) => {
   const { id } = req.params;
-  const reports = await requestService.getRequestsByAssetUnit(id);
+  const reports = await requestService.getIssueReportsByAssetUnit(id);
   res.status(201).json(reports);
 };
 
@@ -17,8 +17,7 @@ export const createRequest = async (req, res) => {
 };
 
 export const handleReportApproval = async (req, res) => {
-  const { id } = req.params;
-  const { status } = req.body;
-  const createdRequest = await requestService.handleReportApproval(id, status);
+  const reportData = req.body;
+  const createdRequest = await requestService.approveMaintenanceRequest(reportData);
   res.status(201).json(createdRequest);
 };
