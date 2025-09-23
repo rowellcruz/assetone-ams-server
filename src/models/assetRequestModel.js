@@ -24,32 +24,6 @@ async function getAssetRequests() {
   return rows;
 }
 
-async function getRequestsAsProcurement() {
-  const { rows } = await db.query(
-    `
-    SELECT 
-      r.*, 
-      ar.*, 
-      a.type AS asset_type
-    FROM asset_requests ar
-    JOIN requests r ON ar.request_id = r.id
-    JOIN assets a ON ar.asset_id = a.id
-    JOIN sub_locations sl ON ar.sub_location_id = sl.id
-    JOIN locations l ON sl.location_id = l.id
-    WHERE r.request_type = 'procurement'
-    ORDER BY 
-      CASE r.status
-        WHEN 'pending' THEN 1
-        WHEN 'in_progress' THEN 2
-        WHEN 'resolved' THEN 3
-        ELSE 4
-      END,
-      r.created_at DESC
-    `
-  );
-  return rows;
-}
-
 async function getAssetRequestsByLocationAndAssetId(location_id, asset_id) {
   const { rows } = await db.query(
     `
@@ -108,7 +82,6 @@ async function createAssetRequest(data) {
 
 export {
   getAssetRequestsByLocationAndAssetId,
-  getRequestsAsProcurement,
   getAssetRequests,
   createAssetRequest,
 };

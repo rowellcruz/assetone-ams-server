@@ -8,7 +8,7 @@ async function getIssueReportByData(email, asset_unit_id, type) {
     JOIN issue_reports ir ON r.id = ir.request_id
     WHERE ir.reporter_email = $1
       AND ir.asset_unit_id = $2
-      AND r.status = 'pending'
+      AND r.status != 'resolved'
       AND r.request_type = $3
     `,
     [email, asset_unit_id, type]

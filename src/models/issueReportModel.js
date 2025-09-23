@@ -23,32 +23,6 @@ async function getIssueReports() {
   return rows;
 }
 
-async function getReportsAsMaintenanceRequest() {
-  const { rows } = await db.query(
-    `
-    SELECT 
-      r.*, 
-      ir.*, 
-      a.type AS asset_type, 
-      au.unit_tag
-    FROM issue_reports ir
-    JOIN requests r ON ir.request_id = r.id
-    JOIN assets a ON ir.asset_id = a.id
-    JOIN asset_units au ON ir.asset_unit_id = au.id
-    WHERE r.request_type = 'maintenance'
-    ORDER BY 
-      CASE r.status
-        WHEN 'pending' THEN 1
-        WHEN 'in_progress' THEN 2
-        WHEN 'resolved' THEN 3
-        ELSE 4
-      END,
-      r.created_at DESC
-    `
-  );
-  return rows;
-}
-
 async function getRequestsByAssetUnit(asset_unit_id) {
   const { rows } = await db.query(
     `
@@ -99,7 +73,6 @@ async function createIssueReport(data) {
 
 export {
   getIssueReports,
-  getReportsAsMaintenanceRequest,
   createIssueReport,
   getRequestsByAssetUnit,
 };

@@ -67,37 +67,7 @@ export async function createRequest(requestData) {
         throw error;
       }
       break;
-    case "maintenance":
-      existing = await requestModel.getIssueReportByData(
-        requestData.reporter_email,
-        requestData.asset_unit_id,
-        requestData.request_type
-      );
-      if (existing.length > 0) {
-        const error = new Error(
-          "You have already reported this asset. Please wait until it is resolved."
-        );
-        error.status = 409;
-        throw error;
-      }
-      break;
-
-    case "procurement":
-      existing = await assetRequestModel.getAssetRequestByData(
-        requestData.requester_email,
-        requestData.sub_location_id,
-        requestData.asset_id,
-        requestData.request_type
-      );
-      if (existing.length > 0) {
-        const error = new Error(
-          "You already submitted an asset request for this location."
-        );
-        error.status = 409;
-        throw error;
-      }
-      break;
-
+      
     default:
       break;
   }
@@ -128,14 +98,7 @@ export async function approveIssueReport(reportData) {
   if (!reportData.status) throw new Error("Missing status in reportData");
 
   const report = await requestModel.approveIssueReport(reportData.asset_unit_id, reportData.status, "issue");
-  if (!report) throw new Error(`No request found for asset_unit_id ${id}`);
-
-  if (reportData.status === "accepted") {
-    const request = await requestModel.createRequest("maintenance");
-    const { status, ...rest } = reportData;
-    const childData = { ...rest, request_id: request.id };
-    await issueReportModel.createIssueReport(childData);
-  }
+  if (!report) throw new Error(`No request found for asset_unit_id ${reportData.asset_unit_id}`);
 
   return report;
 }
@@ -145,31 +108,6 @@ export async function approveAssetRequest(reportData) {
 
   const report = await requestModel.approveAssetRequest(reportData.asset_id, reportData.sub_location_id, reportData.status, "asset");
   if (!report) throw new Error(`No request found for asset_id ${reportData.asset_id}`);
-
-  if (reportData.status === "accepted") {
-    const request = await requestModel.createRequest("procurement");
-    const { status, ...rest } = reportData;
-    const childData = { ...rest, request_id: request.id };
-    await assetRequestModel.createAssetRequest(childData);
-  }
-
-  return report;
-}
-
-export async function approveMaintenanceRequest(reportData) {
-  if (!reportData.status) throw new Error("Missing status in reportData");
-
-  const report = await requestModel.approveIssueReport(reportData.asset_unit_id, reportData.status, "maintenance");
-  if (!report) throw new Error(`No request found for asset_unit_id ${reportData.asset_unit_id}`);
-
-  return report;
-}
-
-export async function approveProcurementRequest(reportData) {
-  if (!reportData.status) throw new Error("Missing status in reportData");
-
-  const report = await requestModel.approveAssetRequest(reportData.assetId, reportData.sub_location_id, reportData.status, "procurement");
-  if (!report) throw new Error(`No request found for asset_id ${reportData.assetId}`);
 
   return report;
 }
