@@ -95,3 +95,13 @@ export async function deleteAttachment(req, res, next) {
     next(err);
   }
 }
+
+export const finalizeAcquisition = async (req, res) => {
+  const { id } = req.params;
+  const finalized = await procurementTaskService.finalizeAcquisitionAndCreateUnits(id, req.body, req.user.id);
+  if (!finalized) {
+    res.status(404);
+    throw new Error("Procurement Task not found or cannot be finalized");
+  }
+  res.json(finalized);
+}

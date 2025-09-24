@@ -1,5 +1,7 @@
 import * as procurementTaskModel from "../models/procurementTaskModel.js";
 import * as attachmentModel from "../models/procurementAttachmentModel.js";
+import { createAssetUnit } from "../models/assetUnitModel.js";
+import procurementFinalizationModel from "../models/procurementFinalizationModel.js";
 
 export async function getAllProcurementTasks(filters = {}) {
   return await procurementTaskModel.getProcurementTasks(filters);
@@ -44,4 +46,40 @@ export async function listAttachments(taskId) {
 
 export async function removeAttachment(id) {
   return await attachmentModel.deleteAttachment(id);
+}
+
+export async function finalizeAcquisition(id, acquisitionData, finalizedBy) {
+  return await procurementFinalizationModel.finalizeAcquisition(id, acquisitionData, finalizedBy);
+}
+
+export async function finalizeAcquisitionAndCreateUnits(taskId, acquisitionData, finalizedBy) {
+
+  const task = await procurementTaskModel.getProcurementTaskByID(taskId);
+
+  const finalization = await finalizeAcquisition(taskId, acquisitionData, finalizedBy);
+  for (let i = 0; i < task.quantity; i++) {
+    await createAssetUnit({
+      asset_id: task.asset_id,
+      brand: finalization.final_brand,
+      vendor_id: finalization.final_vendor_id,
+      lifecycle_status: "active",
+      operational_status: "available",
+      condition: 100,
+      unit_tag: null,
+      serial_number: null,
+      acquisition_cost: finalization.final_cost_per_unit,
+      useful_life_years: finalization.useful_life_years,
+      depreciation_method: finalization.depreciation_method,
+      depreciation_rate: finalization.depreciation_rate,
+      acquisition_date: new Date(),
+      department_id: null,
+      sub_location_id: null,
+      assigned_user_id: null,
+      is_legacy: false,
+      created_by: finalizedBy,
+      updated_by: finalizedBy,
+    });
+  }
+
+  return finalization;
 }

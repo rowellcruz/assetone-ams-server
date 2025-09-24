@@ -17,4 +17,6 @@ router.get("/:taskId/attachments", asyncHandler(procurementTaskController.getAtt
 router.post("/:taskId/attachments", authenticate, upload.single("file"), asyncHandler(procurementTaskController.uploadAttachment));
 router.delete("/attachments/:id", authenticate, asyncHandler(procurementTaskController.deleteAttachment));
 
+router.post('/:id/finalize', authenticate, asyncHandler(procurementTaskController.finalizeAcquisition));
+
 export default router;
