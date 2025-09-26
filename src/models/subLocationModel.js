@@ -32,12 +32,11 @@ async function getSubLocationByID(id) {
 }
 
 async function createSubLocation(data) {
-  const { name, location_id } = data;
   const { rows } = await db.query(
-    "INSERT INTO sub_locations (name, location_id) VALUES ($1, $2) RETURNING id",
-    [name, location_id]
+    "INSERT INTO sub_locations (name, location_id) VALUES ($1, $2) RETURNING *",
+    [data.name, data.location_id]
   );
-  return { id: rows[0].id, name, location_id };
+  return rows[0];
 }
 
 async function updateSubLocationPartial(id, fieldsToUpdate) {

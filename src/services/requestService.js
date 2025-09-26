@@ -2,6 +2,7 @@ import * as requestModel from "../models/requestModel.js";
 import * as issueReportModel from "../models/issueReportModel.js";
 import * as assetRequestModel from "../models/assetRequestModel.js";
 import * as accountRequestModel from "../models/accountRequestModel.js";
+import * as subLocationAssetModel from "../models/subLocationAssetModel.js";
 
 export async function getIssueReports(filters = {}) {
   return await issueReportModel.getIssueReports(filters);
@@ -108,6 +109,8 @@ export async function approveAssetRequest(reportData) {
 
   const report = await requestModel.approveAssetRequest(reportData.asset_id, reportData.sub_location_id, reportData.status, "asset");
   if (!report) throw new Error(`No request found for asset_id ${reportData.asset_id}`);
+
+  await subLocationAssetModel.createSubLocationAsset({...reportData, status: "pending"});
 
   return report;
 }

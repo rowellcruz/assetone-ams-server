@@ -25,6 +25,12 @@ export const getSubLocationsByLocationID = async (req, res) => {
   res.json(subLocations);
 };
 
+export const getAssetRequestByLocationId = async (req, res) => {
+  const { id } = req.params;
+  const subLocations = await subLocationService.getAssetRequestByLocationId(id);
+  res.json(subLocations);
+};
+
 export const createSubLocation = async (req, res) => {
   const createdSubLocation = await subLocationService.createSubLocation(req.body);
   res.status(201).json(createdSubLocation);
@@ -33,6 +39,26 @@ export const createSubLocation = async (req, res) => {
 export const updateSubLocationPartial = async (req, res) => {
   const { id } = req.params;
   const updated = await subLocationService.updateSubLocationPartial(id, req.body);
+  if (!updated) {
+    res.status(404);
+    throw new Error("Sub-location not found");
+  }
+  res.json(updated);
+};
+
+export const updateSubLocationAssetPartial = async (req, res) => {
+  const { id } = req.params;
+  const updated = await subLocationService.updateSubLocationAssetPartial(id, req.body);
+  if (!updated) {
+    res.status(404);
+    throw new Error("Sub-location not found");
+  }
+  res.json(updated);
+};
+
+export const deliverUnits = async (req, res) => {
+  const { id } = req.params;
+  const updated = await subLocationService.deliverUnits(id, req.body);
   if (!updated) {
     res.status(404);
     throw new Error("Sub-location not found");

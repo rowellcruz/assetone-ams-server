@@ -24,8 +24,17 @@ async function getAllAssetUnits(filters = {}) {
   const values = [];
 
   if (filters.assetId) {
-    conditions.push(`asset_id = $1`);
+    conditions.push(`asset_id = $${values.length + 1}`);
     values.push(filters.assetId);
+  }
+
+  if (filters.subLocationId !== undefined) {
+    if (filters.subLocationId === null) {
+      conditions.push(`sub_location_id IS NULL`);
+    } else {
+      conditions.push(`sub_location_id = $${values.length + 1}`);
+      values.push(filters.subLocationId);
+    }
   }
 
   if (conditions.length > 0) {
@@ -37,15 +46,18 @@ async function getAllAssetUnits(filters = {}) {
 }
 
 async function getAssetUnitByID(id) {
-  const { rows } = await db.query("SELECT * FROM asset_units WHERE id = $1", [id]);
+  const { rows } = await db.query("SELECT * FROM asset_units WHERE id = $1", [
+    id,
+  ]);
   return rows[0] || null;
 }
 
 async function getReportedAssetDataById(id) {
   const { rows } = await db.query(
     `SELECT id, asset_id, unit_tag, sub_location_id
-    FROM asset_units WHERE id = $1`
-    , [id]);
+    FROM asset_units WHERE id = $1`,
+    [id]
+  );
   return rows[0] || null;
 }
 
@@ -119,8 +131,8 @@ async function createAssetUnit(data) {
     [
       asset_id,
       brand || null,
-      lifecycle_status || 'active',
-      operational_status || 'available',
+      lifecycle_status || "active",
+      operational_status || "available",
       condition,
       unit_tag || null,
       serial_number || null,
@@ -143,8 +155,8 @@ async function createAssetUnit(data) {
     id: rows[0].id,
     asset_id,
     brand,
-    lifecycle_status: lifecycle_status || 'active',
-    operational_status: operational_status || 'available',
+    lifecycle_status: lifecycle_status || "active",
+    operational_status: operational_status || "available",
     condition,
     unit_tag,
     serial_number,
@@ -170,21 +182,28 @@ async function updateAssetUnitPartial(id, fieldsToUpdate) {
   if (keys.length === 0) return null;
 
   const setClause = keys.map((key, i) => `${key} = $${i + 1}`).join(", ");
-  const query = `UPDATE asset_units SET ${setClause} WHERE id = $${keys.length + 1}`;
+  const query = `UPDATE asset_units SET ${setClause} WHERE id = $${
+    keys.length + 1
+  }`;
 
   await db.query(query, [...values, id]);
   return getAssetUnitByID(id);
 }
 
 async function deleteAssetUnitByID(id) {
-  const { rowCount } = await db.query("DELETE FROM asset_units WHERE id = $1", [id]);
+  const { rowCount } = await db.query("DELETE FROM asset_units WHERE id = $1", [
+    id,
+  ]);
   return rowCount > 0;
 }
 
 async function deleteAssetUnitsByIDs(ids) {
   if (!Array.isArray(ids) || ids.length === 0) return 0;
   const placeholders = ids.map((_, i) => `$${i + 1}`).join(", ");
-  const { rowCount } = await db.query(`DELETE FROM asset_units WHERE id IN (${placeholders})`, ids);
+  const { rowCount } = await db.query(
+    `DELETE FROM asset_units WHERE id IN (${placeholders})`,
+    ids
+  );
   return rowCount;
 }
 

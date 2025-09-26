@@ -53,7 +53,6 @@ export async function finalizeAcquisition(id, acquisitionData, finalizedBy) {
 }
 
 export async function finalizeAcquisitionAndCreateUnits(taskId, acquisitionData, finalizedBy) {
-
   const task = await procurementTaskModel.getProcurementTaskByID(taskId);
 
   const finalization = await finalizeAcquisition(taskId, acquisitionData, finalizedBy);

@@ -8,9 +8,12 @@ const router = express.Router();
 router.get('/', authenticate, asyncHandler(subLocationController.getSubLocations));
 router.get('/:id', asyncHandler(subLocationController.getSubLocationByID));
 router.get('/by-location/:location_id', authenticate, asyncHandler(subLocationController.getSubLocationsByLocationID));
+router.get('/:id/requests', asyncHandler(subLocationController.getAssetRequestByLocationId));
 router.post('/', authenticate, asyncHandler(subLocationController.createSubLocation));
+router.post('/:id/deliver', authenticate, asyncHandler(subLocationController.deliverUnits));
 router.post('/bulk-delete', authenticate, asyncHandler(subLocationController.deleteSubLocationsByIDs));
 router.patch('/:id', authenticate, asyncHandler(subLocationController.updateSubLocationPartial));
+router.patch('/:id/approve', authenticate, asyncHandler(subLocationController.updateSubLocationAssetPartial));
 router.delete('/:id', authenticate, asyncHandler(subLocationController.deleteSubLocationByID));
 
 export default router;

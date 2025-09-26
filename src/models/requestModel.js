@@ -33,6 +33,21 @@ async function getAssetRequestByData(email, sub_location_id, asset_id, type) {
   return rows;
 }
 
+async function getAssetRequestByLocationId(id) {
+  const { rows } = await db.query(
+    `
+    SELECT r.*, ar.*
+    FROM requests r
+    JOIN asset_requests ar ON r.id = ar.request_id
+    WHERE ar.sub_location_id = $1
+      AND r.status = 'approved'
+      AND r.request_type = 'asset'
+    `,
+    [id]
+  );
+  return rows;
+}
+
 async function createRequest(type) {
   const { rows } = await db.query(
     "INSERT INTO requests (request_type) VALUES ($1) RETURNING id",
@@ -77,6 +92,7 @@ async function approveAssetRequest(assetId, locationId, status, requestType) {
 export {
   getIssueReportByData,
   getAssetRequestByData,
+  getAssetRequestByLocationId,
   createRequest,
   approveIssueReport,
   approveAssetRequest,

@@ -1,7 +1,7 @@
 import db from "../config/db.js";
 
-async function getAssetRequests() {
-  const { rows } = await db.query(`
+async function getAssetRequests(filters = {}) {
+  let query = `
     SELECT
       'asset' AS report_type,
       ar.asset_id,
@@ -18,9 +18,26 @@ async function getAssetRequests() {
     JOIN sub_locations sl ON ar.sub_location_id = sl.id
     JOIN locations l ON sl.location_id = l.id
     WHERE r.status = 'pending' AND r.request_type = 'asset'
+  `;
+
+  const conditions = [];
+  const values = [];
+
+  if (filters.subLocationId) {
+    conditions.push(`ar.sub_location_id = $${values.length + 1}`);
+    values.push(filters.subLocationId);
+  }
+
+  if (conditions.length > 0) {
+    query += " AND " + conditions.join(" AND ");
+  }
+
+  query += `
     GROUP BY ar.asset_id, a.type, ar.sub_location_id, l.name, sl.name, r.status
-    ORDER BY last_reported_at DESC;
-  `);
+    ORDER BY last_reported_at DESC
+  `;
+
+  const { rows } = await db.query(query, values);
   return rows;
 }
 
