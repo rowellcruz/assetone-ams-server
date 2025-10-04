@@ -1,6 +1,7 @@
 import * as requestModel from "../models/requestModel.js";
 import * as issueReportModel from "../models/issueReportModel.js";
 import * as assetRequestModel from "../models/assetRequestModel.js";
+import * as purchaseRequestModel from "../models/purchaseRequestModel.js";
 import * as accountRequestModel from "../models/accountRequestModel.js";
 import * as subLocationAssetModel from "../models/subLocationAssetModel.js";
 
@@ -10,6 +11,10 @@ export async function getIssueReports(filters = {}) {
 
 export async function getAssetRequests(filters = {}) {
   return await assetRequestModel.getAssetRequests(filters);
+}
+
+export async function getPurchaseRequestsById(id) {
+  return await purchaseRequestModel.getPurchaseRequests(id);
 }
 
 export async function getMaintenanceRequests(filters = {}) {
@@ -35,6 +40,13 @@ export async function getAssetRequestsByLocationAndAssetId(
 }
 
 export async function createRequest(requestData) {
+  if (
+    requestData.department_id == null ||
+    requestData.department_id === "null"
+  ) {
+    throw new Error("Invalid department id");
+  }
+
   let existing = [];
 
   switch (requestData.request_type) {
@@ -68,12 +80,30 @@ export async function createRequest(requestData) {
         throw error;
       }
       break;
-      
+
+    case "purchase":
+      existing = await requestModel.getPurchaseRequests(
+        requestData.requested_by,
+        requestData.asset_id,
+        requestData.request_type
+      );
+      if (existing.length > 0) {
+        const error = new Error(
+          "You already submitted a purchase request for this asset."
+        );
+        error.status = 409;
+        throw error;
+      }
+      break;
+
     default:
       break;
   }
 
   const request = await requestModel.createRequest(requestData.request_type);
+  if (!request) {
+    throw new Error("Request creation failed");
+  }
 
   const childData = { ...requestData, request_id: request.id };
 
@@ -84,6 +114,9 @@ export async function createRequest(requestData) {
       break;
     case "asset":
       childRecord = await assetRequestModel.createAssetRequest(childData);
+      break;
+    case "purchase":
+      childRecord = await purchaseRequestModel.createPurchaseRequest(childData);
       break;
     case "account":
       childRecord = await accountRequestModel.createAccountRequest(childData);
@@ -98,8 +131,15 @@ export async function createRequest(requestData) {
 export async function approveIssueReport(reportData) {
   if (!reportData.status) throw new Error("Missing status in reportData");
 
-  const report = await requestModel.approveIssueReport(reportData.asset_unit_id, reportData.status, "issue");
-  if (!report) throw new Error(`No request found for asset_unit_id ${reportData.asset_unit_id}`);
+  const report = await requestModel.approveIssueReport(
+    reportData.asset_unit_id,
+    reportData.status,
+    "issue"
+  );
+  if (!report)
+    throw new Error(
+      `No request found for asset_unit_id ${reportData.asset_unit_id}`
+    );
 
   return report;
 }
@@ -107,10 +147,19 @@ export async function approveIssueReport(reportData) {
 export async function approveAssetRequest(reportData) {
   if (!reportData.status) throw new Error("Missing status in reportData");
 
-  const report = await requestModel.approveAssetRequest(reportData.asset_id, reportData.sub_location_id, reportData.status, "asset");
-  if (!report) throw new Error(`No request found for asset_id ${reportData.asset_id}`);
+  const report = await requestModel.approveAssetRequest(
+    reportData.asset_id,
+    reportData.sub_location_id,
+    reportData.status,
+    "asset"
+  );
+  if (!report)
+    throw new Error(`No request found for asset_id ${reportData.asset_id}`);
 
-  await subLocationAssetModel.createSubLocationAsset({...reportData, status: "pending"});
+  await subLocationAssetModel.createSubLocationAsset({
+    ...reportData,
+    status: "pending",
+  });
 
   return report;
 }

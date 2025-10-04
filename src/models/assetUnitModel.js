@@ -37,6 +37,15 @@ async function getAllAssetUnits(filters = {}) {
     }
   }
 
+  if (filters.departmentId !== undefined) {
+    if (filters.departmentId === null) {
+      conditions.push(`au.department_id IS NULL`);
+    } else {
+      conditions.push(`au.department_id = $${values.length + 1}`);
+      values.push(filters.departmentId);
+    }
+  }
+
   if (conditions.length > 0) {
     query += " WHERE " + conditions.join(" AND ");
   }

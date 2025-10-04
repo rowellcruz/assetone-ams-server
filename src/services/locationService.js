@@ -9,8 +9,19 @@ export async function getLocationByID(id) {
 }
 
 export async function createLocation(locationData) {
+  const { sublocations = [] } = locationData;
+
+  const normalized = sublocations.map(s => s.trim().toLowerCase());
+
+  const duplicates = normalized.filter((s, i) => normalized.indexOf(s) !== i);
+  if (duplicates.length > 0) {
+    const dupList = [...new Set(duplicates)];
+    throw new Error(`Duplicate sublocations in payload: ${dupList.join(", ")}`);
+  }
+
   return await locationModel.createLocation(locationData);
 }
+
 
 export async function deleteLocationsByIDs(ids) {
   return await locationModel.deleteLocationsByIDs(ids);

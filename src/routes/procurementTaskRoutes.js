@@ -14,7 +14,7 @@ router.patch('/:id', authenticate, asyncHandler(procurementTaskController.update
 router.delete('/:id', authenticate, asyncHandler(procurementTaskController.deleteProcurementTaskByID));
 
 router.get("/:taskId/attachments", asyncHandler(procurementTaskController.getAttachments));
-router.post("/:taskId/attachments", authenticate, upload.single("file"), asyncHandler(procurementTaskController.uploadAttachment));
+router.post("/:taskId/attachments/:module", authenticate, upload.single("file"), asyncHandler(procurementTaskController.uploadAttachment));
 router.delete("/attachments/:id", authenticate, asyncHandler(procurementTaskController.deleteAttachment));
 
 router.post('/:id/finalize', authenticate, asyncHandler(procurementTaskController.finalizeAcquisition));

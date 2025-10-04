@@ -48,6 +48,21 @@ async function getAssetRequestByLocationId(id) {
   return rows;
 }
 
+async function getPurchaseRequests(requested_by, asset_id, type) {
+  const { rows } = await db.query(
+    `
+    SELECT r.*, pr.*
+    FROM requests r
+    JOIN purchase_requests pr ON r.id = pr.request_id
+    WHERE pr.requested_by = $1
+      AND pr.asset_id = $2
+      AND r.request_type = $3
+    `,
+    [requested_by, asset_id, type]
+  );
+  return rows;
+}
+
 async function createRequest(type) {
   const { rows } = await db.query(
     "INSERT INTO requests (request_type) VALUES ($1) RETURNING id",
@@ -84,16 +99,36 @@ async function approveAssetRequest(assetId, locationId, status, requestType) {
       AND r.request_type = $4
     RETURNING r.*;
   `;
-  const { rows } = await db.query(query, [assetId, locationId, status, requestType]);
+  const { rows } = await db.query(query, [
+    assetId,
+    locationId,
+    status,
+    requestType,
+  ]);
 
   return rows[0] || null;
 }
+
+async function updateRequestPartial(id, fields) {
+  const keys = Object.keys(fields);
+  if (keys.length === 0) return null;
+  const updates = keys.map((key, i) => `${key} = $${i + 1}`).join(", ");
+  const values = Object.values(fields);
+  const { rowCount } = await db.query(`UPDATE requests SET ${updates} WHERE id = $${keys.length + 1} AND request_type = 'purchase'`, [
+    ...values,
+    id,
+  ]);
+  return rowCount > 0 ? { id, ...fields } : null;
+}
+
 
 export {
   getIssueReportByData,
   getAssetRequestByData,
   getAssetRequestByLocationId,
+  getPurchaseRequests,
   createRequest,
   approveIssueReport,
   approveAssetRequest,
+  updateRequestPartial,
 };

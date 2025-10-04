@@ -56,7 +56,7 @@ export const deleteProcurementTasksByIDs = async (req, res) => {
 
 export async function uploadAttachment(req, res, next) {
   try {
-    const { taskId } = req.params;
+    const { taskId, module } = req.params;
     const uploadedBy = req.user.id;
     const file = req.file;
 
@@ -64,7 +64,7 @@ export async function uploadAttachment(req, res, next) {
       return res.status(400).json({ message: "No file uploaded" });
     }
 
-    const attachment = await procurementTaskService.addAttachment(taskId, file, uploadedBy);
+    const attachment = await procurementTaskService.addAttachment(taskId, file, uploadedBy, module);
     res.status(201).json(attachment);
   } catch (err) {
     next(err);

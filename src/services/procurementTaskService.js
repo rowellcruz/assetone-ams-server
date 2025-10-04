@@ -30,13 +30,14 @@ export async function deleteProcurementTasksByIDs(ids) {
   return await procurementTaskModel.deleteProcurementTasksByIDs(ids);
 }
 
-export async function addAttachment(taskId, file, uploadedBy) {
+export async function addAttachment(taskId, file, uploadedBy, module) {
   return await attachmentModel.createAttachment(
     taskId,
     file.filename,
     file.originalname,
     file.mimetype,
-    uploadedBy
+    uploadedBy,
+    module
   );
 }
 

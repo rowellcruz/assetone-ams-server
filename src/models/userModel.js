@@ -54,11 +54,16 @@ async function getUsersFromDepartment(id) {
 async function getUserDataById(id) {
   const { rows } = await db.query(
     `SELECT
-    id, first_name, last_name, email, role,
-    contact_number, secondary_email, department_id,
-    priority_score, user_status, availability_status,
-    created_at, created_by, updated_at, updated_by, deleted_at, deleted_by
-  FROM users WHERE id = $1;`,
+      u.id, u.first_name, u.last_name, u.email, u.role,
+      u.contact_number, u.secondary_email,
+      u.department_id,
+      d.name AS department_name,
+      u.priority_score, u.user_status, u.availability_status,
+      u.created_at, u.created_by, u.updated_at, u.updated_by,
+      u.deleted_at, u.deleted_by
+     FROM users u
+     LEFT JOIN departments d ON u.department_id = d.id
+     WHERE u.id = $1;`,
     [id]
   );
   return rows[0];

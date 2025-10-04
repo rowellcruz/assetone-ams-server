@@ -18,14 +18,9 @@ async function getAllSubLocationAssets(filters = {}) {
   return rows;
 }
 
-async function getSubLocationByID(id) {
+async function getSubLocationAssetByID(id) {
   const { rows } = await db.query(
-    `
-    SELECT sl.*, l.name AS location_name
-    FROM sub_locations sl
-    JOIN locations l ON sl.location_id = l.id
-    WHERE sl.id = $1
-    `,
+    "SELECT * FROM sub_location_assets WHERE id = $1",
     [id]
   );
   return rows[0] || null;
@@ -73,14 +68,19 @@ async function updateSubLocationAssetPartial(id, fieldsToUpdate) {
   if (keys.length === 0) return null;
 
   const setClause = keys.map((key, i) => `${key} = $${i + 1}`).join(", ");
-  const query = `UPDATE sub_location_assets SET ${setClause} WHERE id = $${keys.length + 1}`;
+  const query = `UPDATE sub_location_assets SET ${setClause} WHERE id = $${
+    keys.length + 1
+  }`;
 
   await db.query(query, [...values, id]);
-  return getSubLocationByID(id);
+  return getSubLocationAssetByID(id);s
 }
 
 async function deleteSubLocationAssetByID(id) {
-  const { rowCount } = await db.query("DELETE FROM sub_location_assets WHERE id = $1", [id]);
+  const { rowCount } = await db.query(
+    "DELETE FROM sub_location_assets WHERE id = $1",
+    [id]
+  );
   return rowCount > 0;
 }
 
