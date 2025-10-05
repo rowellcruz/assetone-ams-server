@@ -41,8 +41,8 @@ export async function getAssetRequestsByLocationAndAssetId(
 
 export async function createRequest(requestData) {
   if (
-    requestData.department_id == null ||
-    requestData.department_id === "null"
+    requestData.request_type === "purchase" &&
+    (requestData.department_id == null || requestData.department_id === "null")
   ) {
     throw new Error("Invalid department id");
   }

@@ -5,6 +5,9 @@ async function getAllAssetUnits(filters = {}) {
     SELECT 
       au.*, 
       d.name AS department_name,
+      v.name AS vendor_name,
+      v.phone_number AS vendor_contact_number,
+      v.address AS vendor_address,
       l.name || ' - ' || sl.name AS full_location_name,
       u.first_name || ' ' || u.last_name AS assigned_user_name,
       cu.first_name || ' ' || cu.last_name AS created_by_name,
@@ -14,6 +17,7 @@ async function getAllAssetUnits(filters = {}) {
     LEFT JOIN departments d ON au.department_id = d.id
     LEFT JOIN sub_locations sl ON au.sub_location_id = sl.id
     LEFT JOIN locations l ON sl.location_id = l.id
+    LEFT JOIN vendors v ON au.vendor_id = v.id
     LEFT JOIN users u ON au.assigned_user_id = u.id
     LEFT JOIN users cu ON au.created_by = cu.id
     LEFT JOIN users uu ON au.updated_by = uu.id

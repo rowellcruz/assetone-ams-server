@@ -57,6 +57,7 @@ async function getPurchaseRequests(requested_by, asset_id, type) {
     WHERE pr.requested_by = $1
       AND pr.asset_id = $2
       AND r.request_type = $3
+      AND r.status != 'approved'
     `,
     [requested_by, asset_id, type]
   );

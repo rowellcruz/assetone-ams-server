@@ -2,6 +2,7 @@ import * as departmentModel from "../models/departmentModel.js";
 import * as userModel from "../models/userModel.js";
 import * as assetUnitModel from "../models/assetUnitModel.js";
 import * as purchaseRequestModel from "../models/purchaseRequestModel.js";
+import * as requestModel from "../models/requestModel.js";
 
 export async function getAllDepartments(filters = {}) {
   return await departmentModel.getAllDepartments(filters);
@@ -45,15 +46,22 @@ export async function updatePurchaseRequestPartial(id, fieldsToUpdate) {
 }
 
 export async function distributeUnits(id, requestData) {
+  const requestedQty = Number(requestData.requested_quantity);
+  if (isNaN(requestedQty)) {
+    throw new Error(`Invalid requested quantity: ${requestData.requested_quantity}`);
+  }
+
   const availableUnits = await assetUnitModel.getAllAssetUnits({
     assetId: requestData.asset_id,
     departmentId: null,
   });
 
-  const requestedQty = Number(requestData.quantity);
   const availableQty = availableUnits.length;
-
   const distributableQty = Math.min(requestedQty, availableQty);
+
+  if (isNaN(distributableQty)) {
+    throw new Error(`Invalid distributable quantity derived from request`);
+  }
 
   for (let i = 0; i < distributableQty; i++) {
     await assetUnitModel.updateAssetUnitPartial(availableUnits[i].id, {
@@ -62,22 +70,25 @@ export async function distributeUnits(id, requestData) {
   }
 
   let newStatus;
-  if (distributableQty === 0) {
-    throw new Error("No units available to distribute");
-  } else if (distributableQty < requestedQty) {
-    newStatus = "pending";
-  } else {
-    newStatus = "approved";
-  }
+  if (distributableQty === 0) throw new Error("No units available to distribute");
+  else if (distributableQty < requestedQty) newStatus = "pending";
+  else newStatus = "approved";
 
-  const updated = await purchaseRequestModel.distributeUnits(id, {
-    status: newStatus,
+  await purchaseRequestModel.updatePurchaseRequestPartial(id, {
     distributed_quantity: distributableQty,
     requested_quantity: requestedQty,
     updated_at: new Date(),
   });
 
-  return updated;
+  const updatedRequest = await requestModel.updateRequestPartial(
+    Number(requestData.request_id),
+    {
+      status: newStatus,
+      updated_at: new Date(),
+    }
+  );
+
+  return updatedRequest;
 }
 
 export async function deleteDepartmentByID(id) {

@@ -5,16 +5,19 @@ async function getPurchaseRequests(id) {
     `
     SELECT 
         pr.*,
+        r.status,
         a.type AS asset_type,
         COUNT(au.id) AS available_units
     FROM purchase_requests pr
+    LEFT JOIN requests r 
+        ON pr.request_id = r.id
     LEFT JOIN assets a 
         ON pr.asset_id = a.id
     LEFT JOIN asset_units au
         ON pr.asset_id = au.asset_id
        AND au.department_id IS NULL
     WHERE pr.department_id = $1
-    GROUP BY pr.id, a.type
+    GROUP BY pr.id, r.status, a.type
     `,
     [id]
   );
@@ -24,15 +27,14 @@ async function getPurchaseRequests(id) {
 async function createPurchaseRequest(data) {
   const { rows } = await db.query(
     `INSERT INTO purchase_requests 
-      (request_id, department_id, asset_id, requested_quantity, status, requested_by) 
-     VALUES ($1, $2, $3, $4, $5, $6) 
+      (request_id, department_id, asset_id, requested_quantity, requested_by) 
+     VALUES ($1, $2, $3, $4, $5) 
      RETURNING *`,
     [
       data.request_id,
       data.department_id,
       data.asset_id,
       data.quantity,
-      "pending",
       data.requested_by,
     ]
   );

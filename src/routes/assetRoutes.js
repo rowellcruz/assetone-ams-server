@@ -9,6 +9,7 @@ const router = express.Router();
 router.get('/', authenticate, asyncHandler(assetController.getAssets));
 router.get('/:id', authenticate, asyncHandler(assetController.getAssetByID));
 router.get('/:id/units', authenticate, asyncHandler(assetUnitsController.getAssetUnitsByAssetID));
+router.get('/:id/units/:departmentId', authenticate, asyncHandler(assetUnitsController.getAssetUnitsByDepartmentID));
 router.get('/by-category/:category_id', authenticate, asyncHandler(assetController.getAssetsByCategoryID));
 router.post('/:id/units', authenticate, asyncHandler(assetUnitsController.createAssetUnit));
 router.post('/', authenticate, asyncHandler(assetController.createAsset));

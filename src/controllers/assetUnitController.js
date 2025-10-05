@@ -35,6 +35,12 @@ export const getAssetUnitsByAssetID = async (req, res) => {
   res.json(assetUnits);
 };
 
+export const getAssetUnitsByDepartmentID = async (req, res) => {
+  const { id, departmentId } = req.params;
+  const assetUnits = await assetUnitService.getAssetUnitsByDepartmentID(id, departmentId);
+  res.json(assetUnits);
+};
+
 export const createAssetUnit = async (req, res) => {
   const createdAssetUnit = await assetUnitService.createAssetUnit(req.body);
   res.status(201).json(createdAssetUnit);

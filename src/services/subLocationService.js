@@ -39,7 +39,6 @@ export async function deliverUnits(id, subLocationData) {
     subLocationId: null,
   });
 
-  console.error(availableUnits);
   const quantity = Number(subLocationData.quantity);
   if (availableUnits.length < quantity) {
     throw new Error("There is not enough stock available");

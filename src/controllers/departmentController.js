@@ -70,7 +70,7 @@ export const distributeUnits = async (req, res) => {
   const updated = await departmentService.distributeUnits(id, req.body);
   if (!updated) {
     res.status(404);
-    throw new Error("Sub-location not found");
+    throw new Error("Unit not found");
   }
   res.json(updated);
 };
