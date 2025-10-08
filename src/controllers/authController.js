@@ -7,7 +7,7 @@ export async function login(req, res) {
     const { token, user } = await authService.login(email, password);
     res.json({
       token,
-      user: { id: user.id, email: user.email, role: user.role },
+      user: { id: user.id, email: user.email, role: user.role, status: user.status },
     });
   } catch (err) {
     console.error("Login error:", err.message);

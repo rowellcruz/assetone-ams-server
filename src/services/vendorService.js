@@ -1,4 +1,5 @@
 import * as vendorModel from "../models/vendorModel.js";
+import * as vendorOfferModel from "../models/vendorOfferModel.js";
 
 export async function getAllVendors(filters = {}) {
   const vendors = await vendorModel.getAllVendors(filters);
@@ -6,7 +7,7 @@ export async function getAllVendors(filters = {}) {
 
   return vendors.map((vendor) => ({
     ...vendor,
-    offers: offersMap[vendor.id] || [],
+    asset_category_ids: (offersMap[vendor.id] || []).map(o => o.id),
   }));
 }
 
@@ -20,6 +21,10 @@ export async function getVendorByID(id) {
 
 export async function createVendor(vendorData) {
   return vendorModel.createVendor(vendorData);
+}
+
+export async function addVendorOffers(vendorId, assetCategoryIds) {
+  return vendorOfferModel.addVendorOffers(vendorId, assetCategoryIds);
 }
 
 export async function deleteVendorsByIDs(ids) {

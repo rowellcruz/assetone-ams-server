@@ -17,14 +17,23 @@ export const getVendorByID = async (req, res) => {
 };
 
 export const createVendor = async (req, res) => {
-  const { offers = [], ...vendorData } = req.body;
-  const createdVendor = await vendorService.createVendor(vendorData);
+  try {
+    const { asset_category_ids = [], ...vendorData } = req.body;
 
-  if (offers.length > 0) {
-    await vendorService.setVendorOffers(createdVendor.id, offers);
+    const createdVendor = await vendorService.createVendor(vendorData);
+
+    if (asset_category_ids.length > 0) {
+      await vendorService.addVendorOffers(createdVendor.id, asset_category_ids);
+    }
+
+    res.status(201).json({
+      ...createdVendor,
+      asset_category_ids,
+    });
+  } catch (err) {
+    console.error("Error creating vendor:", err);
+    res.status(500).json({ message: "Failed to create vendor", error: err.message });
   }
-
-  res.status(201).json({ ...createdVendor, offers });
 };
 
 export const deleteVendorsByIDs = async (req, res) => {
@@ -35,21 +44,6 @@ export const deleteVendorsByIDs = async (req, res) => {
   }
   await vendorService.deleteVendorsByIDs(ids);
   res.json({ message: "Vendors deleted successfully" });
-};
-
-export const replaceVendor = async (req, res) => {
-  const { id } = req.params;
-  const { offers = [], ...vendorData } = req.body;
-
-  const updatedVendor = await vendorService.updateFullVendor(id, vendorData);
-  if (!updatedVendor) {
-    res.status(404);
-    throw new Error("Vendor not found");
-  }
-
-  await vendorService.setVendorOffers(id, offers);
-
-  res.json({ ...updatedVendor, offers });
 };
 
 export const updateVendorPartial = async (req, res) => {
