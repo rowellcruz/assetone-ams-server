@@ -1,19 +1,36 @@
 import db from "../config/db.js";
 
 async function getAllAssets(filters = {}) {
-  let query = `SELECT * FROM assets`;
+  let query = `
+    SELECT 
+      a.*, 
+      c.name AS category_name,
+      d.name AS department_name,
+      COUNT(au.id) AS unit_count
+    FROM assets a
+    LEFT JOIN asset_units au ON au.asset_id = a.id
+    LEFT JOIN asset_categories c ON c.id = a.category_id
+    LEFT JOIN departments d ON d.id = a.department_id
+  `;
 
   const conditions = [];
   const values = [];
 
   if (filters.categoryId) {
-    conditions.push("a.category_id = $1");
+    conditions.push(`a.category_id = $1`);
     values.push(filters.categoryId);
+  }
+
+  if (filters.departmentId) {
+    conditions.push(`a.department_id = $1`);
+    values.push(filters.departmentId);
   }
 
   if (conditions.length > 0) {
     query += " WHERE " + conditions.join(" AND ");
   }
+
+  query += " GROUP BY a.id, c.name, d.name";
 
   const { rows } = await db.query(query, values);
   return rows;
@@ -25,17 +42,28 @@ async function getPublicAssets() {
 }
 
 async function getAssetByID(id) {
-  const { rows } = await db.query("SELECT * FROM assets WHERE id = $1", [id]);
+  const query = `
+    SELECT 
+      a.*, 
+      c.name AS category_name,
+      d.name AS department_name
+    FROM assets a
+    LEFT JOIN asset_categories c ON c.id = a.category_id
+    LEFT JOIN departments d ON d.id = a.department_id
+    WHERE a.id = $1
+  `;
+  
+  const { rows } = await db.query(query, [id]);
   return rows[0] || null;
 }
 
 async function createAsset(data) {
-  const { type, created_by, updated_by } = data;
+  const { type, category_id, created_by, updated_by } = data;
   const { rows } = await db.query(
-    "INSERT INTO assets (type, created_by, updated_by) VALUES ($1, $2, $3) RETURNING id",
-    [type, created_by, updated_by]
+    "INSERT INTO assets (type, category_id, created_by, updated_by) VALUES ($1, $2, $3, $4) RETURNING id",
+    [type, category_id, created_by, updated_by]
   );
-  return { id: rows[0].id, type, created_by, updated_by };
+  return { id: rows[0].id, type, category_id, created_by, updated_by };
 }
 
 async function updateAssetPartial(id, fieldsToUpdate) {

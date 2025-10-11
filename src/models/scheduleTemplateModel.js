@@ -33,6 +33,16 @@ async function getScheduleTemplatesByID(id) {
   return rows[0] || null;
 }
 
+async function getScheduleTemplatesByAssetID(assetId) {
+  const { rows } = await db.query(
+    `SELECT *
+    FROM schedule_templates
+    WHERE asset_id = $1`,
+    [assetId]
+  );
+  return rows;
+}
+
 async function createScheduleTemplate(data) {
   const {
     asset_id,
@@ -41,6 +51,8 @@ async function createScheduleTemplate(data) {
     type,
     frequency_value,
     frequency_unit,
+    grace_period_value,
+    grace_period_unit,
     start_date,
     expiration_date,
     created_by,
@@ -56,12 +68,14 @@ async function createScheduleTemplate(data) {
       type,
       frequency_value,
       frequency_unit,
+    grace_period_value,
+    grace_period_unit,
       start_date,
       expiration_date,
       created_by,
       updated_by,
       updated_at
-    ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) RETURNING id`,
+    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING id`,
     [
       asset_id,
       title,
@@ -69,6 +83,8 @@ async function createScheduleTemplate(data) {
       type,
       frequency_value,
       frequency_unit,
+      grace_period_value,
+      grace_period_unit,
       start_date,
       expiration_date,
       created_by,
@@ -115,6 +131,7 @@ async function deleteScheduleTemplatesByIDs(ids) {
 export {
   getAllScheduleTemplates,
   getScheduleTemplatesByID,
+  getScheduleTemplatesByAssetID,
   createScheduleTemplate,
   updateScheduleTemplatesPartial,
   deleteScheduleTemplateByID,

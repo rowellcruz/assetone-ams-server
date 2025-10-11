@@ -10,6 +10,10 @@ export async function getScheduleTemplatesByID(id) {
   return await scheduleTemplateModel.getScheduleTemplatesByID(id);
 }
 
+export async function getScheduleTemplatesByAssetID(assetId) {
+  return await scheduleTemplateModel.getScheduleTemplatesByAssetID(assetId);
+}
+
 export async function createScheduleTemplate(scheduleTemplateData) {
   const createdTemplate = await scheduleTemplateModel.createScheduleTemplate(scheduleTemplateData);
 

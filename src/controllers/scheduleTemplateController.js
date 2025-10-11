@@ -19,6 +19,12 @@ export const getScheduleTemplateByID = async (req, res) => {
   res.json(scheduleTemplate);
 };
 
+export const getScheduleTemplatesByAssetID = async (req, res) => {
+  const { assetId } = req.params;
+  const scheduleTemplates = await scheduleTemplateService.getScheduleTemplatesByAssetID(assetId);
+  res.json(scheduleTemplates);
+}
+
 export const createScheduleTemplate = async (req, res) => {
   const createdScheduleTemplate = await scheduleTemplateService.createScheduleTemplate(req.body);
   res.status(201).json(createdScheduleTemplate);

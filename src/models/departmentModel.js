@@ -1,7 +1,12 @@
 import db from '../config/db.js';
 
 async function getAllDepartments(filters) {
-  const { rows } = await db.query('SELECT * FROM departments');
+  const { rows } = await db.query(`
+    SELECT d.*, COUNT(u.id) AS user_count
+    FROM departments d
+    LEFT JOIN users u ON u.department_id = d.id
+    GROUP BY d.id
+  `);
   return rows;
 }
 
