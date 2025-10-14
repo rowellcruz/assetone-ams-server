@@ -9,6 +9,10 @@ export async function getAssetCategoryByID(id) {
 }
 
 export async function createAssetCategory(assetCategoryData) {
+  if (assetCategoryData.code) {
+    assetCategoryData.code = assetCategoryData.code.toUpperCase();
+  }
+  
   return await assetCategoryModel.createAssetCategory(assetCategoryData);
 }
 

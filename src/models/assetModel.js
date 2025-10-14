@@ -46,7 +46,9 @@ async function getAssetByID(id) {
     SELECT 
       a.*, 
       c.name AS category_name,
-      d.name AS department_name
+      c.code AS category_code,
+      d.name AS department_name,
+      d.code AS department_code
     FROM assets a
     LEFT JOIN asset_categories c ON c.id = a.category_id
     LEFT JOIN departments d ON d.id = a.department_id

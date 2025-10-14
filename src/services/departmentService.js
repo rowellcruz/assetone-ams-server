@@ -23,6 +23,10 @@ export async function getDepartmentByID(id) {
 }
 
 export async function createDepartment(departmentData) {
+  if (departmentData.code) {
+    departmentData.code = departmentData.code.toUpperCase();
+  }
+
   return await departmentModel.createDepartment(departmentData);
 }
 
@@ -48,7 +52,9 @@ export async function updatePurchaseRequestPartial(id, fieldsToUpdate) {
 export async function distributeUnits(id, requestData) {
   const requestedQty = Number(requestData.requested_quantity);
   if (isNaN(requestedQty)) {
-    throw new Error(`Invalid requested quantity: ${requestData.requested_quantity}`);
+    throw new Error(
+      `Invalid requested quantity: ${requestData.requested_quantity}`
+    );
   }
 
   const availableUnits = await assetUnitModel.getAllAssetUnits({
@@ -70,7 +76,8 @@ export async function distributeUnits(id, requestData) {
   }
 
   let newStatus;
-  if (distributableQty === 0) throw new Error("No units available to distribute");
+  if (distributableQty === 0)
+    throw new Error("No units available to distribute");
   else if (distributableQty < requestedQty) newStatus = "pending";
   else newStatus = "approved";
 

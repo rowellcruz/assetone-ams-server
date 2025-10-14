@@ -1,9 +1,12 @@
 import * as assetUnitService from "../services/assetUnitService.js";
 
 export const getAssetUnits = async (req, res) => {
-  const filters = {
-    assetId: req.query.assetId,
-  };
+  const filters = {};
+  if (req.query.assetId) filters.assetId = req.query.assetId;
+  if (req.query.lifecycle_status)
+    filters.lifecycle_status = req.query.lifecycle_status;
+  if (req.query.operational_status)
+    filters.operational_status = req.query.operational_status;
 
   const assetUnits = await assetUnitService.getAllAssetUnits(filters);
   res.json(assetUnits);
@@ -37,7 +40,10 @@ export const getAssetUnitsByAssetID = async (req, res) => {
 
 export const getAssetUnitsByDepartmentID = async (req, res) => {
   const { id, departmentId } = req.params;
-  const assetUnits = await assetUnitService.getAssetUnitsByDepartmentID(id, departmentId);
+  const assetUnits = await assetUnitService.getAssetUnitsByDepartmentID(
+    id,
+    departmentId
+  );
   res.json(assetUnits);
 };
 

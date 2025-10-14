@@ -50,6 +50,16 @@ async function getAllAssetUnits(filters = {}) {
     }
   }
 
+  if (filters.lifecycle_status !== undefined) {
+    conditions.push(`lifecycle_status = $${values.length + 1}`);
+    values.push(filters.lifecycle_status);
+  }
+
+  if (filters.operational_status !== undefined) {
+    conditions.push(`operational_status = $${values.length + 1}`);
+    values.push(filters.operational_status);
+  }
+
   if (conditions.length > 0) {
     query += " WHERE " + conditions.join(" AND ");
   }
@@ -220,11 +230,24 @@ async function deleteAssetUnitsByIDs(ids) {
   return rowCount;
 }
 
+async function getLastUnitTag(prefix) {
+  const { rows } = await db.query(
+    `SELECT unit_tag 
+     FROM asset_units 
+     WHERE unit_tag LIKE $1
+     ORDER BY unit_tag DESC 
+     LIMIT 1`,
+    [`${prefix}-%`]
+  );
+  return rows[0];
+}
+
 export {
   getAllAssetUnits,
   getAssetUnitByID,
   getReportedAssetDataById,
   getAssetUnitsFromDepartment,
+  getLastUnitTag,
   createAssetUnit,
   updateAssetUnitPartial,
   deleteAssetUnitByID,

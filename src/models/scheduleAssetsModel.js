@@ -38,19 +38,17 @@ async function getAssignedAssetsByTemplateId(templateId) {
   return rows;
 }
 
-
-
-async function assignAssets(template_id, asset_unit_ids) {
+async function assignAssets(occurrence_id, asset_unit_ids) {
   const insertPromises = asset_unit_ids.map((asset_unit_id) =>
     db.query(
-      "INSERT INTO schedule_template_assets (schedule_template_id, asset_unit_id) VALUES ($1, $2)",
-      [template_id, asset_unit_id]
+      "INSERT INTO schedule_template_assets (schedule_occurrence_id, asset_unit_id) VALUES ($1, $2)",
+      [occurrence_id, asset_unit_id]
     )
   );
 
   await Promise.all(insertPromises);
 
-  return { template_id, asset_unit_ids };
+  return { occurrence_id, asset_unit_ids };
 }
 
 export {

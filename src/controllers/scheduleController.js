@@ -23,14 +23,21 @@ export const getAssignedAssetsByTemplateId = async (req, res) => {
   res.json(assets);
 };
 
+export const getScheduleOccurrencesByAssetUnitId = async (req, res) => {
+  const { assetUnitId } = req.params;
+  const schedules = await scheduleService.getScheduleOccurrencesByAssetUnitId(assetUnitId);
+  res.json(schedules);
+};
+
 export const startScheduleOccurrence = async (req, res) => {
   const { id } = req.params;
-  const { started_by, technicians } = req.body;
+  const { started_by, technicians, asset_unit_ids } = req.body;
 
   const updated = await scheduleService.startScheduleOccurrence(
     id,
     started_by,
-    technicians
+    technicians,
+    asset_unit_ids
   );
 
   if (!updated) {
@@ -45,7 +52,10 @@ export const completeScheduleOccurrence = async (req, res) => {
   const { id } = req.params;
   const { completed_by } = req.body;
 
-  const updated = await scheduleService.completeScheduleOccurrence(id, completed_by);
+  const updated = await scheduleService.completeScheduleOccurrence(
+    id,
+    completed_by
+  );
 
   if (!updated) {
     res.status(404);
@@ -58,7 +68,7 @@ export const completeScheduleOccurrence = async (req, res) => {
 export const rejectScheduleOccurrence = async (req, res) => {
   const { id } = req.params;
 
-  const updated = await scheduleService.rejectScheduleOccurrence(id);
+  const updated = await scheduleService.rejectScheduleOccurrence(id, req.body);
 
   if (!updated) {
     res.status(404);
@@ -72,7 +82,11 @@ export const skipScheduleOccurrence = async (req, res) => {
   const { id } = req.params;
   const { skipped_by, reason } = req.body;
 
-  const updated = await scheduleService.skipScheduleOccurrence(id, skipped_by, reason);
+  const updated = await scheduleService.skipScheduleOccurrence(
+    id,
+    skipped_by,
+    reason
+  );
 
   if (!updated) {
     res.status(404);

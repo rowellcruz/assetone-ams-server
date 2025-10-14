@@ -9,6 +9,7 @@ router.get('/details', authenticate, asyncHandler(scheduleController.getSchedule
 
 router.get('/:id', authenticate, asyncHandler(scheduleController.getScheduleOccurrencesByTemplateId));
 router.get('/:id/assigned-assets', authenticate, asyncHandler(scheduleController.getAssignedAssetsByTemplateId));
+router.get('/asset-unit/:assetUnitId', authenticate, asyncHandler(scheduleController.getScheduleOccurrencesByAssetUnitId));
 router.post('/:id/start', authenticate, asyncHandler(scheduleController.startScheduleOccurrence));
 router.post('/:id/complete', authenticate, asyncHandler(scheduleController.completeScheduleOccurrence));
 router.post('/:id/reject', authenticate, asyncHandler(scheduleController.rejectScheduleOccurrence));

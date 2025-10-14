@@ -11,7 +11,12 @@ export const getScheduleTemplates = async (req, res) => {
 
 export const getScheduleTemplateByID = async (req, res) => {
   const { id } = req.params;
-  const scheduleTemplate = await scheduleTemplateService.getScheduleTemplatesByID(id);
+  
+  const filters = {
+    type: req.query.type,
+  };
+
+  const scheduleTemplate = await scheduleTemplateService.getScheduleTemplatesByID(id, filters);
   if (!scheduleTemplate) {
     res.status(404);
     throw new Error("Schedule template not found");
@@ -21,7 +26,12 @@ export const getScheduleTemplateByID = async (req, res) => {
 
 export const getScheduleTemplatesByAssetID = async (req, res) => {
   const { assetId } = req.params;
-  const scheduleTemplates = await scheduleTemplateService.getScheduleTemplatesByAssetID(assetId);
+  
+  const filters = {
+    type: req.query.type,
+  };
+
+  const scheduleTemplates = await scheduleTemplateService.getScheduleTemplatesByAssetID(assetId, filters);
   res.json(scheduleTemplates);
 }
 

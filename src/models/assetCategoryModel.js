@@ -14,10 +14,10 @@ async function getAssetCategoryByID(id) {
 }
 
 async function createAssetCategory(assetCategoryData) {
-  const { name, created_by, updated_by } = assetCategoryData;
+  const { name, code, created_by, updated_by } = assetCategoryData;
   const { rows } = await db.query(
-    "INSERT INTO asset_categories (name, created_by, updated_by) VALUES ($1, $2, $3) RETURNING id",
-    [name, created_by, updated_by]
+    "INSERT INTO asset_categories (name, code, created_by, updated_by) VALUES ($1, $2, $3, $4) RETURNING id",
+    [name, code, created_by, updated_by]
   );
   return { id: rows[0].id, ...assetCategoryData };
 }

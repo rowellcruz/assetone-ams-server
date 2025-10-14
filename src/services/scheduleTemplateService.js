@@ -6,12 +6,12 @@ export async function getAllScheduleTemplates(filters = {}) {
   return await scheduleTemplateModel.getAllScheduleTemplates(filters);
 }
 
-export async function getScheduleTemplatesByID(id) {
-  return await scheduleTemplateModel.getScheduleTemplatesByID(id);
+export async function getScheduleTemplatesByID(id, filters = {}) {
+  return await scheduleTemplateModel.getScheduleTemplatesByID(id, filters);
 }
 
-export async function getScheduleTemplatesByAssetID(assetId) {
-  return await scheduleTemplateModel.getScheduleTemplatesByAssetID(assetId);
+export async function getScheduleTemplatesByAssetID(assetId, filters = {}) {
+  return await scheduleTemplateModel.getScheduleTemplatesByAssetID(assetId, filters);
 }
 
 export async function createScheduleTemplate(scheduleTemplateData) {
@@ -19,10 +19,6 @@ export async function createScheduleTemplate(scheduleTemplateData) {
 
   if (scheduleTemplateData.start_date) {
     await scheduleModel.createSchedule(createdTemplate.id, scheduleTemplateData.start_date);
-  }
-
-  if (scheduleTemplateData.asset_unit_ids) {
-    await scheduleAssetsModel.assignAssets(createdTemplate.id, scheduleTemplateData.asset_unit_ids);
   }
 
   return createdTemplate;

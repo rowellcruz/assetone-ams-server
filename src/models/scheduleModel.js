@@ -34,6 +34,22 @@ async function getScheduleOccurrenceByTemplateId(id) {
   return rows;
 }
 
+async function getScheduleOccurrencesByAssetUnitId(assetUnitId) {
+  const { rows } = await db.query(
+    `SELECT 
+        so.*, 
+        st.* 
+     FROM schedule_occurrences so
+     JOIN schedule_template_assets soa  
+       ON so.id = soa.schedule_occurrence_id 
+     LEFT JOIN schedule_templates st
+       ON so.template_id = st.id
+     WHERE soa.asset_unit_id = $1`,
+    [assetUnitId]
+  );
+  return rows;
+}
+
 async function getAllScheduleOccurrencesWithTemplate(filters = {}) {
   let query = `
     SELECT * FROM (
@@ -153,6 +169,7 @@ export {
   getAllScheduleOccurrencesWithTemplate,
   getScheduleOccurrenceByID,
   getScheduleOccurrenceByTemplateId,
+  getScheduleOccurrencesByAssetUnitId,
   createSchedule,
   updateScheduleOccurrencePartial,
   deleteScheduleOccurrenceByID,

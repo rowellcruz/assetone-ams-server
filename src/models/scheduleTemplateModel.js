@@ -22,24 +22,39 @@ async function getAllScheduleTemplates(filters = {}) {
   return rows;
 }
 
-async function getScheduleTemplatesByID(id) {
-  const { rows } = await db.query(
-    `SELECT st.*, a.type as asset_type
+async function getScheduleTemplatesByID(id, filters = {}) {
+  let query = `
+    SELECT st.*, a.type as asset_type
     FROM schedule_templates st
     LEFT JOIN assets a ON st.asset_id = a.id
-    WHERE st.id = $1`,
-    [id]
-  );
+  `;
+
+  const conditions = [];
+  const values = [];
+
+  if (filters.type) {
+    conditions.push(`st.type = $${values.length + 1}`);
+    values.push(filters.type);
+  }
+
+  if (conditions.length > 0) {
+    query += " WHERE " + conditions.join(" AND ");
+  }
+
+  const { rows } = await db.query(query, values);
   return rows[0] || null;
 }
 
-async function getScheduleTemplatesByAssetID(assetId) {
-  const { rows } = await db.query(
-    `SELECT *
-    FROM schedule_templates
-    WHERE asset_id = $1`,
-    [assetId]
-  );
+async function getScheduleTemplatesByAssetID(assetId, filters = {}) {
+  let query = `SELECT * FROM schedule_templates WHERE asset_id = $1`;
+  const values = [assetId];
+
+  if (filters.type) {
+    values.push(filters.type);
+    query += ` AND type = $${values.length}`;
+  }
+
+  const { rows } = await db.query(query, values);
   return rows;
 }
 

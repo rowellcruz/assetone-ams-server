@@ -7,6 +7,10 @@ export async function getAllSchedules(filters = {}) {
   return await scheduleModel.getAllSchedules(filters);
 }
 
+export async function getScheduleOccurrencesByAssetUnitId(assetUnitId) {
+  return await scheduleModel.getScheduleOccurrencesByAssetUnitId(assetUnitId);
+}
+
 export async function getScheduleByTemplateId(templateId) {
   const occurrences = await scheduleModel.getScheduleOccurrenceByTemplateId(
     templateId
@@ -48,13 +52,17 @@ export async function updateScheduleOccurrencePartial(id, fieldsToUpdate) {
   );
 }
 
-export async function startScheduleOccurrence(id, startedBy, technicians = []) {
+export async function startScheduleOccurrence(id, startedBy, technicians = [], asset_unit_ids) {
   const occurrence = await scheduleModel.getScheduleOccurrenceByID(id);
   if (!occurrence) throw new Error("Schedule not found");
 
   const startableStatuses = ["pending", "overdue"];
   if (!startableStatuses.includes(occurrence.status)) {
     throw new Error("Only pending or overdue schedules can be started");
+  }
+  
+  if (asset_unit_ids) {
+    await scheduleAssetsModel.assignAssets(id, asset_unit_ids);
   }
 
   if (!technicians || technicians.length === 0) {
@@ -74,12 +82,15 @@ export async function startScheduleOccurrence(id, startedBy, technicians = []) {
   return updated;
 }
 
-export async function rejectScheduleOccurrence(id) {
+export async function rejectScheduleOccurrence(id, scheduleData) {
   const occurrence = await scheduleModel.getScheduleOccurrenceByID(id);
   if (!occurrence) throw new Error("Schedule not found");
 
   const updated = await scheduleModel.updateScheduleOccurrencePartial(id, {
     status: "in_progress",
+    reviewed_at: new Date(),
+    reviewed_by: scheduleData.rejected_by,
+    review_remarks: scheduleData.remarks,
   });
 
   return updated;
@@ -136,6 +147,12 @@ export async function skipScheduleOccurrence(id, skippedBy, reason) {
     );
   }
 
+  const template = await scheduleTemplateModel.getScheduleTemplatesByID(
+    occurrence.template_id
+  );
+
+  if (!template) throw new Error("Template not found");
+
   const updated = await scheduleModel.updateScheduleOccurrencePartial(id, {
     status: "skipped",
     skipped_at: new Date(),
@@ -143,6 +160,15 @@ export async function skipScheduleOccurrence(id, skippedBy, reason) {
     skipped_reason: reason,
     skipped_context: occurrence.status,
   });
+
+  if (template.type === "PM" && template.status === "active") {
+    await generateNextScheduleOccurrence(
+      template.id,
+      occurrence.scheduled_date,
+      template.frequency_value,
+      template.frequency_unit
+    );
+  }
 
   return updated;
 }
