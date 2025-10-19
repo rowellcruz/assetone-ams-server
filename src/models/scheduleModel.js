@@ -37,7 +37,8 @@ async function getScheduleOccurrenceByTemplateId(id) {
 async function getScheduleOccurrencesByAssetUnitId(assetUnitId) {
   const { rows } = await db.query(
     `SELECT 
-        so.*, 
+        so.*,
+        so.status as occurrence_status, 
         st.* 
      FROM schedule_occurrences so
      JOIN schedule_template_assets soa  

@@ -3,15 +3,15 @@ import cors from 'cors';
 import helmet from 'helmet';
 
 import userRoutes from './routes/userRoutes.js';
-import assetRoutes from './routes/assetRoutes.js';
-import assetUnitRoutes from './routes/assetUnitRoutes.js';
-import assetCategoryRoutes from './routes/assetCategoryRoutes.js';
+import itemRoutes from './routes/itemRoutes.js';
+import itemUnitRoutes from './routes/itemUnitRoutes.js';
+import itemCategoryRoutes from './routes/itemCategoryRoutes.js';
 import scheduleTemplateRoutes from './routes/scheduleTemplateRoutes.js';
 import scheduleRoutes from './routes/scheduleRoutes.js';
 import procurementTaskRoutes from './routes/procurementTaskRoutes.js';
 import completionRequestRoutes from './routes/completionRequestRoutes.js';
 import issueReportRoutes from './routes/issueReportRoutes.js';
-import assetRequestRoutes from './routes/assetRequestRoutes.js';
+import itemRequestRoutes from './routes/itemRequestRoutes.js';
 import reportRoutes from './routes/reportRoutes.js';
 import departmentRoutes from './routes/departmentRoutes.js';
 import locationRoutes from './routes/locationRoutes.js';
@@ -56,7 +56,6 @@ app.use(
 // JSON parser
 app.use(express.json());
 
-
 import path from "path";
 import { fileURLToPath } from "url";
 
@@ -64,19 +63,20 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 app.use("/api/uploads", express.static(path.join(__dirname, "../uploads")));
+
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/users', userRoutes);
-app.use('/api/assets', assetRoutes);
-app.use('/api/asset-units', assetUnitRoutes);
-app.use('/api/asset-categories', assetCategoryRoutes);
+app.use('/api/items', itemRoutes);
+app.use('/api/item-units', itemUnitRoutes);
+app.use('/api/item-categories', itemCategoryRoutes);
 app.use('/api/schedule-templates', scheduleTemplateRoutes);
 app.use('/api/schedules', scheduleRoutes);
 app.use('/api/procurement-tasks', procurementTaskRoutes);
 app.use('/api/completion-requests', completionRequestRoutes);
 app.use('/api/issue-reports', issueReportRoutes);
-app.use('/api/asset-requests', assetRequestRoutes);
+app.use('/api/item-requests', itemRequestRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/departments', departmentRoutes);
 app.use('/api/locations', locationRoutes);

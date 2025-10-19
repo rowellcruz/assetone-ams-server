@@ -114,9 +114,9 @@ export async function updateVendorPartial(id, fields) {
         .join(", ");
 
       await db.query(
-        `INSERT INTO vendor_offers (vendor_id, asset_category_id)
+        `INSERT INTO vendor_offers (vendor_id, item_category_id)
           VALUES ${placeholders}
-          ON CONFLICT (vendor_id, asset_category_id) DO NOTHING`,
+          ON CONFLICT (vendor_id, item_category_id) DO NOTHING`,
         values
       );
     }
@@ -148,9 +148,9 @@ export async function insertVendorOffers(vendorId, assetIds) {
     .join(", ");
 
   await db.query(
-    `INSERT INTO vendor_offers (vendor_id, asset_category_id)
+    `INSERT INTO vendor_offers (vendor_id, item_category_id)
       VALUES ${placeholders}
-      ON CONFLICT (vendor_id, asset_category_id) DO NOTHING`,
+      ON CONFLICT (vendor_id, item_category_id) DO NOTHING`,
     values
   );
 }
@@ -159,7 +159,7 @@ export async function getVendorOffers(vendorId) {
   const result = await db.query(
     `SELECT ac.id AS id, ac.name
      FROM vendor_offers vo
-     JOIN asset_categories ac ON vo.asset_category_id = ac.id
+     JOIN item_categories ac ON vo.item_category_id = ac.id
      WHERE vo.vendor_id = $1`,
     [vendorId]
   );
@@ -170,7 +170,7 @@ export async function getAllVendorOffersMap() {
   const result = await db.query(
     `SELECT vo.vendor_id, ac.id AS asset_category_id, ac.name AS asset_category_name
      FROM vendor_offers vo
-     JOIN asset_categories ac ON vo.asset_category_id = ac.id`
+     JOIN item_categories ac ON vo.item_category_id = ac.id`
   );
 
   const offersMap = {};

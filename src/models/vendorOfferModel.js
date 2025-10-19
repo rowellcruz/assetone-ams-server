@@ -6,7 +6,7 @@ export async function addVendorOffers(vendorId, assetCategoryIds) {
   const values = assetCategoryIds.map((id) => `(${vendorId}, ${id})`).join(", ");
 
   const query = `
-    INSERT INTO vendor_offers (vendor_id, asset_category_id)
+    INSERT INTO vendor_offers (vendor_id, category_id)
     VALUES ${values}
     RETURNING *;
   `;

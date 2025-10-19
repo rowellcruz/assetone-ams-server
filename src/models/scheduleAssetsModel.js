@@ -1,5 +1,5 @@
 import db from "../config/db.js";
-import * as assetModel from "./assetModel.js";
+import * as itemModel from "./itemModel.js";
 
 async function getAssignedAssetsForOccurrence(templateId) {
   const { rows: units } = await db.query(`
@@ -10,7 +10,7 @@ async function getAssignedAssetsForOccurrence(templateId) {
   `, [templateId]);
 
   const enriched = await Promise.all(units.map(async (unit) => {
-    const asset = await assetModel.getAssetByID(unit.asset_id);
+    const asset = await itemModel.getAssetByID(unit.asset_id);
     return {
       ...unit,
       asset_type: asset.type,

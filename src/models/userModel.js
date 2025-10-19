@@ -18,7 +18,6 @@ async function getAllUsers(filters = {}) {
       u.role,
       u.department_id,
       d.name AS department_name,
-      u.secondary_email,
       u.status, 
       u.created_at, 
       u.created_by, 

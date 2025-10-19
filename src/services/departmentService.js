@@ -1,6 +1,6 @@
 import * as departmentModel from "../models/departmentModel.js";
 import * as userModel from "../models/userModel.js";
-import * as assetUnitModel from "../models/assetUnitModel.js";
+import * as itemUnitModel from "../models/itemUnitModel.js";
 import * as purchaseRequestModel from "../models/purchaseRequestModel.js";
 import * as requestModel from "../models/requestModel.js";
 
@@ -13,7 +13,7 @@ export async function getDepartmentByID(id) {
   if (!department) return null;
 
   const users = await userModel.getUsersFromDepartment(department.id);
-  const units = await assetUnitModel.getAssetUnitsFromDepartment(department.id);
+  const units = await itemUnitModel.getAssetUnitsFromDepartment(department.id);
 
   return {
     ...department,
@@ -57,7 +57,7 @@ export async function distributeUnits(id, requestData) {
     );
   }
 
-  const availableUnits = await assetUnitModel.getAllAssetUnits({
+  const availableUnits = await itemUnitModel.getAllAssetUnits({
     assetId: requestData.asset_id,
     departmentId: null,
   });
@@ -70,7 +70,7 @@ export async function distributeUnits(id, requestData) {
   }
 
   for (let i = 0; i < distributableQty; i++) {
-    await assetUnitModel.updateAssetUnitPartial(availableUnits[i].id, {
+    await itemUnitModel.updateAssetUnitPartial(availableUnits[i].id, {
       department_id: requestData.department_id,
     });
   }

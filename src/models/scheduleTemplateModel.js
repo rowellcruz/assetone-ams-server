@@ -4,7 +4,7 @@ async function getAllScheduleTemplates(filters = {}) {
   let query = `
     SELECT st.*, a.type as asset_type
     FROM schedule_templates st
-    LEFT JOIN assets a ON st.asset_id = a.id
+    LEFT JOIN items a ON st.item_id = a.id
   `;
   const conditions = [];
   const values = [];
@@ -26,7 +26,7 @@ async function getScheduleTemplatesByID(id, filters = {}) {
   let query = `
     SELECT st.*, a.type as asset_type
     FROM schedule_templates st
-    LEFT JOIN assets a ON st.asset_id = a.id
+    LEFT JOIN items a ON st.item_id = a.id
   `;
 
   const conditions = [];
@@ -46,7 +46,7 @@ async function getScheduleTemplatesByID(id, filters = {}) {
 }
 
 async function getScheduleTemplatesByAssetID(assetId, filters = {}) {
-  let query = `SELECT * FROM schedule_templates WHERE asset_id = $1`;
+  let query = `SELECT * FROM schedule_templates WHERE item_id = $1`;
   const values = [assetId];
 
   if (filters.type) {
@@ -60,8 +60,8 @@ async function getScheduleTemplatesByAssetID(assetId, filters = {}) {
 
 async function createScheduleTemplate(data) {
   const {
-    asset_id,
-    title,
+    item_id,
+    name,
     description,
     type,
     frequency_value,
@@ -69,7 +69,7 @@ async function createScheduleTemplate(data) {
     grace_period_value,
     grace_period_unit,
     start_date,
-    expiration_date,
+    end_date,
     created_by,
     updated_by,
     updated_at,
@@ -77,7 +77,7 @@ async function createScheduleTemplate(data) {
 
   const { rows } = await db.query(
     `INSERT INTO schedule_templates (
-    asset_id,
+    item_id,
       title,
       description,
       type,
@@ -86,13 +86,13 @@ async function createScheduleTemplate(data) {
     grace_period_value,
     grace_period_unit,
       start_date,
-      expiration_date,
+      end_date,
       created_by,
       updated_by,
       updated_at
     ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING id`,
     [
-      asset_id,
+      item_id,
       title,
       description,
       type,
@@ -101,7 +101,7 @@ async function createScheduleTemplate(data) {
       grace_period_value,
       grace_period_unit,
       start_date,
-      expiration_date,
+      end_date,
       created_by,
       updated_by,
       updated_at,

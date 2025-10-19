@@ -1,6 +1,6 @@
 import * as procurementTaskModel from "../models/procurementTaskModel.js";
 import * as attachmentModel from "../models/procurementAttachmentModel.js";
-import { createAssetUnit } from "../models/assetUnitModel.js";
+import { createItemUnit } from "../models/itemUnitModel.js";
 import procurementFinalizationModel from "../models/procurementFinalizationModel.js";
 
 export async function getAllProcurementTasks(filters = {}) {
@@ -58,7 +58,7 @@ export async function finalizeAcquisitionAndCreateUnits(taskId, acquisitionData,
 
   const finalization = await finalizeAcquisition(taskId, acquisitionData, finalizedBy);
   for (let i = 0; i < task.quantity; i++) {
-    await createAssetUnit({
+    await createItemUnit({
       asset_id: task.asset_id,
       brand: acquisitionData.brand,
       vendor_id: acquisitionData.vendor_id,

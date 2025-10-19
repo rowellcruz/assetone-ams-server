@@ -27,14 +27,13 @@ async function getPurchaseRequests(id) {
 async function createPurchaseRequest(data) {
   const { rows } = await db.query(
     `INSERT INTO purchase_requests 
-      (request_id, department_id, asset_id, requested_quantity, requested_by) 
-     VALUES ($1, $2, $3, $4, $5) 
+      (request_id, department_id, asset_id, requested_by) 
+     VALUES ($1, $2, $3, $4) 
      RETURNING *`,
     [
       data.request_id,
       data.department_id,
       data.asset_id,
-      data.quantity,
       data.requested_by,
     ]
   );
@@ -43,7 +42,6 @@ async function createPurchaseRequest(data) {
     request_id: data.request_id,
     asset_id: data.asset_id,
     department_id: data.department_id,
-    requested_quantity: data.quantity,
     requested_by: data.requested_by,
   };
 }

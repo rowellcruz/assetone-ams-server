@@ -2,7 +2,6 @@ import * as requestModel from "../models/requestModel.js";
 import * as issueReportModel from "../models/issueReportModel.js";
 import * as assetRequestModel from "../models/assetRequestModel.js";
 import * as purchaseRequestModel from "../models/purchaseRequestModel.js";
-import * as accountRequestModel from "../models/accountRequestModel.js";
 import * as subLocationAssetModel from "../models/subLocationAssetModel.js";
 
 export async function getIssueReports(filters = {}) {

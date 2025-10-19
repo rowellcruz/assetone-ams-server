@@ -2,4 +2,4 @@ DB_HOST=localhost
 DB_PORT=3306
 DB_USER=root
 DB_PASSWORD=your_password_here
-DB_NAME=assetone_db
+DB_NAME=assetone_ams_db

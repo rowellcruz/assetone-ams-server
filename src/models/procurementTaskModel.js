@@ -32,7 +32,7 @@ async function createProcurementTask(data) {
 
   const { rows } = await db.query(
     `INSERT INTO procurement_tasks 
-      (asset_id, quantity, estimated_cost_per_unit, description, created_by, updated_by, updated_at) 
+      (category_id, quantity, estimated_cost_per_unit, description, created_by, updated_by, updated_at) 
      VALUES ($1, $2, $3, $4, $5, $6, $7) 
      RETURNING id`,
     [asset_id, quantity, estimated_cost_per_unit, description, created_by, updated_by, updated_at]
