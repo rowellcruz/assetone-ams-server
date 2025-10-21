@@ -1,10 +1,9 @@
 import db from "../config/db.js";
 
 async function getUserDataByEmail(email) {
-  const { rows } = await db.query(
-    "SELECT * FROM users WHERE email = $1",
-    [email]
-  );
+  const { rows } = await db.query("SELECT * FROM users WHERE email = $1", [
+    email,
+  ]);
   return rows[0];
 }
 
@@ -32,13 +31,25 @@ async function getAllUsers(filters = {}) {
   const conditions = [];
   const values = [];
 
+  if (filters.excludeRole) {
+    conditions.push(`role != $${values.length + 1}`);
+    values.push(filters.excludeRole);
+  }
+
+  if (filters.excludeStatus) {
+    conditions.push(`status != $${values.length + 1}`);
+    values.push(filters.excludeStatus);
+  }
+
   if (filters.role) {
     conditions.push(`u.role = $${values.length + 1}`);
     values.push(filters.role);
   }
 
-  if (filters.departmentId) {
-    conditions.push(`u.department_id = $${values.length + 1}`);
+  if (filters.departmentId === null) {
+    conditions.push("department_id IS NULL");
+  } else if (filters.departmentId) {
+    conditions.push(`department_id = $${values.length + 1}`);
     values.push(filters.departmentId);
   }
 
@@ -92,7 +103,8 @@ async function getUserDataById(id) {
 }
 
 async function createUser(userData) {
-  const { first_name, last_name, email, password, role, department_id } = userData;
+  const { first_name, last_name, email, password, role, department_id } =
+    userData;
   const { rows } = await db.query(
     `
     INSERT INTO users (first_name, last_name, email, password, role, department_id) 
@@ -133,17 +145,11 @@ async function updateUserPartial(id, fields) {
 }
 
 async function updatePassword(id, hash) {
-  await db.query(
-    "UPDATE users SET password = $1 WHERE id = $2",
-    [hash, id]
-  );
+  await db.query("UPDATE users SET password = $1 WHERE id = $2", [hash, id]);
 }
 
 async function deleteUserByID(id) {
-  const { rowCount } = await db.query(
-    "DELETE FROM users WHERE id = $1",
-    [id]
-  );
+  const { rowCount } = await db.query("DELETE FROM users WHERE id = $1", [id]);
   return rowCount > 0;
 }
 

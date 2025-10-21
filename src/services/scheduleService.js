@@ -52,7 +52,7 @@ export async function updateScheduleOccurrencePartial(id, fieldsToUpdate) {
   );
 }
 
-export async function startScheduleOccurrence(id, startedBy, technicians = [], asset_unit_ids) {
+export async function startScheduleOccurrence(id, startedBy, technicians = [], item_unit_ids) {
   const occurrence = await scheduleModel.getScheduleOccurrenceByID(id);
   if (!occurrence) throw new Error("Schedule not found");
 
@@ -61,8 +61,8 @@ export async function startScheduleOccurrence(id, startedBy, technicians = [], a
     throw new Error("Only pending or overdue schedules can be started");
   }
   
-  if (asset_unit_ids) {
-    await scheduleAssetsModel.assignAssets(id, asset_unit_ids);
+  if (item_unit_ids) {
+    await scheduleAssetsModel.assignAssets(id, item_unit_ids);
   }
 
   if (!technicians || technicians.length === 0) {

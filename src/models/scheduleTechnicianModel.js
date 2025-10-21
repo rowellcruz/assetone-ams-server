@@ -6,7 +6,7 @@ async function getScheduleTechniciansByOccurrenceId(occurrenceId) {
     SELECT st.user_id, u.id, u.first_name, u.last_name
     FROM schedule_technicians AS st
     JOIN users AS u ON st.user_id = u.id
-    WHERE st.schedule_occurrence_id = $1
+    WHERE st.occurrence_id = $1
   `,
     [occurrenceId]
   );
@@ -26,7 +26,7 @@ async function addTechniciansToOccurrence(occurrenceId, technicianIds = []) {
   });
 
   const query = `
-    INSERT INTO schedule_technicians (schedule_occurrence_id, user_id)
+    INSERT INTO schedule_technicians (occurrence_id, user_id)
     VALUES ${params.join(", ")}
   `;
 

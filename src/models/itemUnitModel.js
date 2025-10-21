@@ -12,8 +12,10 @@ async function getAllItemUnits(filters = {}) {
       pc.first_name || ' ' || pc.last_name AS property_custodian_name,
       cu.first_name || ' ' || cu.last_name AS created_by_name,
       uu.first_name || ' ' || uu.last_name AS updated_by_name,
-      du.first_name || ' ' || du.last_name AS deleted_by_name
+      du.first_name || ' ' || du.last_name AS deleted_by_name,
+      id.*
     FROM item_units iu
+    LEFT JOIN item_depreciation id ON id.item_unit_id = iu.id
     LEFT JOIN departments d ON iu.owner_department_id = d.id
     LEFT JOIN sub_locations sl ON iu.sub_location_id = sl.id
     LEFT JOIN locations l ON sl.location_id = l.id

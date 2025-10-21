@@ -1,6 +1,5 @@
 import * as scheduleTemplateModel from "../models/scheduleTemplateModel.js";
 import * as scheduleModel from "../models/scheduleModel.js";
-import * as scheduleAssetsModel from "../models/scheduleAssetsModel.js";
 
 export async function getAllScheduleTemplates(filters = {}) {
   return await scheduleTemplateModel.getAllScheduleTemplates(filters);

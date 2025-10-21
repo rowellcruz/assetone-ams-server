@@ -3,17 +3,17 @@ import * as itemModel from "./itemModel.js";
 
 async function getAssignedAssetsForOccurrence(templateId) {
   const { rows: units } = await db.query(`
-    SELECT sa.asset_unit_id, au.asset_id, au.brand
-    FROM schedule_template_assets AS sa
-    JOIN asset_units AS au ON sa.asset_unit_id = au.id
-    WHERE sa.schedule_template_id = $1
+    SELECT sa.item_unit_id, au.item_id, au.brand
+    FROM schedule_units AS sa
+    JOIN item_units AS au ON sa.item_unit_id = au.id
+    WHERE sa.template_id = $1
   `, [templateId]);
 
   const enriched = await Promise.all(units.map(async (unit) => {
-    const asset = await itemModel.getAssetByID(unit.asset_id);
+    const item = await itemModel.getAssetByID(unit.item_id);
     return {
       ...unit,
-      asset_type: asset.type,
+      item_name: item.name,
     };
   }));
 
@@ -27,28 +27,28 @@ async function getAssignedAssetsByTemplateId(templateId) {
        au.unit_tag, 
        d.name AS department_name,
        CONCAT(l.name, ' - ', sl.name) AS location_name
-     FROM schedule_template_assets AS sa
-     JOIN asset_units AS au ON sa.asset_unit_id = au.id
+     FROM schedule_units AS sa
+     JOIN item_units AS au ON sa.item_unit_id = au.id
      JOIN departments AS d ON au.department_id = d.id
      LEFT JOIN sub_locations AS sl ON au.sub_location_id = sl.id
      LEFT JOIN locations AS l ON sl.location_id = l.id
-     WHERE sa.schedule_template_id = $1`,
+     WHERE sa.template_id = $1`,
     [templateId]
   );
   return rows;
 }
 
-async function assignAssets(occurrence_id, asset_unit_ids) {
-  const insertPromises = asset_unit_ids.map((asset_unit_id) =>
+async function assignAssets(occurrence_id, item_unit_ids) {
+  const insertPromises = item_unit_ids.map((item_unit_id) =>
     db.query(
-      "INSERT INTO schedule_template_assets (schedule_occurrence_id, asset_unit_id) VALUES ($1, $2)",
-      [occurrence_id, asset_unit_id]
+      "INSERT INTO schedule_units (occurrence_id, item_unit_id) VALUES ($1, $2)",
+      [occurrence_id, item_unit_id]
     )
   );
 
   await Promise.all(insertPromises);
 
-  return { occurrence_id, asset_unit_ids };
+  return { occurrence_id, item_unit_ids };
 }
 
 export {

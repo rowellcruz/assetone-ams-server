@@ -7,6 +7,15 @@ export const getUsers = async (req, res) => {
     isActive: req.query.isActive,
   };
 
+  if(req.user.role !== "system_administrator") {
+    filters.excludeStatus = "deleted";
+  }
+
+  if (req.user.role === "gso_head") {
+    filters.departmentId = null;
+    filters.excludeRole = "system_administrator";
+  }
+
   const users = await userService.getAllUsers(filters);
   res.json(users);
 };
@@ -16,7 +25,7 @@ export const getUserDataByEmail = async (req, res) => {
   const user = await userService.getUserDataByEmail(email);
   if (!user) {
     res.status(404);
-    throw new Error('User not found');
+    throw new Error("User not found");
   }
   res.json(user);
 };
@@ -26,7 +35,7 @@ export const getUserByID = async (req, res) => {
   const user = await userService.getUserDataById(id);
   if (!user) {
     res.status(404);
-    throw new Error('User not found');
+    throw new Error("User not found");
   }
   res.json(user);
 };
@@ -45,10 +54,10 @@ export const deleteUsersByIDs = async (req, res) => {
   const { ids } = req.body;
   if (!Array.isArray(ids) || ids.length === 0) {
     res.status(400);
-    throw new Error('IDs array is required');
+    throw new Error("IDs array is required");
   }
   await userService.deleteUsersByIDs(ids);
-  res.json({ message: 'Users deleted successfully' });
+  res.json({ message: "Users deleted successfully" });
 };
 
 export const replaceUser = async (req, res) => {
@@ -56,7 +65,7 @@ export const replaceUser = async (req, res) => {
   const updatedUser = await userService.updateFullUser(id, req.body);
   if (!updatedUser) {
     res.status(404);
-    throw new Error('User not found');
+    throw new Error("User not found");
   }
   res.json(updatedUser);
 };
@@ -66,7 +75,7 @@ export const updateUserPartial = async (req, res) => {
   const updatedUser = await userService.updateUserPartial(id, req.body);
   if (!updatedUser) {
     res.status(404);
-    throw new Error('User not found');
+    throw new Error("User not found");
   }
   res.json(updatedUser);
 };
@@ -76,7 +85,7 @@ export const deleteUserByID = async (req, res) => {
   const deleted = await userService.deleteUserByID(id);
   if (!deleted) {
     res.status(404);
-    throw new Error('User not found');
+    throw new Error("User not found");
   }
-  res.json({ message: 'User deleted successfully' });
+  res.json({ message: "User deleted successfully" });
 };

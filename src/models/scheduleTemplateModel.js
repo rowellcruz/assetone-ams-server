@@ -61,7 +61,7 @@ async function getScheduleTemplatesByAssetID(assetId, filters = {}) {
 async function createScheduleTemplate(data) {
   const {
     item_id,
-    name,
+    title,
     description,
     type,
     frequency_value,
@@ -83,8 +83,8 @@ async function createScheduleTemplate(data) {
       type,
       frequency_value,
       frequency_unit,
-    grace_period_value,
-    grace_period_unit,
+      grace_period_value,
+      grace_period_unit,
       start_date,
       end_date,
       created_by,

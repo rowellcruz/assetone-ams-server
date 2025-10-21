@@ -1,48 +1,62 @@
 import db from "../config/db.js";
 
-async function getPurchaseRequests(id) {
+async function getPurchaseRequests() {
   const { rows } = await db.query(
     `
-    SELECT 
-        pr.*,
-        r.status,
-        a.type AS asset_type,
-        COUNT(au.id) AS available_units
-    FROM purchase_requests pr
-    LEFT JOIN requests r 
-        ON pr.request_id = r.id
-    LEFT JOIN assets a 
-        ON pr.asset_id = a.id
-    LEFT JOIN asset_units au
-        ON pr.asset_id = au.asset_id
-       AND au.department_id IS NULL
-    WHERE pr.department_id = $1
-    GROUP BY pr.id, r.status, a.type
+    SELECT pr.*, 
+    c.name as item_category_name,
+    (u.first_name || ' ' || u.last_name) AS requestor,
+    d.name AS department_name
+    FROM purchase_requests pr 
+    LEFT JOIN item_categories c ON pr.item_category_id = c.id
+    LEFT JOIN users u ON pr.requested_by = u.id
+    LEFT JOIN departments d ON u.department_id = d.id
+    `
+  );
+  return rows;
+}
+
+async function getPurchaseRequestById(id) {
+  const { rows } = await db.query(
+    `
+    SELECT pr.*, 
+    c.name as item_category_name,
+    (u.first_name || ' ' || u.last_name) AS requestor,
+    d.name AS department_name
+    FROM purchase_requests pr 
+    LEFT JOIN item_categories c ON pr.item_category_id = c.id
+    LEFT JOIN users u ON pr.requested_by = u.id
+    LEFT JOIN departments d ON u.department_id = d.id
+    WHERE pr.id = $1
     `,
     [id]
   );
-  return rows;
+  return rows[0];
 }
 
 async function createPurchaseRequest(data) {
   const { rows } = await db.query(
     `INSERT INTO purchase_requests 
-      (request_id, department_id, asset_id, requested_by) 
-     VALUES ($1, $2, $3, $4) 
+      (control_number, item_category_id, date_required, requested_by, requested_at, reason) 
+     VALUES ($1, $2, $3, $4, $5, $6) 
      RETURNING *`,
     [
-      data.request_id,
-      data.department_id,
-      data.asset_id,
+      data.control_number,
+      data.item_category_id,
+      data.date_required,
       data.requested_by,
+      data.requested_at,
+      data.reason,
     ]
   );
   return {
     id: rows[0].id,
-    request_id: data.request_id,
-    asset_id: data.asset_id,
-    department_id: data.department_id,
+    control_number: data.control_number,
+    item_category_id: data.item_category_id,
+    date_required: data.date_required,
     requested_by: data.requested_by,
+    requested_at: data.requested_at,
+    reason: data.reason,
   };
 }
 
@@ -51,11 +65,16 @@ async function updatePurchaseRequestPartial(id, fields) {
   if (keys.length === 0) return null;
   const updates = keys.map((key, i) => `${key} = $${i + 1}`).join(", ");
   const values = Object.values(fields);
-  const { rowCount } = await db.query(`UPDATE purchase_requests SET ${updates} WHERE id = $${keys.length + 1}`, [
-    ...values,
-    id,
-  ]);
+  const { rowCount } = await db.query(
+    `UPDATE purchase_requests SET ${updates} WHERE id = $${keys.length + 1}`,
+    [...values, id]
+  );
   return rowCount > 0 ? { id, ...fields } : null;
 }
 
-export { getPurchaseRequests, createPurchaseRequest, updatePurchaseRequestPartial };
+export {
+  getPurchaseRequests,
+  getPurchaseRequestById,
+  createPurchaseRequest,
+  updatePurchaseRequestPartial,
+};
