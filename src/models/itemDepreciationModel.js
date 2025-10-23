@@ -16,7 +16,7 @@ async function getItemDepreciationByID(id) {
 async function createItemDepreciation(itemDepreciationData) {
   const { item_unit_id, useful_life, method, purchase_date, rate } = itemDepreciationData;
   const { rows } = await db.query(
-    "INSERT INTO item_depreciation (item_unit_id, useful_life, method, purchase_date, rate) VALUES ($1, $2, $3, $4, $5k) RETURNING id",
+    "INSERT INTO item_depreciation (item_unit_id, useful_life, method, purchase_date, rate) VALUES ($1, $2, $3, $4, $5) RETURNING id",
     [item_unit_id, useful_life, method, purchase_date, rate]
   );
   return { id: rows[0].id, ...itemDepreciationData };

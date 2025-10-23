@@ -13,9 +13,15 @@ async function getAllItemUnits(filters = {}) {
       cu.first_name || ' ' || cu.last_name AS created_by_name,
       uu.first_name || ' ' || uu.last_name AS updated_by_name,
       du.first_name || ' ' || du.last_name AS deleted_by_name,
-      id.*
+      id.method,
+      id.rate,
+      id.purchase_date,
+      id.useful_life,
+      id.accumulated_depreciation,
+      ic.purchase_price
     FROM item_units iu
     LEFT JOIN item_depreciation id ON id.item_unit_id = iu.id
+    LEFT JOIN item_costs ic ON ic.item_unit_id = iu.id
     LEFT JOIN departments d ON iu.owner_department_id = d.id
     LEFT JOIN sub_locations sl ON iu.sub_location_id = sl.id
     LEFT JOIN locations l ON sl.location_id = l.id
@@ -24,7 +30,7 @@ async function getAllItemUnits(filters = {}) {
                       AND pc.department_id = iu.owner_department_id
     LEFT JOIN users cu ON iu.created_by = cu.id
     LEFT JOIN users uu ON iu.updated_by = uu.id
-    LEFT JOIN users du ON iu.deleted_by = du.id;
+    LEFT JOIN users du ON iu.deleted_by = du.id
   `;
 
   const conditions = [];
@@ -102,13 +108,15 @@ async function createItemUnit(data) {
   const {
     item_id,
     brand,
-    status = "available",
+    status,
     condition,
     unit_tag,
     serial_number,
     specifications,
     sub_location_id,
+    owner_department_id,
     is_legacy = false,
+    vendor_id,
     created_by,
     updated_by,
   } = data;
@@ -124,11 +132,13 @@ async function createItemUnit(data) {
         serial_number,
         specifications,
         sub_location_id,
+        owner_department_id,
         is_legacy,
+        vendor_id,
         created_by,
         updated_by
       ) 
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
      RETURNING id`,
     [
       item_id,
@@ -139,7 +149,9 @@ async function createItemUnit(data) {
       serial_number || null,
       specifications || null,
       sub_location_id || null,
+      owner_department_id,
       is_legacy,
+      vendor_id,
       created_by,
       updated_by,
     ]
@@ -155,7 +167,9 @@ async function createItemUnit(data) {
     serial_number,
     specifications,
     sub_location_id,
+    owner_department_id,
     is_legacy,
+    vendor_id,
     created_by,
     updated_by,
   };

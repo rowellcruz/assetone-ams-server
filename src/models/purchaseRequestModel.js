@@ -19,15 +19,37 @@ async function getPurchaseRequests() {
 async function getPurchaseRequestById(id) {
   const { rows } = await db.query(
     `
-    SELECT pr.*, 
-    c.name as item_category_name,
-    (u.first_name || ' ' || u.last_name) AS requestor,
-    d.name AS department_name
-    FROM purchase_requests pr 
+    SELECT 
+      pr.*,
+      c.name AS item_category_name,
+      (u.first_name || ' ' || u.last_name) AS requestor,
+      d.id AS department_id,
+      d.name AS department_name,
+      po.vendor_id,
+      po.status AS po_status,
+      COALESCE(
+        JSON_AGG(
+          JSON_BUILD_OBJECT(
+            'id', poi.id,
+            'item_name', poi.item_name,
+            'quantity', poi.quantity,
+            'brand', poi.brand,
+            'unit_price', poi.unit_price,
+            'specifications', poi.specifications,
+            'useful_life', poi.useful_life,
+            'acquired_date', poi.acquired_date
+          )
+        ) FILTER (WHERE poi.id IS NOT NULL),
+        '[]'
+      ) AS items
+    FROM purchase_requests pr
     LEFT JOIN item_categories c ON pr.item_category_id = c.id
     LEFT JOIN users u ON pr.requested_by = u.id
     LEFT JOIN departments d ON u.department_id = d.id
+    LEFT JOIN purchase_orders po ON po.purchase_request_id = pr.id
+    LEFT JOIN purchase_order_items poi ON poi.purchase_order_id = po.id
     WHERE pr.id = $1
+    GROUP BY pr.id, c.name, u.first_name, u.last_name, d.id, d.name, po.vendor_id, po.status
     `,
     [id]
   );

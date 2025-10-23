@@ -15,23 +15,23 @@ export async function createVendor(vendorData) {
     name,
     address,
     contact_person,
-    email_address,
-    phone_number,
+    contact_email,
+    contact_phone,
     created_by,
     updated_by,
   } = vendorData;
 
   const result = await db.query(
     `INSERT INTO vendors 
-       (name, address, contact_person, email_address, phone_number, created_by, updated_by)
+       (name, address, contact_person, contact_email, contact_phone, created_by, updated_by)
      VALUES ($1, $2, $3, $4, $5, $6, $7)
      RETURNING id`,
     [
       name,
       address,
       contact_person,
-      email_address,
-      phone_number,
+      contact_email,
+      contact_phone,
       created_by,
       updated_by,
     ]
@@ -115,8 +115,7 @@ export async function updateVendorPartial(id, fields) {
 
       await db.query(
         `INSERT INTO vendor_offers (vendor_id, item_category_id)
-          VALUES ${placeholders}
-          ON CONFLICT (vendor_id, item_category_id) DO NOTHING`,
+          VALUES ${placeholders}`,
         values
       );
     }
@@ -149,8 +148,7 @@ export async function insertVendorOffers(vendorId, assetIds) {
 
   await db.query(
     `INSERT INTO vendor_offers (vendor_id, item_category_id)
-      VALUES ${placeholders}
-      ON CONFLICT (vendor_id, item_category_id) DO NOTHING`,
+      VALUES ${placeholders}`,
     values
   );
 }

@@ -1,6 +1,7 @@
 import * as itemUnitModel from "../models/itemUnitModel.js";
 import * as itemModel from "../models/itemModel.js";
 import * as itemDepreciationModel from "../models/itemDepreciationModel.js";
+import * as itemCostModel from "../models/itemCostModel.js";
 
 export async function getAllItemUnits(filters = {}) {
   return await itemUnitModel.getAllItemUnits(filters);
@@ -24,10 +25,11 @@ export async function getItemUnitsByDepartmentID(itemId, departmentId) {
 
 export async function createItemUnit(itemUnitData) {
   const codes = await itemModel.getItemByID(itemUnitData.item_id);
-  const unitTag = await generateUnitTag({ department_code: codes.department_code, category_code: codes.category_code });
+  const unitTag = await generateUnitTag({ department_code: codes?.department_code || "GSO", category_code: codes.category_code });
   const dataToInsert = { ...itemUnitData, unit_tag: unitTag };
   const unitData = await itemUnitModel.createItemUnit(dataToInsert);
   const depreciationData = await itemDepreciationModel.createItemDepreciation({...itemUnitData, item_unit_id: unitData.id});
+  const costData = await itemCostModel.createItemCost({...itemUnitData, item_unit_id: unitData.id});
   return depreciationData;
 }
 

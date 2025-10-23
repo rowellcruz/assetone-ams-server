@@ -8,7 +8,7 @@ const router = express.Router();
 
 router.get('/', authenticate, asyncHandler(itemController.getItems));
 router.get('/:id', authenticate, asyncHandler(itemController.getItemByID));
-router.get('/:id/units', authenticate, asyncHandler(itemUnitsController.getItemUnitsByItemID));
+router.get('/:itemId/units', authenticate, asyncHandler(itemUnitsController.getItemUnitsByItemID));
 router.get('/:id/units/:departmentId', authenticate, asyncHandler(itemUnitsController.getItemUnitsByDepartmentID));
 router.get('/by-category/:category_id', authenticate, asyncHandler(itemController.getItemsByCategoryID));
 router.post('/:id/units', authenticate, asyncHandler(itemUnitsController.createItemUnit));

@@ -26,6 +26,11 @@ async function getAllItems(filters = {}) {
     values.push(filters.departmentId);
     conditions.push(`i.department_id = $${values.length}`);
   }
+  
+  if (filters.name) {
+    values.push(filters.name);
+    conditions.push(`i.name = $${values.length}`);
+  }
 
   if (conditions.length > 0) {
     query += " WHERE " + conditions.join(" AND ");

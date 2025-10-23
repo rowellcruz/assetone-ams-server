@@ -15,5 +15,7 @@ router.get("/:requestId/attachments", asyncHandler(purchaseRequestController.get
 router.post("/:requestId/attachments/:module", authenticate, upload.single("file"), asyncHandler(purchaseRequestController.uploadAttachment));
 router.delete("/attachments/:id", authenticate, asyncHandler(purchaseRequestController.deleteAttachment));
 
+router.post('/:id/select-vendor', authenticate, asyncHandler(purchaseRequestController.selectVendor));
+router.post('/:id/po-item/:poItemId/acquire', authenticate, asyncHandler(purchaseRequestController.acquirePOItem));
 
 export default router;
