@@ -8,6 +8,7 @@ const router = express.Router();
 
 router.get('/', authenticate, asyncHandler(purchaseRequestController.getPurchaseRequests));
 router.get('/:id', authenticate, asyncHandler(purchaseRequestController.getPurchaseRequestById));
+router.get('/:id/items-for-distribution', authenticate, asyncHandler(purchaseRequestController.getItemForDistributionByPRId));
 router.post('/', authenticate, asyncHandler(purchaseRequestController.createPurchaseRequest));
 router.patch('/:id', authenticate, asyncHandler(purchaseRequestController.updatePurchaseRequest));
 

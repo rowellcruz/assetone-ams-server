@@ -4,7 +4,7 @@ import * as attachmentModel from "../models/procurementAttachmentModel.js";
 import * as vendorModel from "../models/vendorModel.js";
 import * as purchaseOrderModel from "../models/purchaseOrderModel.js";
 import * as purchaseOrderItemModel from "../models/purchaseOrderItemModel.js";
-import * as itemUnitModel from "../models/itemUnitModel.js";
+import * as itemDistributionModel from "../models/itemDistributionModel.js";
 import * as itemUnitService from "../services/itemUnitService.js";
 import * as itemModel from "../models/itemModel.js";
 
@@ -87,7 +87,7 @@ export async function selectVendor(requestId, vendorData) {
     for (const item of vendorData.finalizedItems) {
       await purchaseOrderItemModel.createPurchaseOrderItem({
         purchase_order_id: purchaseOrder.id,
-        brand: purchaseOrder.brand,
+        brand: item.brand,
         item_name: item.item_name,
         specifications: item.specifications,
         quantity: item.quantity,
@@ -110,7 +110,6 @@ export async function acquirePOItem(id, poItemId, data) {
     }
   );
 
-  // Loop through each item in the items array
   for (const item of data.items) {
     let itemRecord = await itemModel.getAllItems({ name: item.item_name });
 
@@ -132,9 +131,9 @@ export async function acquirePOItem(id, poItemId, data) {
       : [];
     const qty = serials.length > 0 ? serials.length : data.quantity;
 
-    // Create item units per quantity
     for (let i = 0; i < qty; i++) {
-      await itemUnitService.createItemUnit({
+      // 1. Create item unit
+      const itemUnit = await itemUnitService.createItemUnit({
         item_id: itemId,
         vendor_id: data.vendor_id,
         brand: item.brand,
@@ -149,6 +148,17 @@ export async function acquirePOItem(id, poItemId, data) {
         created_by: data.acquired_by,
         updated_by: data.acquired_by,
       });
+
+      // 2. Insert into items_for_distribution
+      await itemDistributionModel.createItemForDistribution({
+        purchase_request_id: data.purchase_request_id,
+        item_unit_id: itemUnit.id,
+        received_at: null,
+      });
     }
   }
+}
+
+export async function getItemForDistributionByPRId(id) {
+  return await itemDistributionModel.getItemsForDistributionByPRId();
 }

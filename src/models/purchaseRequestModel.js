@@ -16,6 +16,20 @@ async function getPurchaseRequests() {
   return rows;
 }
 
+async function getPurchaseRequestCosts() {
+  const query = `
+    SELECT 
+      SUM(pr.planned_cost) AS total_planned,
+      SUM(poi.total_amount) AS total_actual
+    FROM purchase_requests pr
+    LEFT JOIN purchase_orders po ON po.purchase_request_id = pr.id
+    LEFT JOIN purchase_order_items poi ON poi.purchase_order_id = po.id
+    WHERE pr.status != 'pending' AND pr.status != 'rework'
+  `;
+  const { rows } = await db.query(query);
+  return rows[0] || { total_planned: 0, total_actual: 0 };
+}
+
 async function getPurchaseRequestById(id) {
   const { rows } = await db.query(
     `
@@ -96,6 +110,7 @@ async function updatePurchaseRequestPartial(id, fields) {
 
 export {
   getPurchaseRequests,
+  getPurchaseRequestCosts,
   getPurchaseRequestById,
   createPurchaseRequest,
   updatePurchaseRequestPartial,

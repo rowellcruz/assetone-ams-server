@@ -1,4 +1,5 @@
 import * as purchaseRequestService from "../services/purchaseRequestService.js";
+import * as itemDistributionService from "../services/itemDistributionService.js";
 
 export const getPurchaseRequests = async (req, res) => {
   const purchaseRequests = await purchaseRequestService.getPurchaseRequests();
@@ -11,6 +12,12 @@ export const getPurchaseRequestById = async (req, res) => {
     id
   );
   res.json(purchaseRequest);
+};
+
+export const getItemForDistributionByPRId = async (req, res) => {
+  const { id } = req.params;
+  const data = await itemDistributionService.getItemForDistributionByPRId(id);
+  res.json(data);
 };
 
 export const createPurchaseRequest = async (req, res) => {
@@ -59,7 +66,10 @@ export async function getAttachments(req, res, next) {
     const { requestId } = req.params;
     const filters = {};
     if (req.query.module) filters.module = req.query.module;
-    const attachments = await purchaseRequestService.listAttachments(requestId, filters);
+    const attachments = await purchaseRequestService.listAttachments(
+      requestId,
+      filters
+    );
     res.json(attachments);
   } catch (err) {
     next(err);

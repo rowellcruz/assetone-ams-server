@@ -1,5 +1,10 @@
 import db from "../config/db.js";
 
+async function getPurchaseOrderById() {
+  const { rows } = await db.query("SELECT * FROM purchase_order_items");
+  return rows;
+}
+
 async function createPurchaseOrderItem(data) {
   const { rows } = await db.query(
     `INSERT INTO purchase_order_items 
@@ -39,4 +44,4 @@ async function updatePOItemPartial(id, fields) {
 }
 
 
-export { createPurchaseOrderItem, updatePOItemPartial };
+export { getPurchaseOrderById, createPurchaseOrderItem, updatePOItemPartial };

@@ -18,6 +18,7 @@ import departmentRoutes from './routes/departmentRoutes.js';
 import locationRoutes from './routes/locationRoutes.js';
 import subLocationRoutes from './routes/subLocationRoutes.js';
 import vendorRoutes from './routes/vendorRoutes.js';
+import metricRoutes from './routes/metricRoutes.js';
 import authRoutes from './routes/authRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
 
@@ -84,6 +85,7 @@ app.use('/api/departments', departmentRoutes);
 app.use('/api/locations', locationRoutes);
 app.use('/api/sub-locations', subLocationRoutes);
 app.use('/api/vendors', vendorRoutes);
+app.use('/api/metrics', metricRoutes);
 
 // Error handler
 app.use(errorHandler);
