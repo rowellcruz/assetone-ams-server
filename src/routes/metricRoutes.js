@@ -7,5 +7,6 @@ const router = express.Router();
 
 router.get("/order-on-time", authenticate, asyncHandler(metricController.getOrderOnTime));
 router.get("/cost-savings", authenticate, asyncHandler(metricController.getCostSavings));
+router.get("/lead-time-trend", authenticate, asyncHandler(metricController.getLeadTimeTrend));
 
 export default router;

@@ -5,14 +5,16 @@ import asyncHandler from '../utils/asyncHandler.js';
 import authenticate from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
+const MODULE = 'itemUnits';
 
-router.get('/', authenticate, asyncHandler(itemUnitsController.getItemUnits));
-router.get('/:id', authenticate, asyncHandler(itemUnitsController.getItemUnitByID));
-router.get('/by-items/:itemId', authenticate, asyncHandler(itemUnitsController.getItemUnitsByItemID));
-router.post('/', authenticate, asyncHandler(itemUnitsController.createItemUnit));
-router.post('/:id/receive', authenticate, asyncHandler(itemDistributionController.markAsReceived));
-router.post('/bulk-delete', authenticate, asyncHandler(itemUnitsController.deleteItemUnitsByIDs));
-router.patch('/:id', authenticate, asyncHandler(itemUnitsController.updateItemUnitPartial));
-router.delete('/:id', authenticate, asyncHandler(itemUnitsController.deleteItemUnitByID));
+router.get('/', authenticate, itemUnitsController.getItemUnits);
+router.get('/:id', authenticate, itemUnitsController.getItemUnitByID);
+router.get('/by-items/:itemId', authenticate, itemUnitsController.getItemUnitsByItemID);
+
+router.post('/', authenticate, asyncHandler(itemUnitsController.createItemUnit, MODULE));
+router.post('/:id/receive', authenticate, asyncHandler(itemDistributionController.markAsReceived, MODULE));
+router.post('/bulk-delete', authenticate, asyncHandler(itemUnitsController.deleteItemUnitsByIDs, MODULE));
+router.patch('/:id', authenticate, asyncHandler(itemUnitsController.updateItemUnitPartial, MODULE));
+router.delete('/:id', authenticate, asyncHandler(itemUnitsController.deleteItemUnitByID, MODULE));
 
 export default router;

@@ -7,9 +7,21 @@ import * as purchaseOrderItemModel from "../models/purchaseOrderItemModel.js";
 import * as itemDistributionModel from "../models/itemDistributionModel.js";
 import * as itemUnitService from "../services/itemUnitService.js";
 import * as itemModel from "../models/itemModel.js";
+import { generatePurchaseRequisitionPDF } from "../utils/pdfGenerator.js";
 
-export async function getPurchaseRequests() {
-  return await purchaseRequestModel.getPurchaseRequests();
+export async function getPurchaseRequests(filters = {}) {
+  return await purchaseRequestModel.getPurchaseRequests(filters);
+}
+
+export async function getPurchaseRequestPDFById(id) {
+  const prfData = await purchaseRequestModel.getPurchaseRequestById(id);
+  const requested_items = await requestedItemModel.getRequestedItemsByRequestId(
+    id
+  );
+
+  const pdfBuffer = await generatePurchaseRequisitionPDF({...prfData, requested_items});
+
+  return pdfBuffer;
 }
 
 export async function getPurchaseRequestById(id) {
@@ -24,9 +36,9 @@ export async function getPurchaseRequestById(id) {
 export async function createPurchaseRequest(purchaseRequestData) {
   const { requested_items, ...requestData } = purchaseRequestData;
 
-  const purchaseRequest = await purchaseRequestModel.createPurchaseRequest(
-    requestData
-  );
+  requestData.control_number = await purchaseRequestModel.generateControlNo();
+
+  const purchaseRequest = await purchaseRequestModel.createPurchaseRequest(requestData);
 
   if (Array.isArray(requested_items) && requested_items.length > 0) {
     for (const item of requested_items) {
@@ -45,6 +57,10 @@ export async function updatePurchaseRequestPartial(id, fieldsToUpdate) {
     id,
     fieldsToUpdate
   );
+}
+
+export async function updatePurchaseOrderByPRId(id, fieldsToUpdate) {
+  return await purchaseOrderModel.updatePurchaseOrderByPRId(id, fieldsToUpdate);
 }
 
 export async function addAttachment(requestId, file, uploadedBy, module) {
@@ -140,7 +156,7 @@ export async function acquirePOItem(id, poItemId, data) {
         status: "available",
         condition: 100,
         serial_number: serials[i] || null,
-        useful_life: item.useful_life,
+        useful_life: data.useful_life,
         purchase_price: item.unit_price,
         acquisition_date: new Date(),
         owner_department_id: null,

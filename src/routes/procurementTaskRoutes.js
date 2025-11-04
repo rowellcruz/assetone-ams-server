@@ -5,18 +5,20 @@ import authenticate from '../middlewares/authMiddleware.js';
 import upload from "../middlewares/uploadMiddleware.js";
 
 const router = express.Router();
+const MODULE = 'procurementTasks';
 
-router.get('/', authenticate, asyncHandler(procurementTaskController.getProcurementTasks));
-router.get('/:id', authenticate, asyncHandler(procurementTaskController.getProcurementTaskByID));
-router.post('/', authenticate, asyncHandler(procurementTaskController.createProcurementTask));
-router.post('/bulk-delete', authenticate, asyncHandler(procurementTaskController.deleteProcurementTasksByIDs));
-router.patch('/:id', authenticate, asyncHandler(procurementTaskController.updateProcurementTaskPartial));
-router.delete('/:id', authenticate, asyncHandler(procurementTaskController.deleteProcurementTaskByID));
+router.get('/', authenticate, procurementTaskController.getProcurementTasks);
+router.get('/:id', authenticate, procurementTaskController.getProcurementTaskByID);
+router.get("/:taskId/attachments", procurementTaskController.getAttachments);
 
-router.get("/:taskId/attachments", asyncHandler(procurementTaskController.getAttachments));
-router.post("/:taskId/attachments/:module", authenticate, upload.single("file"), asyncHandler(procurementTaskController.uploadAttachment));
-router.delete("/attachments/:id", authenticate, asyncHandler(procurementTaskController.deleteAttachment));
+router.post('/', authenticate, asyncHandler(procurementTaskController.createProcurementTask, MODULE));
+router.post('/bulk-delete', authenticate, asyncHandler(procurementTaskController.deleteProcurementTasksByIDs, MODULE));
+router.patch('/:id', authenticate, asyncHandler(procurementTaskController.updateProcurementTaskPartial, MODULE));
+router.delete('/:id', authenticate, asyncHandler(procurementTaskController.deleteProcurementTaskByID, MODULE));
 
-router.post('/:id/finalize', authenticate, asyncHandler(procurementTaskController.finalizeAcquisition));
+router.post("/:taskId/attachments/:module", authenticate, upload.single("file"), asyncHandler(procurementTaskController.uploadAttachment, MODULE));
+router.delete("/attachments/:id", authenticate, asyncHandler(procurementTaskController.deleteAttachment, MODULE));
+
+router.post('/:id/finalize', authenticate, asyncHandler(procurementTaskController.finalizeAcquisition, MODULE));
 
 export default router;

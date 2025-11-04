@@ -119,3 +119,387 @@ export const generatePDF = async (reportType, data = [], user = {}) => {
     stream.on("error", reject);
   });
 };
+
+export const generatePurchaseRequisitionPDF = async (prfData = {}) => {
+  const __filename = fileURLToPath(import.meta.url);
+  const __dirname = path.dirname(__filename);
+
+  const doc = new PDFDocument({ size: "Legal", margin: 50 });
+  const stream = new PassThrough();
+  doc.pipe(stream);
+
+  // --- HEADER (Rectangle with Logo & Titles) ---
+  const stickerW = doc.page.width - 100; // width of header rectangle
+  const stickerH = 50; // height of header rectangle
+  const x = 50; // left margin
+  const headerY = 30; // top margin (renamed to avoid conflict)
+
+  const padding = 8;
+  let curY = headerY + padding;
+
+  // Logo
+  const logoPath = path.resolve(__dirname, "../assets/dycilogocircle.jpeg");
+  if (fs.existsSync(logoPath)) {
+    try {
+      doc.image(logoPath, x + padding, curY, { width: 70 });
+    } catch (err) {
+      console.error("Error adding logo:", err.message);
+    }
+  }
+
+  // Title Lines
+  doc
+    .fontSize(15)
+    .font("Helvetica-Bold")
+    .text("DR. YANGA'S COLLEGES, INC.", x + 20, curY + 20, {
+      width: stickerW,
+      align: "center",
+    });
+
+  doc
+    .fontSize(9)
+    .font("Helvetica-Bold")
+    .text("GENERAL SERVICES OFFICE", x + 20, curY + 35, {
+      width: stickerW,
+      align: "center",
+    });
+
+  doc
+    .fontSize(12)
+    .font("Helvetica-Bold")
+    .text("PURCHASE REQUISITION FORM", x + 10, curY + 80, {
+      width: stickerW,
+      align: "center",
+    });
+
+  // Space below header
+  doc.moveDown(2);
+
+  // --- PRF FORM CONTENT ---
+  let y = doc.y; // safe to declare now
+  const options = { year: "numeric", month: "short", day: "numeric" };
+
+  // Left column X position
+  const leftX = 50;
+  // Right column X position
+  const rightX = 350;
+  // Row height
+  const rowHeight = 20;
+
+  // Top row
+  // CONTROL NO.
+  doc.font("Helvetica-Bold").fontSize(10).text("Control No.:", leftX, y);
+
+  // line
+  doc
+    .moveTo(leftX + 70, y + 12)
+    .lineTo(leftX + 190, y + 12)
+    .stroke();
+
+  // value on line
+  doc
+    .font("Helvetica")
+    .fontSize(10)
+    .text(prfData.control_number || "", leftX + 70, y + 2, {
+      width: 120,
+    });
+
+  // DATE
+  doc.font("Helvetica-Bold").text("Date:", rightX, y);
+
+  // line
+  doc
+    .moveTo(rightX + 50, y + 12)
+    .lineTo(rightX + 200, y + 12)
+    .stroke();
+
+  // value
+  doc
+    .font("Helvetica")
+    .text(
+      prfData.requested_at
+        ? new Date(prfData.requested_at).toLocaleDateString("en-US", options)
+        : "",
+      rightX + 50,
+      y + 2,
+      { width: 150 }
+    );
+
+  y += rowHeight;
+
+  // FROM
+  doc.font("Helvetica-Bold").text("From:", leftX, y);
+
+  // line
+  doc
+    .moveTo(leftX + 40, y + 12)
+    .lineTo(leftX + 190, y + 12)
+    .stroke();
+
+  // value
+  doc.font("Helvetica").text(prfData.department || "", leftX + 40, y + 2, {
+    width: 110,
+  });
+
+  // DATE REQUIRED
+  doc.font("Helvetica-Bold").text("Date Required:", rightX, y);
+
+  // line
+  doc
+    .moveTo(rightX + 90, y + 12)
+    .lineTo(rightX + 200, y + 12)
+    .stroke();
+
+  // value
+  doc
+    .font("Helvetica")
+    .text(
+      prfData.date_required
+        ? new Date(prfData.date_required).toLocaleDateString("en-US", options)
+        : "",
+      rightX + 90,
+      y + 2,
+      { width: 110 }
+    );
+
+  y += 25;
+
+  // Supplier Category Section
+  doc
+    .font("Helvetica-Bold")
+    .fontSize(10)
+    .text(
+      "Kindly put a check in the supplier category of your requisition. Strictly one (1) category per requisition form.",
+      50,
+      y
+    );
+
+  y += 25;
+
+  doc.font("Helvetica-Bold").fontSize(10).text("Supplier Category:", 50, y);
+
+  const boxX = 160;
+  const boxY = y - 2;
+
+  // Draw checkbox
+  doc.rect(boxX, boxY, 10, 10).stroke();
+
+  // Draw check mark if exists
+  if (prfData.item_category_name) {
+    doc
+      .font("Helvetica-Bold")
+      .fontSize(12)
+      .text("/", boxX + 3, boxY); // visually centered
+  }
+
+  // Category text
+  doc
+    .font("Helvetica")
+    .fontSize(10)
+    .text(prfData.item_category_name || "__________", boxX + 20, y);
+
+  y += 20;
+
+  // Items Table Section Title
+  doc
+    .font("Helvetica-Bold")
+    .fontSize(10)
+    .text(
+      "Enumerate the specific item/s below. If possible, include preferred brand, specifications, and item description.",
+      50,
+      y
+    );
+
+  y += 30;
+
+  // Table dimensions
+  const tableX = 50;
+  const tableWidth = doc.page.width - 100;
+  const qtyColWidth = 80;
+  const descColWidth = tableWidth - qtyColWidth;
+  const rowHeight2 = 25;
+  const headerHeight = 20;
+  const totalRows = Math.max((prfData.requested_items || []).length, 14);
+
+  // Draw table outer border
+  doc
+    .rect(tableX, y, tableWidth, headerHeight + rowHeight2 * totalRows)
+    .stroke();
+
+  // Header background
+  doc.rect(tableX, y, tableWidth, headerHeight).fill("#e0e0e0");
+
+  // Header text
+  doc.fillColor("#000").font("Helvetica-Bold").fontSize(9);
+  doc.text("QUANTITY", tableX + 5, y + 5);
+  doc.text(
+    "PARTICULARS / ITEM DESCRIPTION / SPECIFICATIONS",
+    tableX + qtyColWidth + 5,
+    y + 5
+  );
+
+  // Column line between quantity & description
+  doc
+    .fillColor("#000")
+    .moveTo(tableX + qtyColWidth, y)
+    .lineTo(tableX + qtyColWidth, y + headerHeight + rowHeight2 * totalRows)
+    .stroke();
+
+  let rowY = y + headerHeight;
+
+  // Table rows
+  const items = prfData?.requested_items || [];
+
+  doc.font("Helvetica").fontSize(9);
+
+  for (let i = 0; i < totalRows; i++) {
+    const rowItem = items[i];
+
+    // Horizontal line for each row
+    doc
+      .moveTo(tableX, rowY)
+      .lineTo(tableX + tableWidth, rowY)
+      .stroke();
+
+    if (rowItem) {
+      doc.text(rowItem.quantity?.toString() || "", tableX + 5, rowY + 7);
+      doc.text(
+        rowItem.item_description || "",
+        tableX + qtyColWidth + 5,
+        rowY + 7,
+        {
+          width: descColWidth - 10,
+        }
+      );
+    }
+
+    rowY += rowHeight2;
+  }
+
+  y = rowY + 10;
+
+  // Purpose of Request (inline)
+  doc.font("Helvetica-Bold").fontSize(10).text("Purpose of Request:", 50, y);
+
+  const purposeX = 170; // start of line
+  const purposeWidth = 350; // width of line
+
+  // underline
+  doc
+    .moveTo(purposeX, y + 12)
+    .lineTo(purposeX + purposeWidth, y + 12)
+    .stroke();
+
+  // value on top of line
+  doc
+    .font("Helvetica")
+    .fontSize(10)
+    .text(prfData.reason || "", purposeX, y + 2, {
+      width: purposeWidth,
+    });
+
+  y += 15;
+
+  // Note
+  doc
+    .font("Helvetica")
+    .fontSize(8)
+    .text(
+      "*Note: Purchase requisition form must be submitted minimum two (2) weeks prior to the date required otherwise request will not be processed. For urgent unplanned requirement use emergency purchase form (08).",
+      50,
+      y,
+      { width: doc.page.width - 100 }
+    );
+
+  y += 40;
+
+  // Signature Section
+
+  const colWidth = (doc.page.width - 100) / 2; // two columns
+
+  // Row 1, Col 1 — Requested by
+  doc.font("Helvetica-Bold").fontSize(9).text("Requested by:", 50, y);
+  doc.font("Helvetica").text("________________________________", 50, y + 15);
+  doc
+    .font("Helvetica")
+    .fontSize(8)
+    .text("(Regulating Personnel / OIC)", 50, y + 30);
+
+  // Row 1, Col 2 — Checked / verified by
+  doc
+    .font("Helvetica-Bold")
+    .fontSize(9)
+    .text("Checked / verified by:", 100 + colWidth, y);
+  doc.font("Helvetica").text("________________________________", 100 + colWidth, y + 15);
+  doc
+    .font("Helvetica")
+    .fontSize(8)
+    .text("Property Controller", 100 + colWidth, y + 30);
+
+  // --- Move to next row
+  y += rowHeight + 25;
+
+  // Row 2, Col 1 — Recommending Approval by
+  doc
+    .font("Helvetica-Bold")
+    .fontSize(9)
+    .text("Recommending Approval by:", 50, y);
+  doc.font("Helvetica").text("________________________________", 50, y + 15);
+
+  // Row 2, Col 2 — Approved by
+  doc
+    .font("Helvetica-Bold")
+    .fontSize(9)
+    .text("Approved by:", 100 + colWidth, y);
+  doc.font("Helvetica").text("________________________________", 100 + colWidth, y + 15);
+  doc
+    .font("Helvetica")
+    .fontSize(8)
+    .text("President / EVP / GSO Director", 100 + colWidth, y + 30);
+
+  // Move down after signatures
+  y += 70;
+
+  const colWidth2 = (doc.page.width - 100) / 3; // 50 margin each side
+  const startX = 50;
+
+  // Finance Names Row
+  const financeNames = [
+    { name: "MS. ELEANOR M. R. UTAY", role: "COLLEGE FINANCE" },
+    { name: "MS. MILLENCIA POLICARDO", role: "CME FINANCE" },
+    { name: "MS. CRISZA BERNARDO", role: "BED FINANCE" },
+  ];
+
+  financeNames.forEach((f, i) => {
+    const x = startX + i * colWidth2;
+
+    // Name centered + underline
+    const underline = "_".repeat(f.name.length + 2);
+    doc
+      .font("Helvetica-Bold")
+      .fontSize(9)
+      .text(f.name, x, y, { width: colWidth2, align: "center" });
+    doc
+      .font("Helvetica")
+      .fontSize(9)
+      .text(underline, x, y + 3, { width: colWidth2, align: "center" });
+
+    // Role (center below)
+    doc
+      .font("Helvetica")
+      .fontSize(8)
+      .text(f.role, x, y + 13, { width: colWidth2, align: "center" });
+  });
+
+  y += 45;
+
+  doc.end();
+
+  return await new Promise((resolve, reject) => {
+    const chunks = [];
+    stream.on("data", (chunk) => chunks.push(chunk));
+    stream.on("finish", () => resolve(Buffer.concat(chunks)));
+    stream.on("error", reject);
+    doc.on("error", reject);
+  });
+};

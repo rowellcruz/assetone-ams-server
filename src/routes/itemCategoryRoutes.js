@@ -4,12 +4,14 @@ import asyncHandler from '../utils/asyncHandler.js';
 import authenticate from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
+const MODULE = 'itemCategories';
 
-router.get('/', authenticate, asyncHandler(itemCategoryController.getItemCategories));
-router.get('/:id', authenticate, asyncHandler(itemCategoryController.getItemCategoryByID));
-router.post('/', authenticate, asyncHandler(itemCategoryController.createItemCategory));
-router.post('/bulk-delete', authenticate, asyncHandler(itemCategoryController.deleteItemCategoriesByIDs));
-router.patch('/:id', authenticate, asyncHandler(itemCategoryController.updateItemCategoryPartial));
-router.delete('/:id', authenticate, asyncHandler(itemCategoryController.deleteItemCategoryByID));
+router.get('/', authenticate, itemCategoryController.getItemCategories);
+router.get('/:id', authenticate, itemCategoryController.getItemCategoryByID);
+
+router.post('/', authenticate, asyncHandler(itemCategoryController.createItemCategory, MODULE));
+router.post('/bulk-delete', authenticate, asyncHandler(itemCategoryController.deleteItemCategoriesByIDs, MODULE));
+router.patch('/:id', authenticate, asyncHandler(itemCategoryController.updateItemCategoryPartial, MODULE));
+router.delete('/:id', authenticate, asyncHandler(itemCategoryController.deleteItemCategoryByID, MODULE));
 
 export default router;

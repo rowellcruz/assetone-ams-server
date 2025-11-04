@@ -3,10 +3,9 @@ import * as itemUnitService from "../services/itemUnitService.js";
 export const getItemUnits = async (req, res) => {
   const filters = {};
   if (req.query.itemId) filters.itemId = req.query.itemId;
-  if (req.query.lifecycle_status)
-    filters.lifecycle_status = req.query.lifecycle_status;
-  if (req.query.operational_status)
-    filters.operational_status = req.query.operational_status;
+  if (req.query.status) filters.status = req.query.status;
+  if (req.query.ownerDepartmentId)
+    filters.ownerDepartmentId = req.query.ownerDepartmentId;
 
   const itemUnits = await itemUnitService.getAllItemUnits(filters);
   res.json(itemUnits);

@@ -4,6 +4,7 @@ async function getAllItemUnits(filters = {}) {
   let query = `
     SELECT 
       iu.*, 
+      i.name AS item_name,
       d.name AS department_name,
       v.name AS vendor_name,
       v.contact_phone AS vendor_contact_number,
@@ -20,6 +21,7 @@ async function getAllItemUnits(filters = {}) {
       id.accumulated_depreciation,
       ic.purchase_price
     FROM item_units iu
+    LEFT JOIN items i ON iu.item_id = i.id
     LEFT JOIN item_depreciation id ON id.item_unit_id = iu.id
     LEFT JOIN item_costs ic ON ic.item_unit_id = iu.id
     LEFT JOIN departments d ON iu.owner_department_id = d.id
@@ -39,6 +41,11 @@ async function getAllItemUnits(filters = {}) {
   if (filters.itemId) {
     conditions.push(`item_id = $${values.length + 1}`);
     values.push(filters.itemId);
+  }
+
+  if (filters.ownerDepartmentId) {
+    conditions.push(`owner_department_id = $${values.length + 1}`);
+    values.push(filters.ownerDepartmentId);
   }
 
   if (filters.subLocationId !== undefined) {
@@ -79,6 +86,31 @@ async function getItemUnitByID(id) {
   return rows[0] || null;
 }
 
+async function getItemUnitsByIds(ids) {
+  const placeholders = ids.map((_, i) => `$${i + 1}`).join(",");
+  const { rows } = await db.query(
+    `
+    SELECT iu.id, iu.unit_tag, i.name as item_name, iu.brand, d.name AS department_name, 
+      l.name || ' - ' || sl.name AS full_location_name
+    FROM item_units iu
+    LEFT JOIN items i ON iu.item_id = i.id
+    LEFT JOIN departments d ON iu.owner_department_id = d.id
+    LEFT JOIN sub_locations sl ON iu.sub_location_id = sl.id
+    LEFT JOIN locations l ON sl.location_id = l.id
+    WHERE iu.id IN (${placeholders})`,
+    ids
+  );
+  return rows;
+}
+
+async function getItemUnitsByDepartmentId(id) {
+  const { rows } = await db.query(
+    "SELECT * FROM item_units WHERE owner_department_id = $1",
+    [id]
+  );
+  return rows[0] || null;
+}
+
 async function getReportedItemDataById(id) {
   const { rows } = await db.query(
     `SELECT id, item_id, unit_tag, sub_location_id
@@ -115,6 +147,7 @@ async function createItemUnit(data) {
     specifications,
     sub_location_id,
     owner_department_id,
+    acquisition_date,
     is_legacy = false,
     vendor_id,
     created_by,
@@ -133,12 +166,13 @@ async function createItemUnit(data) {
         specifications,
         sub_location_id,
         owner_department_id,
+    acquisition_date,
         is_legacy,
         vendor_id,
         created_by,
         updated_by
       ) 
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)
      RETURNING id`,
     [
       item_id,
@@ -150,6 +184,7 @@ async function createItemUnit(data) {
       specifications || null,
       sub_location_id || null,
       owner_department_id,
+      acquisition_date,
       is_legacy,
       vendor_id,
       created_by,
@@ -168,6 +203,7 @@ async function createItemUnit(data) {
     specifications,
     sub_location_id,
     owner_department_id,
+    acquisition_date,
     is_legacy,
     vendor_id,
     created_by,
@@ -222,7 +258,9 @@ async function getLastUnitTag(prefix) {
 export {
   getAllItemUnits,
   getItemUnitByID,
+  getItemUnitsByDepartmentId,
   getReportedItemDataById,
+  getItemUnitsByIds,
   getItemUnitsFromDepartment,
   getLastUnitTag,
   createItemUnit,

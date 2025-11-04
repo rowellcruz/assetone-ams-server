@@ -1,0 +1,58 @@
+import * as borrowLogModel from "../models/borrowLogModel.js";
+import { updateItemUnitPartial } from "./itemUnitService.js";
+
+export async function getBorrowLog(filters = {}) {
+  return await borrowLogModel.getBorrowLogs(filters);
+}
+
+export async function getBorrowLogByItemUnitId(id) {
+  return await borrowLogModel.getBorrowLogsByItemUnitId(id);
+}
+
+export async function getItemUnitLastBorrowLog(item_unit_id) {
+  return await borrowLogModel.getItemUnitLastBorrowLog(item_unit_id);
+}
+
+export async function logBorrow(
+  item_unit_id,
+  borrowed_by,
+  lend_by,
+  purpose = null
+) {
+  const lastBorrowLog = await borrowLogModel.getItemUnitLastBorrowLog(
+    item_unit_id
+  );
+  if (lastBorrowLog) {
+    throw new Error("This item is already borrowed and not yet returned.");
+  }
+
+  const log = await borrowLogModel.logBorrow(
+    item_unit_id,
+    borrowed_by,
+    lend_by,
+    purpose
+  );
+
+  await updateItemUnitPartial(item_unit_id, { status: "borrowed" });
+
+  return log;
+}
+
+export async function logReturn(item_unit_id, remarks = null) {
+  const lastBorrowLog = await borrowLogModel.getItemUnitLastBorrowLog(
+    item_unit_id
+  );
+  if (!lastBorrowLog)
+    throw new Error("No active borrow record found for this item.");
+
+  const updatedLog = await borrowLogModel.logReturn(
+    lastBorrowLog.id,
+    new Date(),
+    "returned",
+    remarks
+  );
+
+  await updateItemUnitPartial(item_unit_id, { status: "available" });
+
+  return updatedLog;
+}

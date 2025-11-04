@@ -158,7 +158,6 @@ export async function skipScheduleOccurrence(id, skippedBy, reason) {
     skipped_at: new Date(),
     skipped_by: skippedBy,
     skipped_reason: reason,
-    skipped_context: occurrence.status,
   });
 
   if (template.type === "PM" && template.status === "active") {

@@ -10,7 +10,7 @@ router.get('/', authenticate, asyncHandler(itemController.getItems));
 router.get('/:id', authenticate, asyncHandler(itemController.getItemByID));
 router.get('/:itemId/units', authenticate, asyncHandler(itemUnitsController.getItemUnitsByItemID));
 router.get('/:id/units/:departmentId', authenticate, asyncHandler(itemUnitsController.getItemUnitsByDepartmentID));
-router.get('/by-category/:category_id', authenticate, asyncHandler(itemController.getItemsByCategoryID));
+router.post('/stickers', authenticate, itemController.getUnitStickers);
 router.post('/:id/units', authenticate, asyncHandler(itemUnitsController.createItemUnit));
 router.post('/', authenticate, asyncHandler(itemController.createItem));
 router.post('/bulk-delete', authenticate, asyncHandler(itemController.deleteItemsByIDs));

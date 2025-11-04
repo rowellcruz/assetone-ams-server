@@ -2,7 +2,11 @@ import * as purchaseRequestService from "../services/purchaseRequestService.js";
 import * as itemDistributionService from "../services/itemDistributionService.js";
 
 export const getPurchaseRequests = async (req, res) => {
-  const purchaseRequests = await purchaseRequestService.getPurchaseRequests();
+  const filters = {};
+  if (req.query.requestorId) filters.requestorId = req.query.requestorId;
+  const purchaseRequests = await purchaseRequestService.getPurchaseRequests(
+    filters
+  );
   res.json(purchaseRequests);
 };
 
@@ -12,6 +16,18 @@ export const getPurchaseRequestById = async (req, res) => {
     id
   );
   res.json(purchaseRequest);
+};
+
+export const getPurchaseRequestPDFById = async (req, res) => {
+  const { id } = req.params;
+  const purchaseRequest =
+    await purchaseRequestService.getPurchaseRequestPDFById(id);
+  res.setHeader("Content-Type", "application/pdf");
+  res.setHeader(
+    "Content-Disposition",
+    `attachment; filename=purchase-requisition-${id}.pdf`
+  );
+  res.send(purchaseRequest);
 };
 
 export const getItemForDistributionByPRId = async (req, res) => {
@@ -35,6 +51,19 @@ export const updatePurchaseRequest = async (req, res) => {
   if (!updated) {
     res.status(404);
     throw new Error("Purchase request not found");
+  }
+  res.json(updated);
+};
+
+export const updatePurchaseOrderByPRId = async (req, res) => {
+  const { id } = req.params;
+  const updated = await purchaseRequestService.updatePurchaseOrderByPRId(
+    id,
+    req.body
+  );
+  if (!updated) {
+    res.status(404);
+    throw new Error("Purchase Order not found");
   }
   res.json(updated);
 };

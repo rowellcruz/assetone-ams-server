@@ -1,11 +1,11 @@
 import * as requestModel from "../models/requestModel.js";
-import * as issueReportModel from "../models/issueReportModel.js";
+import * as issueReportModel from "../models/maintenanceRequestModel.js";
 import * as assetRequestModel from "../models/assetRequestModel.js";
 import * as purchaseRequestModel from "../models/purchaseRequestModel.js";
 import * as subLocationAssetModel from "../models/subLocationAssetModel.js";
 
-export async function getIssueReports(filters = {}) {
-  return await issueReportModel.getIssueReports(filters);
+export async function getReportedAssets(filters = {}) {
+  return await issueReportModel.getMaintenanceRequests(filters);
 }
 
 export async function getAssetRequests(filters = {}) {
@@ -109,7 +109,7 @@ export async function createRequest(requestData) {
   let childRecord;
   switch (requestData.request_type) {
     case "issue":
-      childRecord = await issueReportModel.createIssueReport(childData);
+      childRecord = await issueReportModel.createMaintenanceRequest(childData);
       break;
     case "asset":
       childRecord = await assetRequestModel.createAssetRequest(childData);

@@ -1,6 +1,10 @@
 import * as itemDistributionModel from "../models/itemDistributionModel.js";
 import * as purchaseRequestModel from "../models/purchaseRequestModel.js";
 
+export async function getAllItemsForDistribution() {
+  return await itemDistributionModel.getAllItemsForDistribution();
+}
+
 export async function getItemForDistributionByPRId(id) {
   return await itemDistributionModel.getItemForDistributionByPRId(id);
 }

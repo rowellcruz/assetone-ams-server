@@ -3,9 +3,7 @@ import * as purchaseRequestModel from "../models/purchaseRequestModel.js";
 import * as purchaseOrderModel from "../models/purchaseOrderModel.js";
 import * as purchaseOrderItemModel from "../models/purchaseOrderItemModel.js";
 
-
 export async function getOrderOnTime() {
-  // 1. Fetch all items for distribution that have been received
   const items = await itemDistributionModel.getItemsForDistribution({
     receivedOnly: true,
   });
@@ -15,16 +13,14 @@ export async function getOrderOnTime() {
   let lateCount = 0;
 
   for (const item of items) {
-    // 2. Get the purchase request for each item
     const pr = await purchaseRequestModel.getPurchaseRequestById(
       item.purchase_request_id
     );
 
-    if (!pr) continue; // skip if somehow the PR doesn't exist
+    if (!pr) continue;
 
     totalReceived++;
 
-    // 3. Compare received_at vs required date
     const receivedAt = new Date(item.received_at);
     const requiredDate = new Date(pr.date_required);
 
@@ -47,12 +43,14 @@ export async function getOrderOnTime() {
 }
 
 export async function getCostSavings() {
-  const { total_planned, total_actual } = await purchaseRequestModel.getPurchaseRequestCosts();
+  const { total_planned, total_actual } =
+    await purchaseRequestModel.getPurchaseRequestCosts();
 
   const total_planned_num = Number(total_planned || 0);
   const total_actual_num = Number(total_actual || 0);
   const cost_savings = total_planned_num - total_actual_num;
-  const savings_percent = total_planned_num > 0 ? (cost_savings / total_planned_num) * 100 : 0;
+  const savings_percent =
+    total_planned_num > 0 ? (cost_savings / total_planned_num) * 100 : 0;
 
   return {
     total_planned: total_planned_num,
@@ -60,4 +58,45 @@ export async function getCostSavings() {
     cost_savings,
     savings_percent,
   };
+}
+
+export async function getLeadTimeTrend() {
+  const rows = await purchaseOrderModel.getLeadTimeRows();
+
+  // Step 1: Group lead times by YYYY-MM
+  const map = {};
+  for (const row of rows) {
+    const month = row.delivery_month.toISOString().slice(0, 7); // "YYYY-MM"
+    const leadTime = Number(row.lead_time_days);
+
+    if (!map[month]) map[month] = [];
+    map[month].push(leadTime);
+  }
+
+  // Step 2: Generate last 12 months
+  const result = [];
+  const today = new Date();
+  const currentMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+
+  for (let i = 11; i >= 0; i--) {
+    const d = new Date(currentMonth);
+    d.setMonth(d.getMonth() - i + 1);
+    const key = d.toISOString().slice(0, 7); // "YYYY-MM"
+
+    const leadTimes = map[key] || [];
+    const avgLeadTime = leadTimes.length
+      ? Number(
+          (leadTimes.reduce((a, b) => a + b, 0) / leadTimes.length).toFixed(2)
+        )
+      : 0;
+
+    const monthName = d.toLocaleString("default", {
+      month: "short",
+      year: "numeric",
+    });
+
+    result.push({ month: monthName, avgLeadTime });
+  }
+
+  return result;
 }

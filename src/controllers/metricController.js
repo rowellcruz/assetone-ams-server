@@ -9,3 +9,8 @@ export const getCostSavings = async (req, res) => {
   const data = await metricService.getCostSavings();
   res.json(data);
 };
+
+export const getLeadTimeTrend = async (req, res) => {
+  const data = await metricService.getLeadTimeTrend();
+  res.json(data);
+};

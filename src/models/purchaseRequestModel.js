@@ -1,8 +1,7 @@
 import db from "../config/db.js";
 
-async function getPurchaseRequests() {
-  const { rows } = await db.query(
-    `
+async function getPurchaseRequests(filters = {}) {
+  let query = `
     SELECT pr.*, 
     c.name as item_category_name,
     (u.first_name || ' ' || u.last_name) AS requestor,
@@ -11,8 +10,21 @@ async function getPurchaseRequests() {
     LEFT JOIN item_categories c ON pr.item_category_id = c.id
     LEFT JOIN users u ON pr.requested_by = u.id
     LEFT JOIN departments d ON u.department_id = d.id
-    `
-  );
+    `;
+
+  const conditions = [];
+  const values = [];
+
+  if (filters.requestorId) {
+    conditions.push(`requested_by = $${values.length + 1}`);
+    values.push(filters.requestorId);
+  }
+
+  if (conditions.length > 0) {
+    query += " WHERE " + conditions.join(" AND ");
+  }
+
+  const { rows } = await db.query(query, values);
   return rows;
 }
 
@@ -70,6 +82,33 @@ async function getPurchaseRequestById(id) {
   return rows[0];
 }
 
+async function generateControlNo() {
+  const today = new Date();
+  const dateKey = today.toISOString().slice(0, 10).replace(/-/g, "");
+  const row = await db.query(
+    "SELECT seq FROM pr_sequences WHERE date_key = $1",
+    [dateKey]
+  );
+
+  let seq = 1;
+
+  if (row.rows.length > 0) {
+    seq = row.rows[0].seq + 1;
+    await db.query("UPDATE pr_sequences SET seq = $1 WHERE date_key = $2", [
+      seq,
+      dateKey,
+    ]);
+  } else {
+    await db.query("INSERT INTO pr_sequences (date_key, seq) VALUES ($1, $2)", [
+      dateKey,
+      seq,
+    ]);
+  }
+
+  const padded = seq.toString().padStart(4, "0");
+  return `PR-${dateKey}-${padded}`;
+}
+
 async function createPurchaseRequest(data) {
   const { rows } = await db.query(
     `INSERT INTO purchase_requests 
@@ -111,6 +150,7 @@ async function updatePurchaseRequestPartial(id, fields) {
 export {
   getPurchaseRequests,
   getPurchaseRequestCosts,
+  generateControlNo,
   getPurchaseRequestById,
   createPurchaseRequest,
   updatePurchaseRequestPartial,

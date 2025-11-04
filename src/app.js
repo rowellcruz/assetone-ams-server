@@ -11,8 +11,9 @@ import scheduleRoutes from './routes/scheduleRoutes.js';
 import procurementTaskRoutes from './routes/procurementTaskRoutes.js';
 import purchaseRequestRoutes from './routes/purchaseRequestRoutes.js';
 import completionRequestRoutes from './routes/completionRequestRoutes.js';
-import issueReportRoutes from './routes/issueReportRoutes.js';
+import maintenanceRequestRoutes from './routes/maintenanceRequestRoutes.js';
 import itemRequestRoutes from './routes/itemRequestRoutes.js';
+import itemDistributionRoutes from './routes/itemDistributionRoutes.js';
 import reportRoutes from './routes/reportRoutes.js';
 import departmentRoutes from './routes/departmentRoutes.js';
 import locationRoutes from './routes/locationRoutes.js';
@@ -21,6 +22,7 @@ import vendorRoutes from './routes/vendorRoutes.js';
 import metricRoutes from './routes/metricRoutes.js';
 import authRoutes from './routes/authRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
+import borrowLogRoutes from './routes/borrowLogRoutes.js';
 
 import errorHandler from './middlewares/errorHandler.js';
 
@@ -73,12 +75,13 @@ app.use('/api/users', userRoutes);
 app.use('/api/items', itemRoutes);
 app.use('/api/item-units', itemUnitRoutes);
 app.use('/api/item-categories', itemCategoryRoutes);
+app.use('/api/items-for-distribution', itemDistributionRoutes);
 app.use('/api/schedule-templates', scheduleTemplateRoutes);
 app.use('/api/schedules', scheduleRoutes);
 app.use('/api/procurement-tasks', procurementTaskRoutes);
 app.use('/api/purchase-requests', purchaseRequestRoutes);
 app.use('/api/completion-requests', completionRequestRoutes);
-app.use('/api/issue-reports', issueReportRoutes);
+app.use('/api/maintenance-requests', maintenanceRequestRoutes);
 app.use('/api/item-requests', itemRequestRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/departments', departmentRoutes);
@@ -86,6 +89,7 @@ app.use('/api/locations', locationRoutes);
 app.use('/api/sub-locations', subLocationRoutes);
 app.use('/api/vendors', vendorRoutes);
 app.use('/api/metrics', metricRoutes);
+app.use('/api/borrow-log', borrowLogRoutes);
 
 // Error handler
 app.use(errorHandler);
