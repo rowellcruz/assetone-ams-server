@@ -4,12 +4,12 @@ import db from "../config/db.js";
 export const getAssets = async (filters = {}) => {
   let query = `
     SELECT 
-        a.type AS "Asset Type",
-        COUNT(au.id) AS "Asset Unit Count",
+        a.name AS "Asset",
+        COUNT(au.id) AS "Unit Count",
         CONCAT(u_created.first_name, ' ', u_created.last_name) AS "Created By",
         a.created_at AS "Created At"
-    FROM assets a
-    LEFT JOIN asset_units au ON au.asset_id = a.id
+    FROM items a
+    LEFT JOIN item_units au ON au.item_id = a.id
     LEFT JOIN users u_created ON a.created_by = u_created.id
   `;
 

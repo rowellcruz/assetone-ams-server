@@ -5,42 +5,78 @@ import PDFDocument from "pdfkit";
 import { PassThrough } from "stream";
 
 export const generatePDF = async (reportType, data = [], user = {}) => {
+  const __filename = fileURLToPath(import.meta.url);
+  const __dirname = path.dirname(__filename);
+
   const doc = new PDFDocument({ size: "Legal", margin: 50 });
   const stream = new PassThrough();
   doc.pipe(stream);
 
-  // --- HEADER ---
-  const __filename = fileURLToPath(import.meta.url);
-  const __dirname = path.dirname(__filename);
-  const logoPath = path.resolve(__dirname, "../assets/dycilogo.jpeg");
+  // --- HEADER (Rectangle with Logo & Titles) ---
+  const stickerW = doc.page.width - 100; // width of header rectangle
+  const stickerH = 50; // height of header rectangle
+  const x = 50; // left margin
+  const headerY = 30; // top margin
 
+  const padding = 8;
+  let curY = headerY + padding;
+
+  // Report Title mapping
+  const titleMap = {
+    asset: "ASSET SUMMARY REPORT",
+    "asset-unit": "ASSET UNITS REPORT",
+    "maintenance-schedule": "MAINTENANCE SCHEDULES REPORT",
+    procurement: "PROCUREMENT REPORT",
+    "purchase-request": "PURCHASE REQUESTS REPORT",
+    user: "USERS REPORT",
+    "activity-log": "ACTIVITY LOGS REPORT",
+    department: "DEPARTMENTS REPORT",
+    location: "LOCATIONS REPORT",
+    vendor: "VENDORS REPORT",
+  };
+
+  // Logo
+  const logoPath = path.resolve(__dirname, "../assets/dycilogocircle.jpeg");
   if (fs.existsSync(logoPath)) {
     try {
-      const logoWidth = 90;
-      const logoHeight = 30;
-      const x = (doc.page.width - logoWidth) / 2;
-      doc.image(logoPath, x, 30, { width: logoWidth, height: logoHeight });
+      doc.image(logoPath, x + padding, curY, { width: 70 });
     } catch (err) {
-      console.error("Error adding logo to PDF:", err.message);
+      console.error("Error adding logo:", err.message);
     }
   }
 
-  // Space below logo
-  doc.moveDown(3);
-
-  // Title (capitalize first letter, avoid repeating "Report")
-  const titleText = reportType
-    ? reportType.charAt(0).toUpperCase() + reportType.slice(1).replace("-", " ")
-    : "Report";
-
-  doc.font("Helvetica-Bold").fontSize(20).text(titleText, { align: "center" });
-
-  // Generated date
+  // Title Lines
   doc
-    .font("Helvetica")
-    .fontSize(10)
-    .text(`Report created at: ${new Date().toLocaleDateString()}`, {
-      align: "right",
+    .fontSize(15)
+    .font("Helvetica-Bold")
+    .text("DR. YANGA'S COLLEGES, INC.", x + 20, curY + 20, {
+      width: stickerW,
+      align: "center",
+    });
+
+  doc
+    .fontSize(9)
+    .font("Helvetica-Bold")
+    .text("GENERAL SERVICES OFFICE", x + 20, curY + 35, {
+      width: stickerW,
+      align: "center",
+    });
+
+  // Report Title (capitalize first letter, avoid repeating "Report")
+  const titleText =
+    titleMap[reportType] ||
+    (reportType
+      ? reportType.charAt(0).toUpperCase() +
+        reportType.slice(1).replace("-", " ") +
+        " REPORT"
+      : "REPORT");
+
+  doc
+    .fontSize(12)
+    .font("Helvetica-Bold")
+    .text(titleText.toUpperCase(), x + 10, curY + 80, {
+      width: stickerW,
+      align: "center",
     });
 
   doc.moveDown(2);
@@ -91,24 +127,37 @@ export const generatePDF = async (reportType, data = [], user = {}) => {
     });
   }
 
-  // --- FOOTER: Reported by at bottom of last page ---
+  // --- FOOTER: Two-column layout right after the table ---
+  y += 60; // Add some space after the table
+
+  const colWidth = (doc.page.width - 100) / 2;
+  const leftX = 50;
+  const rightX = leftX + colWidth;
+
+  // Left column - Reported by
   if (user && user.first_name && user.last_name) {
-    const bottomMargin = 50; // same as doc margin
-    let yPosition = doc.page.height - bottomMargin - 30; // leave extra space for name
-
-    // Make sure it doesn't overlap table
-    if (y > yPosition) {
-      doc.addPage();
-      yPosition = doc.page.height - bottomMargin - 30;
-    }
-
-    doc.fontSize(10).text("Reported by:", 50, yPosition, { align: "left" });
+    doc.fontSize(10).text("Reported by:", leftX, y, { align: "left" });
     doc
       .fontSize(10)
-      .text(`${user.first_name} ${user.last_name}`, 50, yPosition + 15, {
+      .text(`${user.first_name} ${user.last_name}`, leftX, y + 15, {
         align: "left",
       });
   }
+
+  // Right column - Reported at
+  doc.fontSize(10).text("Reported at:", rightX, y, { align: "left" });
+  doc.fontSize(10).text(
+    `${new Date().toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    })}`,
+    rightX,
+    y + 15,
+    {
+      align: "left",
+    }
+  );
 
   doc.end();
 
@@ -430,7 +479,9 @@ export const generatePurchaseRequisitionPDF = async (prfData = {}) => {
     .font("Helvetica-Bold")
     .fontSize(9)
     .text("Checked / verified by:", 100 + colWidth, y);
-  doc.font("Helvetica").text("________________________________", 100 + colWidth, y + 15);
+  doc
+    .font("Helvetica")
+    .text("________________________________", 100 + colWidth, y + 15);
   doc
     .font("Helvetica")
     .fontSize(8)
@@ -451,7 +502,9 @@ export const generatePurchaseRequisitionPDF = async (prfData = {}) => {
     .font("Helvetica-Bold")
     .fontSize(9)
     .text("Approved by:", 100 + colWidth, y);
-  doc.font("Helvetica").text("________________________________", 100 + colWidth, y + 15);
+  doc
+    .font("Helvetica")
+    .text("________________________________", 100 + colWidth, y + 15);
   doc
     .font("Helvetica")
     .fontSize(8)
