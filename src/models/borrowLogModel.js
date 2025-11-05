@@ -4,10 +4,10 @@ async function getBorrowLogs() {
   const { rows } = await db.query(`
     SELECT 
       bl.*,
-      iu.name AS item_name,
+      iu.unit_tag AS item_unit_tag,
       CONCAT(u.first_name, ' ', u.last_name) AS lender_name
     FROM borrow_logs bl
-    LEFT JOIN items iu ON bl.item_unit_id = iu.id
+    LEFT JOIN item_units iu ON bl.item_unit_id = iu.id
     LEFT JOIN users u ON bl.lend_by = u.id
   `);
   return rows;

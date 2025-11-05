@@ -80,3 +80,34 @@ export const deleteItemUnitsByIDs = async (req, res) => {
   await itemUnitService.deleteItemUnitsByIDs(ids);
   res.json({ message: "Item units deleted successfully" });
 };
+
+export const relocateItemUnit = async (req, res) => {
+  const { id } = req.params;
+  const user = req.user;
+  const relocate = await itemUnitService.relocateItemUnit(id, user, req.body);
+  if (!relocate) {
+    res.status(404);
+    throw new Error("Item unit not found");
+  }
+  res.json({ message: "Item unit relocated successfully" });
+};
+
+export const itemUnitRelocationLog = async (req, res) => {
+  const { id } = req.params;
+  const relocate = await itemUnitService.itemUnitRelocationLog(id);
+  if (!relocate) {
+    res.status(404);
+    throw new Error("Item unit relocation log not found");
+  }
+  res.json({ message: "Item unit relocation log found" });
+};
+
+export const pendingRelocationLogs = async (req, res) => {
+  const { departmentId } = req.params;
+  const relocate = await itemUnitService.pendingRelocationLogs(departmentId);
+  if (!relocate) {
+    res.status(404);
+    throw new Error("Item unit relocation log not found");
+  }
+  res.json({ message: "Item unit relocation log found" });
+};

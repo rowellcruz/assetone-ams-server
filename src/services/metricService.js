@@ -1,7 +1,7 @@
 import * as itemDistributionModel from "../models/itemDistributionModel.js";
 import * as purchaseRequestModel from "../models/purchaseRequestModel.js";
 import * as purchaseOrderModel from "../models/purchaseOrderModel.js";
-import * as purchaseOrderItemModel from "../models/purchaseOrderItemModel.js";
+import * as itemUnitModel from "../models/itemUnitModel.js";
 
 export async function getOrderOnTime() {
   const items = await itemDistributionModel.getItemsForDistribution({
@@ -99,4 +99,36 @@ export async function getLeadTimeTrend() {
   }
 
   return result;
+}
+
+export async function getUnusedAssets() {
+  const availableAssets = await itemUnitModel.getAllItemUnits({ status: "available" });
+  const totalAssets = await itemUnitModel.getAllItemUnits();
+
+  const unusedCount = availableAssets.length;
+  const totalCount = totalAssets.length;
+
+  const percentage = (unusedCount / totalCount) * 100;
+
+  return {
+    unused_assets: unusedCount,
+    total_assets: totalCount,
+    unused_percentage: Number(percentage.toFixed(2)),
+  };
+}
+
+export async function getLostAssets() {
+  const lostAssets = await itemUnitModel.getAllItemUnits({ status: "lost" });
+  const totalAssets = await itemUnitModel.getAllItemUnits();
+
+  const lostCount = lostAssets.length;
+  const totalCount = totalAssets.length;
+
+  const percentage = (lostCount / totalCount) * 100;
+
+  return {
+    lost_assets: lostCount,
+    total_assets: totalCount,
+    lost_percentage: Number(percentage.toFixed(2)),
+  };
 }

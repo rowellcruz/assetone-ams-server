@@ -67,7 +67,7 @@ async function getAllItemUnits(filters = {}) {
   }
 
   if (filters.status !== undefined) {
-    conditions.push(`status = $${values.length + 1}`);
+    conditions.push(`iu.status = $${values.length + 1}`);
     values.push(filters.status);
   }
 
@@ -80,7 +80,11 @@ async function getAllItemUnits(filters = {}) {
 }
 
 async function getItemUnitByID(id) {
-  const { rows } = await db.query("SELECT * FROM item_units WHERE id = $1", [
+  const { rows } = await db.query(`
+    SELECT iu.*, d.name AS department_name 
+    FROM item_units iu 
+    LEFT JOIN departments d ON iu.owner_department_id = d.id 
+    WHERE iu.id = $1`, [
     id,
   ]);
   return rows[0] || null;

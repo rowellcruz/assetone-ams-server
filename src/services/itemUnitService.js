@@ -2,6 +2,8 @@ import * as itemUnitModel from "../models/itemUnitModel.js";
 import * as itemModel from "../models/itemModel.js";
 import * as itemDepreciationModel from "../models/itemDepreciationModel.js";
 import * as itemCostModel from "../models/itemCostModel.js";
+import * as relocationModel from "../models/relocationModel.js";
+
 
 export async function getAllItemUnits(filters = {}) {
   return await itemUnitModel.getAllItemUnits(filters);
@@ -72,4 +74,17 @@ export async function deleteItemUnitByID(id) {
 
 export async function deleteItemUnitsByIDs(ids) {
   return await itemUnitModel.deleteItemUnitsByIDs(ids);
+}
+
+export async function relocateItemUnit(id, user, data) {
+  const {from_sub_location_id, to_sub_location_id, requested_from} = data;
+  return await relocationModel.logRelocation(id, from_sub_location_id, to_sub_location_id, user.id, requested_from);
+}
+
+export async function itemUnitRelocationLog(id) {
+  return await relocationModel.getRelocationLogsById(id);
+}
+
+export async function pendingRelocationLogs(department) {
+  return await relocationModel.getPendingRelocationLogs(department);
 }

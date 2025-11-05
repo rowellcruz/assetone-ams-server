@@ -14,3 +14,13 @@ export const getLeadTimeTrend = async (req, res) => {
   const data = await metricService.getLeadTimeTrend();
   res.json(data);
 };
+
+export const getUnusedAssets = async (req, res) => {
+  const data = await metricService.getUnusedAssets();
+  res.json(data);
+};
+
+export const getLostAssets = async (req, res) => {
+  const data = await metricService.getLostAssets();
+  res.json(data);
+};
