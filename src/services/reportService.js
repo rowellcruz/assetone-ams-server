@@ -12,10 +12,10 @@ export const generateReport = async (reportType, filters, userId) => {
 
   switch (reportType) {
     case "asset":
-      data = await reportModel.getAssets(filters);
+      data = await reportModel.getItems(filters);
       break;
     case "asset-unit":
-      data = await reportModel.getAssetUnits(filters);
+      data = await reportModel.getItemUnits(filters);
       break;
     case "maintenance-schedule":
       data = await reportModel.getMaintenanceSchedules(filters);

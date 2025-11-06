@@ -12,16 +12,14 @@ export const generatePDF = async (reportType, data = [], user = {}) => {
   const stream = new PassThrough();
   doc.pipe(stream);
 
-  // --- HEADER (Rectangle with Logo & Titles) ---
-  const stickerW = doc.page.width - 100; // width of header rectangle
-  const stickerH = 50; // height of header rectangle
-  const x = 50; // left margin
-  const headerY = 30; // top margin
-
+  // --- HEADER ---
+  const stickerW = doc.page.width - 100;
+  const stickerH = 50;
+  const x = 50;
+  const headerY = 30;
   const padding = 8;
   let curY = headerY + padding;
 
-  // Report Title mapping
   const titleMap = {
     asset: "ASSET SUMMARY REPORT",
     "asset-unit": "ASSET UNITS REPORT",
@@ -35,7 +33,6 @@ export const generatePDF = async (reportType, data = [], user = {}) => {
     vendor: "VENDORS REPORT",
   };
 
-  // Logo
   const logoPath = path.resolve(__dirname, "../assets/dycilogocircle.jpeg");
   if (fs.existsSync(logoPath)) {
     try {
@@ -45,7 +42,6 @@ export const generatePDF = async (reportType, data = [], user = {}) => {
     }
   }
 
-  // Title Lines
   doc
     .fontSize(15)
     .font("Helvetica-Bold")
@@ -62,7 +58,6 @@ export const generatePDF = async (reportType, data = [], user = {}) => {
       align: "center",
     });
 
-  // Report Title (capitalize first letter, avoid repeating "Report")
   const titleText =
     titleMap[reportType] ||
     (reportType
@@ -82,59 +77,60 @@ export const generatePDF = async (reportType, data = [], user = {}) => {
   doc.moveDown(2);
 
   // --- TABLE ---
-  let y = doc.y; // define y here so it exists outside table block
+  let y = doc.y;
   if (data.length === 0) {
     doc.text("No data available.", { align: "center" });
   } else {
     const columns = Object.keys(data[0]);
-    const colWidth = (doc.page.width - 100) / columns.length;
-
-    // Table header with background
+    const tableX = 50;
+    const tableWidth = doc.page.width - 100;
+    const colWidth = tableWidth / columns.length;
     const headerHeight = 25;
-    doc.rect(50, y, doc.page.width - 100, headerHeight).fill("#e0e0e0");
-    doc.fillColor("#000000").font("Helvetica-Bold");
+    const rowHeight = 20;
+
+    // Header with borders
+    doc.font("Helvetica-Bold").fontSize(10);
     columns.forEach((col, i) => {
+      const cellX = tableX + i * colWidth;
+      doc.rect(cellX, y, colWidth, headerHeight).stroke();
       doc.text(
         col.charAt(0).toUpperCase() + col.slice(1),
-        50 + i * colWidth + 5,
+        cellX + 5,
         y + 7,
         { width: colWidth - 10, align: "left" }
       );
     });
+    y += headerHeight;
 
-    y += headerHeight + 5;
-    doc.font("Helvetica").fillColor("#000000");
-
-    const rowHeight = 20;
+    // Rows with borders
+    doc.font("Helvetica").fontSize(9);
     data.forEach((item) => {
       columns.forEach((col, i) => {
+        const cellX = tableX + i * colWidth;
         let value = item[col];
         if (value instanceof Date) value = value.toLocaleString();
         if (value === undefined || value === null) value = "-";
-
-        doc.text(value.toString(), 50 + i * colWidth + 5, y + 5, {
+        doc.rect(cellX, y, colWidth, rowHeight).stroke();
+        doc.text(value.toString(), cellX + 5, y + 5, {
           width: colWidth - 10,
           align: "left",
         });
       });
-      y += rowHeight;
 
-      // Check if we need a page break
+      y += rowHeight;
       if (y + rowHeight > doc.page.height - 70) {
         doc.addPage();
-        y = 50; // reset y for new page
+        y = 50;
       }
     });
   }
 
-  // --- FOOTER: Two-column layout right after the table ---
-  y += 60; // Add some space after the table
-
+  // --- FOOTER ---
+  y += 60;
   const colWidth = (doc.page.width - 100) / 2;
   const leftX = 50;
   const rightX = leftX + colWidth;
 
-  // Left column - Reported by
   if (user && user.first_name && user.last_name) {
     doc.fontSize(10).text("Reported by:", leftX, y, { align: "left" });
     doc
@@ -144,7 +140,6 @@ export const generatePDF = async (reportType, data = [], user = {}) => {
       });
   }
 
-  // Right column - Reported at
   doc.fontSize(10).text("Reported at:", rightX, y, { align: "left" });
   doc.fontSize(10).text(
     `${new Date().toLocaleDateString("en-US", {
@@ -154,9 +149,7 @@ export const generatePDF = async (reportType, data = [], user = {}) => {
     })}`,
     rightX,
     y + 15,
-    {
-      align: "left",
-    }
+    { align: "left" }
   );
 
   doc.end();

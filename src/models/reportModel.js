@@ -1,94 +1,107 @@
 import db from "../config/db.js";
 
-// 1. Assets
-export const getAssets = async (filters = {}) => {
+// 1. Items
+export const getItems = async (filters = {}) => {
+  const values = [];
   let query = `
     SELECT 
-        a.name AS "Asset",
-        COUNT(au.id) AS "Unit Count",
+        i.name AS "Item",
+        COUNT(iu.id) AS "Unit Count",
         CONCAT(u_created.first_name, ' ', u_created.last_name) AS "Created By",
-        a.created_at AS "Created At"
-    FROM items a
-    LEFT JOIN item_units au ON au.item_id = a.id
-    LEFT JOIN users u_created ON a.created_by = u_created.id
+        i.created_at AS "Created At"
+    FROM items i
+    LEFT JOIN item_units iu ON iu.item_id = i.id
   `;
 
-  const conditions = [];
-  const values = [];
-
-  if (filters.departmentId) {
-    values.push(filters.departmentId);
-    conditions.push(`a.department_id = $${values.length}`);
+  if (filters.status && filters.status !== "*") {
+    values.push(filters.status);
+    query += ` AND iu.status = $${values.length}`;
   }
-
-  if (filters.from && filters.to) {
-    values.push(filters.from, filters.to);
-    conditions.push(
-      `a.created_at BETWEEN $${values.length - 1} AND $${values.length}`
-    );
-  }
-
-  if (conditions.length) query += " WHERE " + conditions.join(" AND ");
 
   query += `
-    GROUP BY a.id, a.type, u_created.first_name, u_created.last_name, a.created_at
-    ORDER BY a.type
+    LEFT JOIN users u_created ON i.created_by = u_created.id
+  `;
+
+  const where = [];
+  if (filters.from && filters.to) {
+    values.push(filters.from, filters.to);
+    where.push(`i.created_at BETWEEN $${values.length - 1} AND $${values.length}`);
+  }
+
+  if (where.length) query += ` WHERE ${where.join(" AND ")}`;
+
+  query += `
+    GROUP BY i.id, i.name, u_created.first_name, u_created.last_name, i.created_at
+    ORDER BY i.created_at DESC
   `;
 
   const { rows } = await db.query(query, values);
   return rows;
 };
 
-// 2. Asset Units
-export const getAssetUnits = async (filters = {}, limit = 50) => {
+
+// 2. Item Units
+export const getItemUnits = async (filters = {}, limit = 50) => {
   let query = `
     SELECT 
-      unit_tag,
-      serial_number,
-      brand,
-      condition,
-      operational_status,
-      acquisition_date,
-      department_id
-    FROM asset_units
+      iu.unit_tag,
+      iu.brand,
+      iu.condition,
+      iu.status,
+      iu.acquisition_date,
+      d.name AS department_name
+    FROM item_units iu
+    LEFT JOIN departments d ON iu.owner_department_id = d.id
   `;
 
   const conditions = [];
   const values = [];
 
-  if (filters.assetId) {
-    values.push(filters.assetId);
-    conditions.push(`asset_id = $${values.length}`);
+  if (filters.itemId) {
+    values.push(filters.itemId);
+    conditions.push(`iu.item_id = $${values.length}`);
   }
 
-  if (filters.status) {
+  if (filters.status && filters.status !== "*") {
     values.push(filters.status);
-    conditions.push(`operational_status = $${values.length}`);
+    conditions.push(`iu.status = $${values.length}`);
+  }
+
+  if (filters.from && filters.to) {
+    values.push(filters.from, filters.to);
+    conditions.push(
+      `iu.acquisition_date BETWEEN $${values.length - 1} AND $${values.length}`
+    );
   }
 
   if (conditions.length) query += " WHERE " + conditions.join(" AND ");
-
-  query += " ORDER BY condition DESC, acquisition_date ASC";
+  query += " ORDER BY iu.acquisition_date DESC";
   query += ` LIMIT ${limit}`;
 
   const { rows } = await db.query(query, values);
   return rows;
 };
 
+
 // 3. Maintenance Schedules
 export const getMaintenanceSchedules = async (filters = {}) => {
   let query = `
     SELECT 
       st.title AS "Title",
-      so.scheduled_date as "Scheduled Date",
+      so.scheduled_date AS "Scheduled Date",
       so.status,
-      so.completed_at as "Completion Date"
+      so.completed_at AS "Completion Date"
     FROM schedule_occurrences so
     LEFT JOIN schedule_templates st ON so.template_id = st.id
   `;
 
   const conditions = [];
   const values = [];
+
+  if (filters.status) {
+    values.push(filters.status);
+    conditions.push(`so.status = $${values.length}`);
+  }
 
   if (filters.departmentId) {
     values.push(filters.departmentId);
@@ -97,30 +110,31 @@ export const getMaintenanceSchedules = async (filters = {}) => {
 
   if (filters.from && filters.to) {
     values.push(filters.from, filters.to);
-    conditions.push(`so.scheduled_date BETWEEN $${values.length - 1} AND $${values.length}`);
+    conditions.push(
+      `so.scheduled_date BETWEEN $${values.length - 1} AND $${values.length}`
+    );
   }
 
   if (conditions.length) query += " WHERE " + conditions.join(" AND ");
-
   query += " ORDER BY so.scheduled_date ASC";
 
   const { rows } = await db.query(query, values);
   return rows;
 };
 
-// 4. Procurement Process
+// 4. Procurement
 export const getProcurements = async (filters = {}) => {
   let query = `
     SELECT 
       pt.id AS "Task Id",
-      a.type AS "Asset",
+      i.name AS "Item",
       v.name AS "Vendor",
       pt.created_at AS "Task Start",
       pt.status AS "Status",
       pf.finalized_at AS "Task End"
     FROM procurement_tasks pt
     LEFT JOIN procurement_finalizations pf ON pf.task_id = pt.id
-    LEFT JOIN assets a ON pt.asset_id = a.id
+    LEFT JOIN items i ON pt.item_id = i.id
     LEFT JOIN vendors v ON pf.final_vendor_id = v.id
   `;
 
@@ -134,11 +148,17 @@ export const getProcurements = async (filters = {}) => {
 
   if (filters.status) {
     values.push(filters.status);
-    conditions.push(`pf.status = $${values.length}`);
+    conditions.push(`pt.status = $${values.length}`);
+  }
+
+  if (filters.from && filters.to) {
+    values.push(filters.from, filters.to);
+    conditions.push(
+      `pt.created_at BETWEEN $${values.length - 1} AND $${values.length}`
+    );
   }
 
   if (conditions.length) query += " WHERE " + conditions.join(" AND ");
-
   query += " ORDER BY pt.created_at DESC";
 
   const { rows } = await db.query(query, values);
@@ -149,13 +169,14 @@ export const getProcurements = async (filters = {}) => {
 export const getPurchaseRequests = async (filters = {}) => {
   let query = `
     SELECT 
-      a.type AS "Asset Type",
+      i.name AS "Item",
       d.name AS "Department",
       CONCAT(u.first_name, ' ', u.last_name) AS "Requested By",
       pr.requested_quantity AS "Requested Quantity",
-      r.status
+      r.status,
+      pr.created_at
     FROM purchase_requests pr
-    LEFT JOIN assets a ON pr.asset_id = a.id
+    LEFT JOIN items i ON pr.item_id = i.id
     LEFT JOIN users u ON pr.requested_by = u.id
     LEFT JOIN departments d ON pr.department_id = d.id
     LEFT JOIN requests r ON pr.request_id = r.id
@@ -174,24 +195,32 @@ export const getPurchaseRequests = async (filters = {}) => {
     conditions.push(`r.status = $${values.length}`);
   }
 
-  if (conditions.length) query += " WHERE " + conditions.join(" AND ");
+  if (filters.from && filters.to) {
+    values.push(filters.from, filters.to);
+    conditions.push(
+      `pr.created_at BETWEEN $${values.length - 1} AND $${values.length}`
+    );
+  }
 
+  if (conditions.length) query += " WHERE " + conditions.join(" AND ");
   query += " ORDER BY pr.created_at DESC";
 
   const { rows } = await db.query(query, values);
   return rows;
 };
 
+// 6. Users
 export const getUsers = async (filters = {}) => {
   let query = `
     SELECT 
       CONCAT(u.first_name, ' ', u.last_name) AS name,
       u.role,
-      d.name AS "Department Name"
+      d.name AS "Department Name",
+      u.created_at
     FROM users u
     LEFT JOIN departments d ON u.department_id = d.id
   `;
-  
+
   const conditions = [];
   const values = [];
 
@@ -205,8 +234,14 @@ export const getUsers = async (filters = {}) => {
     conditions.push(`u.department_id = $${values.length}`);
   }
 
-  if (conditions.length) query += " WHERE " + conditions.join(" AND ");
+  if (filters.from && filters.to) {
+    values.push(filters.from, filters.to);
+    conditions.push(
+      `u.created_at BETWEEN $${values.length - 1} AND $${values.length}`
+    );
+  }
 
+  if (conditions.length) query += " WHERE " + conditions.join(" AND ");
   query += " ORDER BY u.first_name, u.last_name";
 
   const { rows } = await db.query(query, values);
@@ -223,6 +258,7 @@ export const getActivityLogs = async (filters = {}) => {
     values.push(filters.userId);
     conditions.push(`user_id = $${values.length}`);
   }
+
   if (filters.from && filters.to) {
     values.push(filters.from, filters.to);
     conditions.push(
@@ -231,59 +267,115 @@ export const getActivityLogs = async (filters = {}) => {
   }
 
   if (conditions.length) query += " WHERE " + conditions.join(" AND ");
+  query += " ORDER BY created_at DESC";
 
   const { rows } = await db.query(query, values);
   return rows;
 };
 
-export const getDepartments = async () => {
-  const query = `
+// 8. Departments
+export const getDepartments = async (filters = {}) => {
+  let query = `
     SELECT 
-        d.name AS "Department Name",
-        COALESCE(au.asset_unit_count, 0) AS "Asset Unit Count",
-        COALESCE(pc.property_custodians, '') AS "Property Custodian(s)"
+      d.name AS "Department Name",
+      COALESCE(
+        STRING_AGG(CONCAT(u.first_name, ' ', u.last_name), ', ' ORDER BY u.first_name),
+        'No Assigned Custodian'
+      ) AS "Property Custodians"
     FROM departments d
-    LEFT JOIN (
-        SELECT department_id, COUNT(*) AS asset_unit_count
-        FROM asset_units
-        GROUP BY department_id
-    ) au ON au.department_id = d.id
-    LEFT JOIN (
-        SELECT department_id, STRING_AGG(CONCAT(first_name, ' ', last_name), ', ') AS property_custodians
-        FROM users
-        WHERE role = 'property_custodian'
-        GROUP BY department_id
-    ) pc ON pc.department_id = d.id
-    ORDER BY d.name;
+    LEFT JOIN users u 
+      ON u.department_id = d.id 
+      AND u.role = 'property_custodian'
   `;
 
-  const { rows } = await db.query(query);
+  const conditions = [];
+  const values = [];
+
+  if (filters.from && filters.to) {
+    values.push(filters.from, filters.to);
+    conditions.push(
+      `d.created_at BETWEEN $${values.length - 1} AND $${values.length}`
+    );
+  }
+
+  if (conditions.length) query += " WHERE " + conditions.join(" AND ");
+
+  query += `
+    GROUP BY d.id, d.name, d.created_at
+    ORDER BY d.created_at DESC
+  `;
+
+  const { rows } = await db.query(query, values);
   return rows;
 };
-
 
 // 9. Locations
-export const getLocations = async () => {
-  const query = `
+export const getLocations = async (filters = {}) => {
+  let query = `
     SELECT 
-      CONCAT(l.name, ' - ', sl.name) AS "Location",
-      COUNT(au.id) AS "Asset Unit Count",
-      CONCAT(u.first_name, ' ', u.last_name) AS "Created By"
+      l.name AS "Location",
+      sl.name AS "Area",
+      COUNT(iu.id) AS "Unit Count"
     FROM sub_locations sl
-    JOIN locations l ON sl.location_id = l.id
-    LEFT JOIN users u ON sl.created_by = u.id
-    LEFT JOIN asset_units au ON au.sub_location_id = sl.id
-    GROUP BY l.name, sl.name, u.first_name, u.last_name
-    ORDER BY l.name, sl.name
+    LEFT JOIN locations l ON sl.location_id = l.id
+    LEFT JOIN item_units iu ON iu.sub_location_id = sl.id
   `;
 
-  const { rows } = await db.query(query);
+  const conditions = [];
+  const values = [];
+
+  if (filters.locationId) {
+    values.push(filters.locationId);
+    conditions.push(`sl.location_id = $${values.length}`);
+  }
+
+  if (filters.from && filters.to) {
+    values.push(filters.from, filters.to);
+    conditions.push(
+      `sl.created_at BETWEEN $${values.length - 1} AND $${values.length}`
+    );
+  }
+
+  if (conditions.length) query += " WHERE " + conditions.join(" AND ");
+
+  query += `
+    GROUP BY sl.id, sl.name, l.name, sl.created_at
+    ORDER BY sl.created_at DESC
+  `;
+
+  const { rows } = await db.query(query, values);
   return rows;
 };
 
-
 // 10. Vendors
-export const getVendors = async () => {
-  const { rows } = await db.query("SELECT FROM vendors");
+export const getVendors = async (filters = {}) => {
+  let query = `
+    SELECT 
+      v.name AS "Vendor Name",
+      v.contact_person AS "Contact Person",
+      v.contact_phone AS "Phone",
+      v.contact_email AS "Email"
+    FROM vendors v
+  `;
+
+  const conditions = [];
+  const values = [];
+
+  if (filters.from && filters.to) {
+    values.push(filters.from, filters.to);
+    conditions.push(
+      `v.created_at BETWEEN $${values.length - 1} AND $${values.length}`
+    );
+  }
+
+  if (filters.search) {
+    values.push(`%${filters.search}%`);
+    conditions.push(`v.name ILIKE $${values.length}`);
+  }
+
+  if (conditions.length) query += " WHERE " + conditions.join(" AND ");
+  query += " ORDER BY v.created_at DESC";
+
+  const { rows } = await db.query(query, values);
   return rows;
 };
