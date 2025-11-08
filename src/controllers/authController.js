@@ -16,12 +16,31 @@ export async function login(req, res) {
 }
 
 export async function requestPasswordReset(req, res) {
+  const { email } = req.body;
+  if (!email) return res.status(400).json({ message: 'Email is required.' });
+
   try {
-    const { email } = req.body;
     await authService.handlePasswordResetRequest(email);
-    res.status(200).json({ message: "If the email exists, a password reset link has been sent." });
   } catch (err) {
-    console.error("Password reset request error:", err.message);
-    res.status(500).json({ message: "If the email exists, a password reset link has been sent." });
+    console.error('requestPasswordReset error:', err);
+  }
+  res.status(200).json({
+    message: 'If the email exists, a password reset link has been sent (link expires in 10 minutes).'
+  });
+}
+
+export async function resetPassword(req, res) {
+  const { token, password } = req.body;
+  if (!token || !password) return res.status(400).json({ message: 'Token and new password are required.' });
+
+  try {
+    await authService.handlePasswordResetConfirmation(token, password);
+    res.status(200).json({ message: 'Password has been updated.' });
+  } catch (err) {
+    console.error('resetPassword error:', err);
+    if (err.message === 'InvalidOrExpiredToken') {
+      return res.status(400).json({ message: 'Invalid or expired token.' });
+    }
+    res.status(500).json({ message: 'An error occurred.' });
   }
 }

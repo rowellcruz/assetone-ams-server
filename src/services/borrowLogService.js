@@ -17,7 +17,8 @@ export async function logBorrow(
   item_unit_id,
   borrowed_by,
   lend_by,
-  purpose = null
+  purpose = null,
+  due_date
 ) {
   const lastBorrowLog = await borrowLogModel.getItemUnitLastBorrowLog(
     item_unit_id
@@ -30,7 +31,8 @@ export async function logBorrow(
     item_unit_id,
     borrowed_by,
     lend_by,
-    purpose
+    purpose,
+    due_date
   );
 
   await updateItemUnitPartial(item_unit_id, { status: "borrowed" });

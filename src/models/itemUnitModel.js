@@ -39,20 +39,20 @@ async function getAllItemUnits(filters = {}) {
   const values = [];
 
   if (filters.itemId) {
-    conditions.push(`item_id = $${values.length + 1}`);
+    conditions.push(`iu.item_id = $${values.length + 1}`);
     values.push(filters.itemId);
   }
 
   if (filters.ownerDepartmentId) {
-    conditions.push(`owner_department_id = $${values.length + 1}`);
+    conditions.push(`iu.owner_department_id = $${values.length + 1}`);
     values.push(filters.ownerDepartmentId);
   }
 
   if (filters.subLocationId !== undefined) {
     if (filters.subLocationId === null) {
-      conditions.push(`sub_location_id IS NULL`);
+      conditions.push(`iu.sub_location_id IS NULL`);
     } else {
-      conditions.push(`sub_location_id = $${values.length + 1}`);
+      conditions.push(`iu.sub_location_id = $${values.length + 1}`);
       values.push(filters.subLocationId);
     }
   }

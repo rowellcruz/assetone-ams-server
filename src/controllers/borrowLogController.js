@@ -1,7 +1,9 @@
 import * as borrowLogService from "../services/borrowLogService.js";
 
 export const getBorrowLogs = async (req, res) => {
-  const log = await borrowLogService.getBorrowLog();
+  const filters = {};
+  if (req.query.custodianId) filters.custodianId = req.query.custodianId;
+  const log = await borrowLogService.getBorrowLog(filters);
   res.status(201).json(log);
 };
 
@@ -18,12 +20,14 @@ export const getItemUnitLastBorrowLog = async (req, res) => {
 };
 
 export const logBorrow = async (req, res) => {
-  const { item_unit_id, borrowed_by, lend_by, purpose } = req.body;
+  const { item_unit_id, borrowed_by, purpose, due_date } = req.body;
+  const user = req.user;
   const log = await borrowLogService.logBorrow(
     item_unit_id,
     borrowed_by,
-    lend_by,
-    purpose
+    user.id,
+    purpose,
+    due_date
   );
   res.status(201).json(log);
 };
