@@ -1,43 +1,13 @@
-import nodemailer from "nodemailer";
+import sgMail from '@sendgrid/mail';
 
-const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST,
-  port: parseInt(process.env.EMAIL_PORT) || 587,
-  secure: false,
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-  // Add these timeout and connection options
-  connectionTimeout: 30000, // 30 seconds
-  greetingTimeout: 30000,
-  socketTimeout: 30000,
-  // Try alternative connection options
-  requireTLS: true,
-  tls: {
-    rejectUnauthorized: false
-  },
-  // For Gmail specifically
-  service: process.env.EMAIL_HOST?.includes('gmail') ? 'gmail' : undefined
-});
-
-// Enhanced verification with better error handling
-transporter.verify(function (error, success) {
-  if (error) {
-    console.log("Error configuring email transporter:", error);
-    console.log("Trying alternative configuration...");
-    
-    // You might want to try alternative ports here
-  } else {
-    console.log("Email transporter is ready to send messages");
-  }
-});
+// Initialize SendGrid
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 export async function sendRegistrationApproval(email, firstName) {
   try {
-    const mailOptions = {
-      from: process.env.EMAIL_FROM,
+    const msg = {
       to: email,
+      from: process.env.EMAIL_FROM, // Must be verified in SendGrid
       subject: "Registration Approved - Asset Management System",
       html: `
         <h2>Registration Approved</h2>
@@ -49,7 +19,7 @@ export async function sendRegistrationApproval(email, firstName) {
       `,
     };
 
-    await transporter.sendMail(mailOptions);
+    await sgMail.send(msg);
     console.log(`Approval email sent to ${email}`);
   } catch (error) {
     console.error("Error sending approval email:", error);
@@ -57,11 +27,12 @@ export async function sendRegistrationApproval(email, firstName) {
   }
 }
 
+// Update other functions similarly...
 export async function sendRegistrationRejection(email, firstName) {
   try {
-    const mailOptions = {
-      from: process.env.EMAIL_FROM,
+    const msg = {
       to: email,
+      from: process.env.EMAIL_FROM,
       subject: "Registration Request - Asset Management System",
       html: `
         <h2>Registration Not Approved</h2>
@@ -73,7 +44,7 @@ export async function sendRegistrationRejection(email, firstName) {
       `,
     };
 
-    await transporter.sendMail(mailOptions);
+    await sgMail.send(msg);
     console.log(`Rejection email sent to ${email}`);
   } catch (error) {
     console.error("Error sending rejection email:", error);
@@ -83,11 +54,9 @@ export async function sendRegistrationRejection(email, firstName) {
 
 export async function sendNewRegistrationNotification(email, fullName, role) {
   try {
-    const adminEmail = process.env.ADMIN_EMAIL;
-
-    const mailOptions = {
+    const msg = {
+      to: process.env.ADMIN_EMAIL,
       from: process.env.EMAIL_FROM,
-      to: adminEmail,
       subject: "New Registration Request - Asset Management System",
       html: `
         <h2>New Registration Request</h2>
@@ -101,12 +70,10 @@ export async function sendNewRegistrationNotification(email, fullName, role) {
       `,
     };
 
-    await transporter.sendMail(mailOptions);
-    console.log(`New registration notification sent to admin: ${adminEmail}`);
+    await sgMail.send(msg);
+    console.log(`New registration notification sent to admin: ${process.env.ADMIN_EMAIL}`);
   } catch (error) {
     console.error("Error sending registration notification:", error);
     throw error;
   }
 }
-
-export { transporter };
