@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict 52adtOnsHCRLrlw6Af581BDnYNDUQBXi9JNhi7M993ezpiLOBqpme8UMWmaLb1K
+\restrict WyTrbcPSd9hyYwjPEi4LIcKPi7i66l3N7hiWCerkfloh6kdDp7B7Inokloezvqa
 
 -- Dumped from database version 17.6
 -- Dumped by pg_dump version 17.6
@@ -77,7 +77,8 @@ CREATE TABLE public.borrow_logs (
     returned_at timestamp with time zone,
     status character varying(10) DEFAULT 'borrowed'::character varying NOT NULL,
     remarks character varying(255),
-    purpose character varying
+    purpose character varying,
+    due_date timestamp with time zone NOT NULL
 );
 
 
@@ -627,6 +628,43 @@ ALTER SEQUENCE public.maintenance_requests_id_seq OWNED BY public.maintenance_re
 
 
 --
+-- Name: password_reset_tokens; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.password_reset_tokens (
+    id bigint NOT NULL,
+    user_id bigint NOT NULL,
+    token_hash character varying(128) NOT NULL,
+    expires_at timestamp without time zone NOT NULL,
+    used boolean DEFAULT false,
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP
+);
+
+
+ALTER TABLE public.password_reset_tokens OWNER TO postgres;
+
+--
+-- Name: password_reset_tokens_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.password_reset_tokens_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.password_reset_tokens_id_seq OWNER TO postgres;
+
+--
+-- Name: password_reset_tokens_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.password_reset_tokens_id_seq OWNED BY public.password_reset_tokens.id;
+
+
+--
 -- Name: pr_sequences; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -841,6 +879,48 @@ ALTER SEQUENCE public.purchase_requests_id_seq OWNER TO postgres;
 --
 
 ALTER SEQUENCE public.purchase_requests_id_seq OWNED BY public.purchase_requests.id;
+
+
+--
+-- Name: relocation_log; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.relocation_log (
+    id integer NOT NULL,
+    item_unit_id integer NOT NULL,
+    from_sub_location_id integer,
+    to_sub_location_id integer,
+    requested_by integer NOT NULL,
+    completed_by integer,
+    status character varying(20) DEFAULT 'pending'::character varying NOT NULL,
+    requested_at timestamp without time zone DEFAULT now() NOT NULL,
+    completed_at timestamp without time zone,
+    requested_from bigint
+);
+
+
+ALTER TABLE public.relocation_log OWNER TO postgres;
+
+--
+-- Name: relocation_log_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.relocation_log_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.relocation_log_id_seq OWNER TO postgres;
+
+--
+-- Name: relocation_log_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.relocation_log_id_seq OWNED BY public.relocation_log.id;
 
 
 --
@@ -1315,6 +1395,13 @@ ALTER TABLE ONLY public.maintenance_requests ALTER COLUMN id SET DEFAULT nextval
 
 
 --
+-- Name: password_reset_tokens id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.password_reset_tokens ALTER COLUMN id SET DEFAULT nextval('public.password_reset_tokens_id_seq'::regclass);
+
+
+--
 -- Name: procurement_attachments id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -1347,6 +1434,13 @@ ALTER TABLE ONLY public.purchase_orders ALTER COLUMN id SET DEFAULT nextval('pub
 --
 
 ALTER TABLE ONLY public.purchase_requests ALTER COLUMN id SET DEFAULT nextval('public.purchase_requests_id_seq'::regclass);
+
+
+--
+-- Name: relocation_log id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.relocation_log ALTER COLUMN id SET DEFAULT nextval('public.relocation_log_id_seq'::regclass);
 
 
 --
@@ -1426,7 +1520,19 @@ COPY public.activity_log (id, user_id, module, action, endpoint, method, request
 -- Data for Name: borrow_logs; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.borrow_logs (id, item_unit_id, borrowed_by, lend_by, borrowed_at, returned_at, status, remarks, purpose) FROM stdin;
+COPY public.borrow_logs (id, item_unit_id, borrowed_by, lend_by, borrowed_at, returned_at, status, remarks, purpose, due_date) FROM stdin;
+12	297	Prof. Santos	5	2025-10-10 09:00:00+08	2025-10-10 12:00:00+08	returned	\N	Lecture use	2025-11-08 00:00:00+08
+13	297	Engr. Dela Cruz	5	2025-10-12 08:00:00+08	2025-10-12 11:30:00+08	returned	\N	Lab session	2025-11-08 00:00:00+08
+14	297	Dr. Rivera	5	2025-10-15 13:00:00+08	2025-10-15 16:00:00+08	returned	\N	Presentation	2025-11-08 00:00:00+08
+15	298	Prof. Santos	5	2025-10-08 08:30:00+08	2025-10-08 10:00:00+08	returned	\N	Event setup	2025-11-08 00:00:00+08
+16	298	Mr. Lopez	5	2025-10-14 10:00:00+08	2025-10-14 15:00:00+08	returned	\N	Research demo	2025-11-08 00:00:00+08
+17	298	Ms. Torres	5	2025-10-20 09:00:00+08	2025-10-20 11:30:00+08	returned	\N	Audio-visual request	2025-11-08 00:00:00+08
+18	300	Coach Ramirez	5	2025-10-05 10:00:00+08	2025-10-05 13:00:00+08	returned	\N	Event equipment	2025-11-08 00:00:00+08
+19	301	Librarian Cruz	5	2025-10-07 14:00:00+08	2025-10-07 16:00:00+08	returned	\N	Testing device	2025-11-08 00:00:00+08
+20	302	IT Intern Reyes	5	2025-10-09 08:00:00+08	2025-10-09 12:00:00+08	returned	\N	Reserve unit	2025-11-08 00:00:00+08
+21	299	Dean Alvarez	5	2025-10-20 13:00:00+08	2025-10-20 16:00:00+08	returned	\N	First loan record	2025-11-08 00:00:00+08
+23	307	wew	2	2025-11-08 06:43:26.473899+08	2025-11-08 09:08:45.61524+08	returned	\N	ew	2025-11-08 09:09:03.159326+08
+24	306	Carlo bernardo	2	2025-11-08 08:40:26.113966+08	2025-11-08 10:01:29.831768+08	returned	\N	hehe	2025-11-08 09:07:36.990687+08
 \.
 
 
@@ -1485,6 +1591,11 @@ COPY public.item_costs (id, item_unit_id, purchase_price, additional_cost, total
 295	300	2001.00	\N	\N	2025-11-05 05:14:26.410698+08	2025-11-05 05:14:26.410698+08
 296	301	2001.00	\N	\N	2025-11-05 05:14:26.415881+08	2025-11-05 05:14:26.415881+08
 297	302	2001.00	\N	\N	2025-11-05 05:14:26.422364+08	2025-11-05 05:14:26.422364+08
+298	303	20000.00	\N	\N	2025-11-06 20:00:05.853873+08	2025-11-06 20:00:05.853873+08
+299	304	20000.00	\N	\N	2025-11-06 20:00:05.879929+08	2025-11-06 20:00:05.879929+08
+300	305	20000.00	\N	\N	2025-11-06 20:00:05.897845+08	2025-11-06 20:00:05.897845+08
+301	306	20000.00	\N	\N	2025-11-06 20:00:05.932367+08	2025-11-06 20:00:05.932367+08
+302	307	20000.00	\N	\N	2025-11-06 20:00:05.954457+08	2025-11-06 20:00:05.954457+08
 \.
 
 
@@ -1499,6 +1610,11 @@ COPY public.item_depreciation (id, item_unit_id, method, purchase_date, rate, us
 298	300	\N	\N	\N	\N	0.00	\N	2025-11-05 05:14:26.409812+08
 299	301	\N	\N	\N	\N	0.00	\N	2025-11-05 05:14:26.414988+08
 300	302	\N	\N	\N	\N	0.00	\N	2025-11-05 05:14:26.421467+08
+301	303	straight_line	2025-10-30	0.20	5	0.00	\N	2025-11-06 20:00:05.817764+08
+302	304	straight_line	2025-10-30	0.20	5	0.00	\N	2025-11-06 20:00:05.870313+08
+303	305	straight_line	2025-10-30	0.20	5	0.00	\N	2025-11-06 20:00:05.896925+08
+304	306	straight_line	2025-10-30	0.20	5	0.00	\N	2025-11-06 20:00:05.931412+08
+305	307	straight_line	2025-10-30	0.20	5	0.00	\N	2025-11-06 20:00:05.953508+08
 \.
 
 
@@ -1523,12 +1639,17 @@ COPY public.item_requests (id, item_id, quantity, reason, remarks, status, date_
 --
 
 COPY public.item_units (id, item_id, serial_number, unit_tag, specifications, status, sub_location_id, is_legacy, owner_department_id, created_by, updated_by, deleted_by, created_at, updated_at, deleted_at, vendor_id, brand, condition, acquisition_date) FROM stdin;
-297	22	DLL-599	IT-COMPQ-0001	\N	available	30	t	\N	5	5	\N	2025-11-05 04:58:52.216757+08	2025-11-05 04:58:52.216757+08	\N	\N	Dell	100	\N
-298	22	ABC-123	IT-COMPQ-0002	\N	available	\N	f	\N	2	2	\N	2025-11-05 05:14:26.39024+08	2025-11-05 05:14:26.39024+08	\N	11	HP	100	2025-11-05 05:14:26.387+08
-299	22	DEF-456	IT-COMPQ-0003	\N	available	\N	f	\N	2	2	\N	2025-11-05 05:14:26.403298+08	2025-11-05 05:14:26.403298+08	\N	11	HP	100	2025-11-05 05:14:26.4+08
-300	22	GHI-789	IT-COMPQ-0004	\N	available	\N	f	\N	2	2	\N	2025-11-05 05:14:26.408589+08	2025-11-05 05:14:26.408589+08	\N	11	HP	100	2025-11-05 05:14:26.406+08
-301	22	JKL-123	IT-COMPQ-0005	\N	available	\N	f	\N	2	2	\N	2025-11-05 05:14:26.413935+08	2025-11-05 05:14:26.413935+08	\N	11	HP	100	2025-11-05 05:14:26.411+08
-302	22	MNO-456	IT-COMPQ-0006	\N	available	\N	f	\N	2	2	\N	2025-11-05 05:14:26.42023+08	2025-11-05 05:14:26.42023+08	\N	11	HP	100	2025-11-05 05:14:26.417+08
+302	22	MNO-456	IT-COMPQ-0006	\N	available	\N	f	3	2	2	\N	2025-11-05 05:14:26.42023+08	2025-11-05 05:14:26.42023+08	\N	11	HP	100	2025-11-05 05:14:26.417+08
+303	22	\N	IT-COMPQ-0007	\N	available	21	t	3	5	5	\N	2025-11-06 20:00:05.78821+08	2025-11-06 20:00:05.78821+08	\N	\N	HEHE-006	100	\N
+304	22	\N	IT-COMPQ-0008	\N	available	21	t	3	5	5	\N	2025-11-06 20:00:05.869242+08	2025-11-06 20:00:05.869242+08	\N	\N	HEHE-006	100	\N
+305	22	\N	IT-COMPQ-0009	\N	available	21	t	3	5	5	\N	2025-11-06 20:00:05.89539+08	2025-11-06 20:00:05.89539+08	\N	\N	HEHE-006	100	\N
+307	22	\N	IT-COMPQ-0011	\N	available	21	t	3	5	5	\N	2025-11-06 20:00:05.943947+08	2025-11-06 20:00:05.943947+08	\N	\N	HEHE-006	100	\N
+297	22	DLL-599	IT-COMPQ-0001	\N	available	30	t	9	5	5	\N	2025-11-05 04:58:52.216757+08	2025-11-05 04:58:52.216757+08	\N	\N	Dell	100	\N
+298	22	ABC-123	IT-COMPQ-0002	\N	available	\N	f	9	2	2	\N	2025-11-05 05:14:26.39024+08	2025-11-05 05:14:26.39024+08	\N	11	HP	100	2025-11-05 05:14:26.387+08
+300	22	GHI-789	IT-COMPQ-0004	\N	available	21	f	9	2	1	\N	2025-11-05 05:14:26.408589+08	2025-11-05 05:14:26.408589+08	\N	11	HP	100	2025-11-05 05:14:26.406+08
+301	22	JKL-123	IT-COMPQ-0005	\N	available	\N	f	9	2	1	\N	2025-11-05 05:14:26.413935+08	2025-11-05 05:14:26.413935+08	\N	11	HP	100	2025-11-05 05:14:26.411+08
+299	22	DEF-456	IT-COMPQ-0003	\N	available	\N	f	9	2	1	\N	2025-11-05 05:14:26.403298+08	2025-11-05 05:14:26.403298+08	\N	11	HP	100	2025-11-05 05:14:26.4+08
+306	22	\N	IT-COMPQ-0010	\N	available	21	t	3	5	5	\N	2025-11-06 20:00:05.911652+08	2025-11-06 20:00:05.911652+08	\N	\N	HEHE-006	100	\N
 \.
 
 
@@ -1580,6 +1701,15 @@ COPY public.maintenance_history (id, item_unit_id, occurrence_id, performed_by, 
 --
 
 COPY public.maintenance_requests (id, item_unit_id, impact, urgency, status, description, requested_by, requested_at, reviewed_by, reviewed_at) FROM stdin;
+\.
+
+
+--
+-- Data for Name: password_reset_tokens; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.password_reset_tokens (id, user_id, token_hash, expires_at, used, created_at) FROM stdin;
+3	1	b16db39020cfac713224d40a7612d8c6c973c898ab5b21a07416fc2949b54653	2025-11-06 17:51:07.303	t	2025-11-06 17:41:07.316616
 \.
 
 
@@ -1638,6 +1768,15 @@ COPY public.purchase_requests (id, control_number, date_required, requested_by, 
 
 
 --
+-- Data for Name: relocation_log; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.relocation_log (id, item_unit_id, from_sub_location_id, to_sub_location_id, requested_by, completed_by, status, requested_at, completed_at, requested_from) FROM stdin;
+1	299	\N	24	1	\N	pending	2025-11-05 17:31:50.061192	\N	\N
+\.
+
+
+--
 -- Data for Name: requested_items; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
@@ -1652,7 +1791,8 @@ COPY public.requested_items (id, purchase_request_id, item_description, quantity
 
 COPY public.schedule_occurrences (id, template_id, scheduled_date, status, review_remarks, skipped_reason, created_by, updated_by, started_by, completed_by, skipped_by, reviewed_by, created_at, updated_at, started_at, completed_at, skipped_at, reviewed_at) FROM stdin;
 21	19	2025-11-06 17:00:00+08	pending	\N	\N	\N	\N	\N	\N	\N	\N	2025-11-05 05:07:47.684239+08	2025-11-05 05:07:47.684239+08	\N	\N	\N	\N
-22	20	2025-11-02 05:10:00+08	pending	\N	\N	\N	\N	\N	\N	\N	\N	2025-11-05 05:10:52.788653+08	2025-11-05 05:10:52.788653+08	\N	\N	\N	\N
+22	20	2025-11-02 05:10:00+08	skipped	\N	hehe	\N	\N	\N	\N	5	\N	2025-11-05 05:10:52.788653+08	2025-11-05 05:10:52.788653+08	\N	\N	2025-11-05 21:18:31.548+08	\N
+23	20	2025-11-30 05:10:00+08	pending	\N	\N	\N	\N	\N	\N	\N	\N	2025-11-05 21:18:31.594263+08	2025-11-05 21:18:31.594263+08	\N	\N	\N	\N
 \.
 
 
@@ -1720,12 +1860,11 @@ COPY public.sub_locations (id, location_id, name, created_by, updated_by, delete
 --
 
 COPY public.users (id, first_name, last_name, email, password, role, department_id, status, created_by, updated_by, disabled_by, deleted_by, created_at, updated_at, disabled_at, deleted_at) FROM stdin;
-7	John Reinier	De Guzman	jr123@gmail.com	$2b$10$ay94QXh96O7cyxh9WRmgT.vWOFFc3zlTmBnnoqCRAAu42qF1AZP7y	property_custodian	4	inactive	\N	\N	\N	\N	2025-11-05 04:48:32.923021+08	2025-11-05 04:48:32.923021+08	\N	\N
+9	Rowell	Rowell	rowellcruz145@gmail.com	$2b$10$bxd.XBMY.rME5Dl2zq30s.s5X7Qhd6DGQIRka4hTVcKQkM./E1lnm	property_custodian	11	inactive	\N	\N	\N	\N	2025-11-08 06:47:02.14863+08	2025-11-08 06:47:02.14863+08	\N	\N
 8	Geyl	Cating	geyl123@gmail.com	$2b$10$Wu6Rjn9nYyVACUnxFov2BuWpYlGidm7YEkHnsL6RTP/v03ygaMC0S	technician	4	active	\N	\N	\N	\N	2025-11-05 04:49:01.861354+08	2025-11-05 04:49:01.861354+08	\N	\N
-2	Carlo	Bernardo	carlo123@gmail.com	$2b$10$QYySyKaUy.5izqPz8fcnnuvY2vqi9uAP6y8ZpwzJVEwqLHCFPzeLy	procurement_head	\N	inactive	\N	5	\N	\N	2025-11-02 12:58:31.774957+08	2025-11-05 04:40:13.843+08	\N	\N
-5	John Marwin	Castillo	marwin123@gmail.com	$2b$10$wEqTzPc2YxQU1vmhdGgn8.l3T9a/a3oLFxMXPhXufbJDNOTo.N29S	asset_administrator	\N	active	\N	\N	\N	\N	2025-11-05 04:18:08.816673+08	2025-11-05 04:18:08.816673+08	\N	\N
-1	Rowell	Cruz	cruzrowellt11@gmail.com	$2b$10$Uvv4Pgmrd6oaq24lSnwmWububA3h30kf3uJupgyjb.MrcYOT4N56G	system_administrator	\N	inactive	\N	1	1	\N	2025-10-16 18:13:18.932041+08	2025-10-16 11:03:52.015+08	2025-10-16 11:03:52.015+08	\N
-6	John Reinier	De Guzman	jr123@gmail.com	$2b$10$hGj4PUJJGizcDspoS.a/Fu4WQZzZmw5iNxpc6ZK7P/mNPGzw1xDZG	property_custodian	\N	deleted	\N	5	\N	5	2025-11-05 04:36:54.349936+08	2025-11-05 04:39:26.691+08	\N	2025-11-05 04:39:26.691+08
+5	John Marwin	Castillo	marwin123@gmail.com	$2b$10$wEqTzPc2YxQU1vmhdGgn8.l3T9a/a3oLFxMXPhXufbJDNOTo.N29S	asset_administrator	\N	inactive	\N	\N	\N	\N	2025-11-05 04:18:08.816673+08	2025-11-05 04:18:08.816673+08	\N	\N
+2	Carlo	Bernardo	carlo123@gmail.com	$2b$10$QYySyKaUy.5izqPz8fcnnuvY2vqi9uAP6y8ZpwzJVEwqLHCFPzeLy	property_custodian	3	inactive	\N	5	\N	\N	2025-11-02 12:58:31.774957+08	2025-11-05 04:40:13.843+08	\N	\N
+1	Rowell	Cruz	cruzrowellt11@gmail.com	$2b$10$75WdYiTrGU1P2TwiIU6VJeqlM5PWeA3X64SdEJwMsfuvdA5s197rq	system_administrator	\N	inactive	\N	1	1	\N	2025-10-16 18:13:18.932041+08	2025-10-16 11:03:52.015+08	2025-10-16 11:03:52.015+08	\N
 \.
 
 
@@ -1768,7 +1907,7 @@ SELECT pg_catalog.setval('public.activity_log_id_seq', 9, true);
 -- Name: borrow_logs_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.borrow_logs_id_seq', 1, true);
+SELECT pg_catalog.setval('public.borrow_logs_id_seq', 24, true);
 
 
 --
@@ -1796,14 +1935,14 @@ SELECT pg_catalog.setval('public.item_categories_id_seq', 13, true);
 -- Name: item_costs_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.item_costs_id_seq', 297, true);
+SELECT pg_catalog.setval('public.item_costs_id_seq', 302, true);
 
 
 --
 -- Name: item_depreciation_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.item_depreciation_id_seq', 300, true);
+SELECT pg_catalog.setval('public.item_depreciation_id_seq', 305, true);
 
 
 --
@@ -1824,7 +1963,7 @@ SELECT pg_catalog.setval('public.item_requests_id_seq', 1, false);
 -- Name: item_units_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.item_units_id_seq', 302, true);
+SELECT pg_catalog.setval('public.item_units_id_seq', 307, true);
 
 
 --
@@ -1863,6 +2002,13 @@ SELECT pg_catalog.setval('public.maintenance_requests_id_seq', 1, true);
 
 
 --
+-- Name: password_reset_tokens_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.password_reset_tokens_id_seq', 3, true);
+
+
+--
 -- Name: procurement_attachments_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
@@ -1898,6 +2044,13 @@ SELECT pg_catalog.setval('public.purchase_requests_id_seq', 20, true);
 
 
 --
+-- Name: relocation_log_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.relocation_log_id_seq', 1, true);
+
+
+--
 -- Name: requested_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
@@ -1908,7 +2061,7 @@ SELECT pg_catalog.setval('public.requested_items_id_seq', 20, true);
 -- Name: schedule_occurrences_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.schedule_occurrences_id_seq', 22, true);
+SELECT pg_catalog.setval('public.schedule_occurrences_id_seq', 23, true);
 
 
 --
@@ -1943,7 +2096,7 @@ SELECT pg_catalog.setval('public.sub_locations_id_seq', 30, true);
 -- Name: users_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.users_id_seq', 8, true);
+SELECT pg_catalog.setval('public.users_id_seq', 9, true);
 
 
 --
@@ -2097,6 +2250,14 @@ ALTER TABLE ONLY public.maintenance_requests
 
 
 --
+-- Name: password_reset_tokens password_reset_tokens_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.password_reset_tokens
+    ADD CONSTRAINT password_reset_tokens_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: pr_sequences pr_sequences_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2150,6 +2311,14 @@ ALTER TABLE ONLY public.purchase_requests
 
 ALTER TABLE ONLY public.purchase_requests
     ADD CONSTRAINT purchase_requests_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: relocation_log relocation_log_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.relocation_log
+    ADD CONSTRAINT relocation_log_pkey PRIMARY KEY (id);
 
 
 --
@@ -2225,6 +2394,13 @@ ALTER TABLE ONLY public.vendors
 
 
 --
+-- Name: idx_password_reset_token_hash; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX idx_password_reset_token_hash ON public.password_reset_tokens USING btree (token_hash);
+
+
+--
 -- Name: borrow_logs borrow_logs_item_unit_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2241,6 +2417,14 @@ ALTER TABLE ONLY public.borrow_logs
 
 
 --
+-- Name: password_reset_tokens password_reset_tokens_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.password_reset_tokens
+    ADD CONSTRAINT password_reset_tokens_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id);
+
+
+--
 -- Name: purchase_order_items purchase_order_items_purchase_order_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2252,5 +2436,5 @@ ALTER TABLE ONLY public.purchase_order_items
 -- PostgreSQL database dump complete
 --
 
-\unrestrict 52adtOnsHCRLrlw6Af581BDnYNDUQBXi9JNhi7M993ezpiLOBqpme8UMWmaLb1K
+\unrestrict WyTrbcPSd9hyYwjPEi4LIcKPi7i66l3N7hiWCerkfloh6kdDp7B7Inokloezvqa
 

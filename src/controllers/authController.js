@@ -15,6 +15,20 @@ export async function login(req, res) {
   }
 }
 
+export async function register(req, res) {
+  const { first_name, last_name, email, password, role } = req.body;
+
+  try {
+    await authService.registerPending({ first_name, last_name, email, password, role });
+    res.status(200).json({ 
+      message: "Registration submitted successfully! Please wait for administrator approval." 
+    });
+  } catch (err) {
+    console.error("Registration error:", err.message);
+    res.status(400).json({ error: err.message });
+  }
+}
+
 export async function requestPasswordReset(req, res) {
   const { email } = req.body;
   if (!email) return res.status(400).json({ message: 'Email is required.' });

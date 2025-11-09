@@ -1,5 +1,6 @@
 import * as userModel from "../models/userModel.js";
 import * as resetModel from "../models/resetRequestModel.js";
+import * as pendingRegistrationModel from "../models/pendingRegistrationModel.js";
 import * as mailer from "../utils/mailer.js";
 import bcrypt from "bcrypt";
 import crypto from "crypto";
@@ -18,6 +19,75 @@ export async function login(email, password) {
 
   const token = generateToken(user);
   return { token, user };
+}
+
+export async function registerPending(userData) {
+  const { first_name, last_name, email, password, role } = userData;
+  
+  // Check if email already exists in users table
+  const existingUser = await userModel.getUserDataByEmail(email);
+  if (existingUser) {
+    throw new Error("Email already registered");
+  }
+
+  // Check if email already exists in pending registrations
+  const existingPending = await pendingRegistrationModel.getByEmail(email);
+  if (existingPending) {
+    throw new Error("Registration already pending approval");
+  }
+
+  // Hash password
+  const hashedPassword = await bcrypt.hash(password, 10);
+
+  // Create pending registration
+  await pendingRegistrationModel.create({
+    first_name,
+    last_name,
+    email,
+    password: hashedPassword,
+    role,
+    status: 'pending'
+  });
+
+  // Optionally, send notification to admin about new registration
+  // await mailer.sendNewRegistrationNotification(email, `${first_name} ${last_name}`, role);
+}
+
+export async function approveRegistration(pendingId, adminId) {
+  const pending = await pendingRegistrationModel.getById(pendingId);
+  if (!pending) throw new Error("Pending registration not found");
+  if (pending.status !== 'pending') throw new Error("Registration already processed");
+
+  // Create user in main users table
+  const userData = {
+    first_name: pending.first_name,
+    last_name: pending.last_name,
+    email: pending.email,
+    password: pending.password, // already hashed
+    role: pending.role,
+    created_by: adminId
+  };
+
+  const user = await userModel.createUser(userData);
+
+  // Update pending registration status
+  await pendingRegistrationModel.updateStatus(pendingId, 'approved', adminId);
+
+  // Send approval email to user
+  await mailer.sendRegistrationApproval(pending.email, pending.first_name);
+
+  return user;
+}
+
+export async function rejectRegistration(pendingId, adminId) {
+  const pending = await pendingRegistrationModel.getById(pendingId);
+  if (!pending) throw new Error("Pending registration not found");
+  if (pending.status !== 'pending') throw new Error("Registration already processed");
+  // Update pending registration status
+  await pendingRegistrationModel.updateStatus(pendingId, 'rejected', adminId);
+
+  // Send rejection email to user
+  await mailer.sendRegistrationRejection(pending.email, pending.first_name);
 }
 
 // -------------------- PASSWORD RESET FLOW --------------------

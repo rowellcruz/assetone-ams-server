@@ -1,52 +1,101 @@
 import nodemailer from "nodemailer";
 
 const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 587,
-  secure: false,
+  host: process.env.EMAIL_HOST,
+  port: process.env.EMAIL_PORT,
+  secure: false, // true for 465, false for other ports
   auth: {
-    user: "cruzrowellt11@gmail.com",
-    pass: "wdljwnrkppyjclqz",
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+  tls: {
+    rejectUnauthorized: false, // Add this for local development
   },
 });
 
-export async function sendTempPassword(toEmail, tempPassword) {
-  await transporter.sendMail({
-    from: '"AssetONE Support" <cruzrowellt11@gmail.com>',
-    to: toEmail,
-    subject: "Your Temporary Password",
-    html: `<p>Your temporary password is: <strong>${tempPassword}</strong></p><p>Please change it after logging in.</p>`,
-  });
+// Test the configuration
+transporter.verify(function (error, success) {
+  if (error) {
+    console.log("Error configuring email transporter:", error);
+  } else {
+    console.log("Email transporter is ready to send messages");
+  }
+});
+
+export async function sendRegistrationApproval(email, firstName) {
+  try {
+    const mailOptions = {
+      from: process.env.EMAIL_FROM,
+      to: email,
+      subject: "Registration Approved - Asset Management System",
+      html: `
+        <h2>Registration Approved</h2>
+        <p>Dear ${firstName},</p>
+        <p>Your registration for the Asset Management System has been approved.</p>
+        <p>You can now login to the system using your credentials.</p>
+        <br>
+        <p>Best regards,<br>Asset Management Team</p>
+      `,
+    };
+
+    await transporter.sendMail(mailOptions);
+    console.log(`Approval email sent to ${email}`);
+  } catch (error) {
+    console.error("Error sending approval email:", error);
+    throw error;
+  }
 }
 
-export async function sendPasswordResetEmail(toEmail, link, expireMins) {
-  const html = `
-    <p>You (or someone who has access to this email) requested a password reset for your AssetONE account.</p>
-    <p>Click the link below to confirm and set a new password. This link expires in ${expireMins} minutes.</p>
-    <p><a href="${link}">Reset your password</a></p>
-    <p>If you didn't request this, ignore this message.</p>
-  `;
+export async function sendRegistrationRejection(email, firstName) {
+  try {
+    const mailOptions = {
+      from: process.env.EMAIL_FROM,
+      to: email,
+      subject: "Registration Request - Asset Management System",
+      html: `
+        <h2>Registration Not Approved</h2>
+        <p>Dear ${firstName},</p>
+        <p>Thank you for your interest in the Asset Management System.</p>
+        <p>After review, we are unable to approve your registration request at this time.</p>
+        <br>
+        <p>Best regards,<br>Asset Management Team</p>
+      `,
+    };
 
-  await transporter.sendMail({
-    from: '"AssetONE Support" <no-reply@yourdomain.com>',
-    to: toEmail,
-    subject: 'Reset your AssetONE password',
-    html
-  });
+    await transporter.sendMail(mailOptions);
+    console.log(`Rejection email sent to ${email}`);
+  } catch (error) {
+    console.error("Error sending rejection email:", error);
+    throw error;
+  }
 }
 
+export async function sendNewRegistrationNotification(email, fullName, role) {
+  try {
+    const adminEmail = process.env.ADMIN_EMAIL;
 
-export async function sendResetConfirmation(toEmail, resetLink) {
-  await transporter.sendMail({
-    from: '"AssetONE Support" <no-reply@assetone.app>',
-    to: toEmail,
-    subject: "Confirm Password Reset Request",
-    html: `
-      <p>We received a request to reset your password for your AssetONE account.</p>
-      <p>If you requested this, click the link below to set a new password:</p>
-      <p><a href="${resetLink}">Reset Password</a></p>
-      <p>This link will expire in 10 minutes. If you didn’t request this, ignore this email.</p>
-    `,
-  });
+    const mailOptions = {
+      from: process.env.EMAIL_FROM,
+      to: adminEmail,
+      subject: "New Registration Request - Asset Management System",
+      html: `
+        <h2>New Registration Request</h2>
+        <p>A new user has requested registration:</p>
+        <ul>
+          <li><strong>Name:</strong> ${fullName}</li>
+          <li><strong>Email:</strong> ${email}</li>
+          <li><strong>Requested Role:</strong> ${role}</li>
+        </ul>
+        <p>Please review and approve/reject this registration in the admin panel.</p>
+      `,
+    };
+
+    await transporter.sendMail(mailOptions);
+    console.log(`New registration notification sent to admin: ${adminEmail}`);
+  } catch (error) {
+    console.error("Error sending registration notification:", error);
+    throw error;
+  }
 }
 
+export { transporter };
