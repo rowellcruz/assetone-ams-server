@@ -1,21 +1,28 @@
 import nodemailer from 'nodemailer';
 
-// Create transporter (configure based on your email service)
+// Choose ONE configuration approach:
+
+// APPROACH 1: Using service (recommended for Gmail)
 const transporter = nodemailer.createTransport({
-  // Example for Gmail - adjust for your email service
   service: 'gmail',
   auth: {
     user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS, // Use app-specific password for Gmail
+    pass: process.env.EMAIL_PASSWORD, // Use app-specific password for Gmail
   },
+});
+
+// OR APPROACH 2: Using specific SMTP settings (use this for other providers)
+/*
+const transporter = nodemailer.createTransport({
   host: process.env.EMAIL_HOST,
   port: process.env.EMAIL_PORT,
-  secure: true, // true for 465, false for other ports
+  secure: process.env.EMAIL_PORT === '465', // true for 465, false for other ports
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASSWORD,
   },
 });
+*/
 
 // Optional: Add error handling for transporter
 transporter.verify(function (error, success) {
@@ -101,4 +108,3 @@ export async function sendNewRegistrationNotification(email, fullName, role) {
     throw error;
   }
 }
-
