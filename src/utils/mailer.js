@@ -102,5 +102,3 @@ export async function sendNewRegistrationNotification(email, fullName, role) {
   }
 }
 
-
-export { transporter, sendRegistrationApproval, sendRegistrationRejection, sendNewRegistrationNotification };
