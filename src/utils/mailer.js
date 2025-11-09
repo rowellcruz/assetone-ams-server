@@ -1,18 +1,15 @@
 import nodemailer from 'nodemailer';
 
-import nodemailer from 'nodemailer';
-
 const transporter = nodemailer.createTransport({
   host: 'smtp.sendgrid.net',
   port: 587,
   secure: false,
   auth: {
-    user: 'apikey', // This should always be 'apikey'
-    pass: process.env.SENDGRID_API_KEY, // Your SendGrid API key
+    user: 'apikey',
+    pass: process.env.SENDGRID_API_KEY,
   },
 });
 
-// Optional: Add error handling for transporter
 transporter.verify(function (error, success) {
   if (error) {
     console.log('Error configuring email transporter:', error);
