@@ -1,36 +1,39 @@
-import SibApiV3Sdk from "sib-api-v3-sdk";
+import nodemailer from "nodemailer";
 
 const senderName = "Asset Management System";
-const senderEmail = "assetone@brevo.io"; // can be any email you want as sender
-console.log("Sendinblue API Key:", process.env.SENDINBLUE_API_KEY);
+const senderEmail = process.env.EMAIL_USER; // your Gmail address
 
-// Configure the Sendinblue client
-const client = SibApiV3Sdk.ApiClient.instance;
-const apiKey = client.authentications["api-key"];
-apiKey.apiKey = process.env.SENDINBLUE_API_KEY;
+// Configure Nodemailer Gmail transporter
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.EMAIL_USER,       // Gmail
+    pass: process.env.EMAIL_PASS,       // Gmail App Password
+  },
+});
 
-const apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
-
-// Verify service on startup
+// Verify connection on startup
 export async function verifyEmailConnection() {
   try {
-    console.log("Email service configured with Sendinblue");
+    await transporter.verify();
+    console.log("Email service configured with Gmail");
     return true;
   } catch (error) {
-    console.log("Error configuring email service:", error.message);
+    console.error("Error configuring email service:", error.message);
     return false;
   }
 }
 
 verifyEmailConnection();
 
+// Send registration approval email
 export async function sendRegistrationApproval(email, firstName) {
   try {
-    const sendSmtpEmail = {
-      to: [{ email }],
-      sender: { name: senderName, email: senderEmail },
+    const mailOptions = {
+      from: `"${senderName}" <${senderEmail}>`,
+      to: email,
       subject: "Registration Approved - Asset Management System",
-      htmlContent: `
+      html: `
         <h2>Registration Approved</h2>
         <p>Dear ${firstName},</p>
         <p>Your registration for the Asset Management System has been approved.</p>
@@ -40,22 +43,23 @@ export async function sendRegistrationApproval(email, firstName) {
       `,
     };
 
-    const result = await apiInstance.sendTransacEmail(sendSmtpEmail);
-    console.log(`Approval email sent to ${email}`, result.messageId || result.id);
-    return result;
+    const info = await transporter.sendMail(mailOptions);
+    console.log(`Approval email sent to ${email}`, info.messageId);
+    return info;
   } catch (error) {
-    console.error("Error sending approval email:", error.response?.body || error.message);
+    console.error("Error sending approval email:", error.message);
     throw error;
   }
 }
 
+// Send registration rejection email
 export async function sendRegistrationRejection(email, firstName) {
   try {
-    const sendSmtpEmail = {
-      to: [{ email }],
-      sender: { name: senderName, email: senderEmail },
-      subject: "Registration Request - Asset Management System",
-      htmlContent: `
+    const mailOptions = {
+      from: `"${senderName}" <${senderEmail}>`,
+      to: email,
+      subject: "Registration Not Approved - Asset Management System",
+      html: `
         <h2>Registration Not Approved</h2>
         <p>Dear ${firstName},</p>
         <p>Thank you for your interest in the Asset Management System.</p>
@@ -65,25 +69,26 @@ export async function sendRegistrationRejection(email, firstName) {
       `,
     };
 
-    const result = await apiInstance.sendTransacEmail(sendSmtpEmail);
-    console.log(`Rejection email sent to ${email}`, result.messageId || result.id);
-    return result;
+    const info = await transporter.sendMail(mailOptions);
+    console.log(`Rejection email sent to ${email}`, info.messageId);
+    return info;
   } catch (error) {
-    console.error("Error sending rejection email:", error.response?.body || error.message);
+    console.error("Error sending rejection email:", error.message);
     throw error;
   }
 }
 
+// Send new registration notification to admin
 export async function sendNewRegistrationNotification(email, fullName, role) {
   try {
     const adminEmail = process.env.ADMIN_EMAIL;
     if (!adminEmail) throw new Error("ADMIN_EMAIL environment variable is not set");
 
-    const sendSmtpEmail = {
-      to: [{ email: adminEmail }],
-      sender: { name: senderName, email: senderEmail },
+    const mailOptions = {
+      from: `"${senderName}" <${senderEmail}>`,
+      to: adminEmail,
       subject: "New Registration Request - Asset Management System",
-      htmlContent: `
+      html: `
         <h2>New Registration Request</h2>
         <p>A new user has requested registration:</p>
         <ul>
@@ -95,11 +100,11 @@ export async function sendNewRegistrationNotification(email, fullName, role) {
       `,
     };
 
-    const result = await apiInstance.sendTransacEmail(sendSmtpEmail);
-    console.log(`New registration notification sent to admin: ${adminEmail}`, result.messageId || result.id);
-    return result;
+    const info = await transporter.sendMail(mailOptions);
+    console.log(`New registration notification sent to admin: ${adminEmail}`, info.messageId);
+    return info;
   } catch (error) {
-    console.error("Error sending registration notification:", error.response?.body || error.message);
+    console.error("Error sending registration notification:", error.message);
     throw error;
   }
 }
