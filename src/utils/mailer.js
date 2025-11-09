@@ -1,26 +1,15 @@
-import nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 
-// Create SMTP transporter for Gmail
-const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
-  port: 587,
-  secure: false, // Use TLS
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS, // Use App Password, not your regular password
-  },
-});
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 const sender = {
-  email: process.env.EMAIL_FROM || process.env.EMAIL_FROM,
+  email: process.env.EMAIL_FROM || 'onboarding@resend.dev',
   name: "Asset Management System",
 };
 
-// Simple connection test that works on Render
 export async function verifyEmailConnection() {
   try {
-    await transporter.verify();
-    console.log('Email service configured with Gmail SMTP');
+    console.log('Email service configured with Resend');
     return true;
   } catch (error) {
     console.log('Error configuring email service:', error);
@@ -28,14 +17,11 @@ export async function verifyEmailConnection() {
   }
 }
 
-// Call verification on startup
-verifyEmailConnection();
-
 export async function sendRegistrationApproval(email, firstName) {
   try {
-    const mailOptions = {
-      from: sender,
-      to: email,
+    const { data, error } = await resend.emails.send({
+      from: `${sender.name} <${sender.email}>`,
+      to: [email],
       subject: 'Registration Approved - Asset Management System',
       html: `
         <h2>Registration Approved</h2>
@@ -45,17 +31,20 @@ export async function sendRegistrationApproval(email, firstName) {
         <br>
         <p>Best regards,<br>Asset Management Team</p>
       `,
-    };
+    });
 
-    const result = await transporter.sendMail(mailOptions);
-    
-    console.log(`Approval email sent to ${email}`, result.messageId);
-    return result;
+    if (error) {
+      throw error;
+    }
+
+    console.log(`Approval email sent to ${email}`);
+    return data;
   } catch (error) {
     console.error('Error sending approval email:', error);
     throw error;
   }
 }
+
 
 export async function sendRegistrationRejection(email, firstName) {
   try {
