@@ -2,21 +2,32 @@ import nodemailer from "nodemailer";
 
 const transporter = nodemailer.createTransport({
   host: process.env.EMAIL_HOST,
-  port: process.env.EMAIL_PORT,
-  secure: false, // true for 465, false for other ports
+  port: parseInt(process.env.EMAIL_PORT) || 587,
+  secure: false,
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
   },
+  // Add these timeout and connection options
+  connectionTimeout: 30000, // 30 seconds
+  greetingTimeout: 30000,
+  socketTimeout: 30000,
+  // Try alternative connection options
+  requireTLS: true,
   tls: {
-    rejectUnauthorized: false, // Add this for local development
+    rejectUnauthorized: false
   },
+  // For Gmail specifically
+  service: process.env.EMAIL_HOST?.includes('gmail') ? 'gmail' : undefined
 });
 
-// Test the configuration
+// Enhanced verification with better error handling
 transporter.verify(function (error, success) {
   if (error) {
     console.log("Error configuring email transporter:", error);
+    console.log("Trying alternative configuration...");
+    
+    // You might want to try alternative ports here
   } else {
     console.log("Email transporter is ready to send messages");
   }

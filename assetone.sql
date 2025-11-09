@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict WyTrbcPSd9hyYwjPEi4LIcKPi7i66l3N7hiWCerkfloh6kdDp7B7Inokloezvqa
+\restrict pMW4miHVzk69qUUG4eHkHWcu4zyCOAWGXRF957yrjrWhSxPHgfPr116QlH4E2yw
 
 -- Dumped from database version 17.6
 -- Dumped by pg_dump version 17.6
@@ -662,6 +662,49 @@ ALTER SEQUENCE public.password_reset_tokens_id_seq OWNER TO postgres;
 --
 
 ALTER SEQUENCE public.password_reset_tokens_id_seq OWNED BY public.password_reset_tokens.id;
+
+
+--
+-- Name: pending_registration; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.pending_registration (
+    id integer NOT NULL,
+    first_name character varying(100) NOT NULL,
+    last_name character varying(100) NOT NULL,
+    email character varying(255) NOT NULL,
+    password character varying(255) NOT NULL,
+    role character varying(50) NOT NULL,
+    status character varying(20) DEFAULT 'pending'::character varying,
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT pending_registration_role_check CHECK (((role)::text = ANY ((ARRAY['asset_administrator'::character varying, 'property_custodian'::character varying])::text[]))),
+    CONSTRAINT pending_registration_status_check CHECK (((status)::text = ANY ((ARRAY['pending'::character varying, 'approved'::character varying, 'rejected'::character varying])::text[])))
+);
+
+
+ALTER TABLE public.pending_registration OWNER TO postgres;
+
+--
+-- Name: pending_registration_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.pending_registration_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.pending_registration_id_seq OWNER TO postgres;
+
+--
+-- Name: pending_registration_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.pending_registration_id_seq OWNED BY public.pending_registration.id;
 
 
 --
@@ -1402,6 +1445,13 @@ ALTER TABLE ONLY public.password_reset_tokens ALTER COLUMN id SET DEFAULT nextva
 
 
 --
+-- Name: pending_registration id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.pending_registration ALTER COLUMN id SET DEFAULT nextval('public.pending_registration_id_seq'::regclass);
+
+
+--
 -- Name: procurement_attachments id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -1521,18 +1571,6 @@ COPY public.activity_log (id, user_id, module, action, endpoint, method, request
 --
 
 COPY public.borrow_logs (id, item_unit_id, borrowed_by, lend_by, borrowed_at, returned_at, status, remarks, purpose, due_date) FROM stdin;
-12	297	Prof. Santos	5	2025-10-10 09:00:00+08	2025-10-10 12:00:00+08	returned	\N	Lecture use	2025-11-08 00:00:00+08
-13	297	Engr. Dela Cruz	5	2025-10-12 08:00:00+08	2025-10-12 11:30:00+08	returned	\N	Lab session	2025-11-08 00:00:00+08
-14	297	Dr. Rivera	5	2025-10-15 13:00:00+08	2025-10-15 16:00:00+08	returned	\N	Presentation	2025-11-08 00:00:00+08
-15	298	Prof. Santos	5	2025-10-08 08:30:00+08	2025-10-08 10:00:00+08	returned	\N	Event setup	2025-11-08 00:00:00+08
-16	298	Mr. Lopez	5	2025-10-14 10:00:00+08	2025-10-14 15:00:00+08	returned	\N	Research demo	2025-11-08 00:00:00+08
-17	298	Ms. Torres	5	2025-10-20 09:00:00+08	2025-10-20 11:30:00+08	returned	\N	Audio-visual request	2025-11-08 00:00:00+08
-18	300	Coach Ramirez	5	2025-10-05 10:00:00+08	2025-10-05 13:00:00+08	returned	\N	Event equipment	2025-11-08 00:00:00+08
-19	301	Librarian Cruz	5	2025-10-07 14:00:00+08	2025-10-07 16:00:00+08	returned	\N	Testing device	2025-11-08 00:00:00+08
-20	302	IT Intern Reyes	5	2025-10-09 08:00:00+08	2025-10-09 12:00:00+08	returned	\N	Reserve unit	2025-11-08 00:00:00+08
-21	299	Dean Alvarez	5	2025-10-20 13:00:00+08	2025-10-20 16:00:00+08	returned	\N	First loan record	2025-11-08 00:00:00+08
-23	307	wew	2	2025-11-08 06:43:26.473899+08	2025-11-08 09:08:45.61524+08	returned	\N	ew	2025-11-08 09:09:03.159326+08
-24	306	Carlo bernardo	2	2025-11-08 08:40:26.113966+08	2025-11-08 10:01:29.831768+08	returned	\N	hehe	2025-11-08 09:07:36.990687+08
 \.
 
 
@@ -1709,7 +1747,16 @@ COPY public.maintenance_requests (id, item_unit_id, impact, urgency, status, des
 --
 
 COPY public.password_reset_tokens (id, user_id, token_hash, expires_at, used, created_at) FROM stdin;
-3	1	b16db39020cfac713224d40a7612d8c6c973c898ab5b21a07416fc2949b54653	2025-11-06 17:51:07.303	t	2025-11-06 17:41:07.316616
+\.
+
+
+--
+-- Data for Name: pending_registration; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.pending_registration (id, first_name, last_name, email, password, role, status, created_at, updated_at) FROM stdin;
+2	Rowell	Cruz	zaravoc5@gmail.com	$2b$10$ll1NQwiHCjRghUbXVzkCPuGtKo6mNm48hMvaVeBKZaXJrMs/0qYxe	asset_administrator	approved	2025-11-09 10:42:23.552342	2025-11-09 11:44:46.685522
+1	Rowell	Cruz	cruz.rowell00510@gmail.com	$2b$10$OC9VpPZj.bHOM7I8.l4Il.ZxHtGngsAQNPK4wXKlbnMy/A9zVKPg6	property_custodian	approved	2025-11-09 10:25:22.407271	2025-11-09 11:46:35.736508
 \.
 
 
@@ -1860,11 +1907,9 @@ COPY public.sub_locations (id, location_id, name, created_by, updated_by, delete
 --
 
 COPY public.users (id, first_name, last_name, email, password, role, department_id, status, created_by, updated_by, disabled_by, deleted_by, created_at, updated_at, disabled_at, deleted_at) FROM stdin;
-9	Rowell	Rowell	rowellcruz145@gmail.com	$2b$10$bxd.XBMY.rME5Dl2zq30s.s5X7Qhd6DGQIRka4hTVcKQkM./E1lnm	property_custodian	11	inactive	\N	\N	\N	\N	2025-11-08 06:47:02.14863+08	2025-11-08 06:47:02.14863+08	\N	\N
-8	Geyl	Cating	geyl123@gmail.com	$2b$10$Wu6Rjn9nYyVACUnxFov2BuWpYlGidm7YEkHnsL6RTP/v03ygaMC0S	technician	4	active	\N	\N	\N	\N	2025-11-05 04:49:01.861354+08	2025-11-05 04:49:01.861354+08	\N	\N
-5	John Marwin	Castillo	marwin123@gmail.com	$2b$10$wEqTzPc2YxQU1vmhdGgn8.l3T9a/a3oLFxMXPhXufbJDNOTo.N29S	asset_administrator	\N	inactive	\N	\N	\N	\N	2025-11-05 04:18:08.816673+08	2025-11-05 04:18:08.816673+08	\N	\N
-2	Carlo	Bernardo	carlo123@gmail.com	$2b$10$QYySyKaUy.5izqPz8fcnnuvY2vqi9uAP6y8ZpwzJVEwqLHCFPzeLy	property_custodian	3	inactive	\N	5	\N	\N	2025-11-02 12:58:31.774957+08	2025-11-05 04:40:13.843+08	\N	\N
-1	Rowell	Cruz	cruzrowellt11@gmail.com	$2b$10$75WdYiTrGU1P2TwiIU6VJeqlM5PWeA3X64SdEJwMsfuvdA5s197rq	system_administrator	\N	inactive	\N	1	1	\N	2025-10-16 18:13:18.932041+08	2025-10-16 11:03:52.015+08	2025-10-16 11:03:52.015+08	\N
+1	Rowell	Cruz	cruzrowellt11@gmail.com	$2b$10$75WdYiTrGU1P2TwiIU6VJeqlM5PWeA3X64SdEJwMsfuvdA5s197rq	system_administrator	\N	active	\N	1	1	\N	2025-10-16 18:13:18.932041+08	2025-10-16 11:03:52.015+08	2025-10-16 11:03:52.015+08	\N
+22	Rowell	Cruz	zaravoc5@gmail.com	$2b$10$ll1NQwiHCjRghUbXVzkCPuGtKo6mNm48hMvaVeBKZaXJrMs/0qYxe	asset_administrator	\N	inactive	\N	\N	\N	\N	2025-11-09 11:44:46.683848+08	2025-11-09 11:44:46.683848+08	\N	\N
+23	Rowell	Cruz	cruz.rowell00510@gmail.com	$2b$10$OC9VpPZj.bHOM7I8.l4Il.ZxHtGngsAQNPK4wXKlbnMy/A9zVKPg6	property_custodian	\N	inactive	\N	\N	\N	\N	2025-11-09 11:46:35.652064+08	2025-11-09 11:46:35.652064+08	\N	\N
 \.
 
 
@@ -2005,7 +2050,14 @@ SELECT pg_catalog.setval('public.maintenance_requests_id_seq', 1, true);
 -- Name: password_reset_tokens_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.password_reset_tokens_id_seq', 3, true);
+SELECT pg_catalog.setval('public.password_reset_tokens_id_seq', 4, true);
+
+
+--
+-- Name: pending_registration_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.pending_registration_id_seq', 2, true);
 
 
 --
@@ -2096,7 +2148,7 @@ SELECT pg_catalog.setval('public.sub_locations_id_seq', 30, true);
 -- Name: users_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.users_id_seq', 9, true);
+SELECT pg_catalog.setval('public.users_id_seq', 23, true);
 
 
 --
@@ -2255,6 +2307,22 @@ ALTER TABLE ONLY public.maintenance_requests
 
 ALTER TABLE ONLY public.password_reset_tokens
     ADD CONSTRAINT password_reset_tokens_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: pending_registration pending_registration_email_key; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.pending_registration
+    ADD CONSTRAINT pending_registration_email_key UNIQUE (email);
+
+
+--
+-- Name: pending_registration pending_registration_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.pending_registration
+    ADD CONSTRAINT pending_registration_pkey PRIMARY KEY (id);
 
 
 --
@@ -2436,5 +2504,5 @@ ALTER TABLE ONLY public.purchase_order_items
 -- PostgreSQL database dump complete
 --
 
-\unrestrict WyTrbcPSd9hyYwjPEi4LIcKPi7i66l3N7hiWCerkfloh6kdDp7B7Inokloezvqa
+\unrestrict pMW4miHVzk69qUUG4eHkHWcu4zyCOAWGXRF957yrjrWhSxPHgfPr116QlH4E2yw
 
