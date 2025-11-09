@@ -1,25 +1,27 @@
-import { Resend } from 'resend';
+import nodemailer from 'nodemailer';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Create SMTP transporter for Gmail
+const transporter = nodemailer.createTransport({
+  host: 'smtp.gmail.com',
+  port: 587,
+  secure: false, // Use TLS
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS, // Use App Password, not your regular password
+  },
+});
 
-// Verify Resend connection
+const sender = {
+  email: process.env.EMAIL_FROM || process.env.EMAIL_FROM,
+  name: "Asset Management System",
+};
+
+// Simple connection test that works on Render
 export async function verifyEmailConnection() {
   try {
-    // Resend doesn't have a direct verify method, but we can test with a simple API call
-    const { data, error } = await resend.emails.send({
-      from: process.env.EMAIL_FROM || 'noreply@yourdomain.com',
-      to: 'test@example.com',
-      subject: 'Connection Test',
-      html: '<p>Testing email connection</p>',
-    });
-
-    if (error) {
-      console.log('Error configuring email service:', error);
-      return false;
-    } else {
-      console.log('Email service is ready to send messages');
-      return true;
-    }
+    await transporter.verify();
+    console.log('Email service configured with Gmail SMTP');
+    return true;
   } catch (error) {
     console.log('Error configuring email service:', error);
     return false;
@@ -31,8 +33,8 @@ verifyEmailConnection();
 
 export async function sendRegistrationApproval(email, firstName) {
   try {
-    const { data, error } = await resend.emails.send({
-      from: process.env.EMAIL_FROM || 'Asset Management <noreply@yourdomain.com>',
+    const mailOptions = {
+      from: sender,
       to: email,
       subject: 'Registration Approved - Asset Management System',
       html: `
@@ -42,13 +44,13 @@ export async function sendRegistrationApproval(email, firstName) {
         <p>You can now login to the system using your credentials.</p>
         <br>
         <p>Best regards,<br>Asset Management Team</p>
-      `
-    });
+      `,
+    };
+
+    const result = await transporter.sendMail(mailOptions);
     
-    if (error) throw error;
-    
-    console.log(`Approval email sent to ${email}`, data?.id);
-    return data;
+    console.log(`Approval email sent to ${email}`, result.messageId);
+    return result;
   } catch (error) {
     console.error('Error sending approval email:', error);
     throw error;
@@ -57,8 +59,8 @@ export async function sendRegistrationApproval(email, firstName) {
 
 export async function sendRegistrationRejection(email, firstName) {
   try {
-    const { data, error } = await resend.emails.send({
-      from: process.env.EMAIL_FROM || 'Asset Management <noreply@yourdomain.com>',
+    const mailOptions = {
+      from: sender,
       to: email,
       subject: 'Registration Request - Asset Management System',
       html: `
@@ -68,13 +70,13 @@ export async function sendRegistrationRejection(email, firstName) {
         <p>After review, we are unable to approve your registration request at this time.</p>
         <br>
         <p>Best regards,<br>Asset Management Team</p>
-      `
-    });
+      `,
+    };
+
+    const result = await transporter.sendMail(mailOptions);
     
-    if (error) throw error;
-    
-    console.log(`Rejection email sent to ${email}`, data?.id);
-    return data;
+    console.log(`Rejection email sent to ${email}`, result.messageId);
+    return result;
   } catch (error) {
     console.error('Error sending rejection email:', error);
     throw error;
@@ -89,8 +91,8 @@ export async function sendNewRegistrationNotification(email, fullName, role) {
       throw new Error('ADMIN_EMAIL environment variable is not set');
     }
 
-    const { data, error } = await resend.emails.send({
-      from: process.env.EMAIL_FROM || 'Asset Management <noreply@yourdomain.com>',
+    const mailOptions = {
+      from: sender,
       to: adminEmail,
       subject: 'New Registration Request - Asset Management System',
       html: `
@@ -102,37 +104,15 @@ export async function sendNewRegistrationNotification(email, fullName, role) {
           <li><strong>Requested Role:</strong> ${role}</li>
         </ul>
         <p>Please review and approve/reject this registration in the admin panel.</p>
-      `
-    });
+      `,
+    };
+
+    const result = await transporter.sendMail(mailOptions);
     
-    if (error) throw error;
-    
-    console.log(`New registration notification sent to admin: ${adminEmail}`, data?.id);
-    return data;
+    console.log(`New registration notification sent to admin: ${adminEmail}`, result.messageId);
+    return result;
   } catch (error) {
     console.error('Error sending registration notification:', error);
-    throw error;
-  }
-}
-
-// Batch email sending helper
-export async function sendBatchEmails(emails, subject, htmlContent) {
-  try {
-    const { data, error } = await resend.batch.send(
-      emails.map(email => ({
-        from: process.env.EMAIL_FROM || 'Asset Management <noreply@yourdomain.com>',
-        to: email,
-        subject: subject,
-        html: htmlContent
-      }))
-    );
-    
-    if (error) throw error;
-    
-    console.log(`Batch email sent to ${emails.length} recipients`);
-    return data;
-  } catch (error) {
-    console.error('Error sending batch emails:', error);
     throw error;
   }
 }
