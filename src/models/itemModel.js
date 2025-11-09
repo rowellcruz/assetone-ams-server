@@ -63,18 +63,17 @@ async function getItemByID(id) {
 
 // Create a new item
 async function createItem(data) {
-  const { name, type, category_id, department_id, created_by, updated_by } =
+  const { name, category_id, department_id, created_by, updated_by } =
     data;
   const { rows } = await db.query(
-    `INSERT INTO items (name, type, category_id, department_id, created_by, updated_by)
-     VALUES ($1, $2, $3, $4, $5, $6)
+    `INSERT INTO items (name, category_id, department_id, created_by, updated_by)
+     VALUES ($1, $2, $3, $4, $5)
      RETURNING id`,
-    [name, type, category_id, department_id, created_by, updated_by]
+    [name, category_id, department_id, created_by, updated_by]
   );
   return {
     id: rows[0].id,
     name,
-    type,
     category_id,
     department_id,
     created_by,

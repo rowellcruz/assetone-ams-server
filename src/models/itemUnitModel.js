@@ -19,7 +19,16 @@ async function getAllItemUnits(filters = {}) {
       id.purchase_date,
       id.useful_life,
       id.accumulated_depreciation,
-      ic.purchase_price
+      ic.purchase_price,
+      -- Calculate remaining useful life
+      CASE 
+        WHEN iu.acquisition_date IS NOT NULL AND id.useful_life IS NOT NULL THEN
+          GREATEST(
+            0, 
+            id.useful_life - EXTRACT(YEAR FROM AGE(CURRENT_DATE, iu.acquisition_date))
+          )
+        ELSE NULL
+      END AS remaining_useful_life
     FROM item_units iu
     LEFT JOIN items i ON iu.item_id = i.id
     LEFT JOIN item_depreciation id ON id.item_unit_id = iu.id

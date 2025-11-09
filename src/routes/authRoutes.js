@@ -11,11 +11,10 @@ import authenticate from "../middlewares/authMiddleware.js";
 const router = express.Router();
 const MODULE = "auth";
 
-router.post("/login", authenticate, asyncHandler(login, MODULE));
-router.post("/register", authenticate, asyncHandler(register, MODULE));
+router.post("/login", asyncHandler(login, MODULE));
+router.post("/register", asyncHandler(register, MODULE));
 router.post(
   "/request-password-reset",
-  authenticate,
   asyncHandler(requestPasswordReset, MODULE)
 );
 router.post(
