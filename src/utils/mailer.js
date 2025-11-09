@@ -1,28 +1,16 @@
 import nodemailer from 'nodemailer';
 
-// Choose ONE configuration approach:
+import nodemailer from 'nodemailer';
 
-// APPROACH 1: Using service (recommended for Gmail)
 const transporter = nodemailer.createTransport({
-  service: 'gmail',
+  host: 'smtp.sendgrid.net',
+  port: 587,
+  secure: false,
   auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASSWORD, // Use app-specific password for Gmail
+    user: 'apikey', // This should always be 'apikey'
+    pass: process.env.SENDGRID_API_KEY, // Your SendGrid API key
   },
 });
-
-// OR APPROACH 2: Using specific SMTP settings (use this for other providers)
-/*
-const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST,
-  port: process.env.EMAIL_PORT,
-  secure: process.env.EMAIL_PORT === '465', // true for 465, false for other ports
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASSWORD,
-  },
-});
-*/
 
 // Optional: Add error handling for transporter
 transporter.verify(function (error, success) {
