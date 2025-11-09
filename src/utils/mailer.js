@@ -6,10 +6,8 @@ const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
     user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASSWORD, // Use app-specific password for Gmail
+    pass: process.env.EMAIL_PASS, // Use app-specific password for Gmail
   },
-  // Alternative configuration for other services:
-  /*
   host: process.env.EMAIL_HOST,
   port: process.env.EMAIL_PORT,
   secure: true, // true for 465, false for other ports
@@ -17,7 +15,6 @@ const transporter = nodemailer.createTransport({
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASSWORD,
   },
-  */
 });
 
 // Optional: Add error handling for transporter
@@ -104,3 +101,6 @@ export async function sendNewRegistrationNotification(email, fullName, role) {
     throw error;
   }
 }
+
+
+export { transporter, sendRegistrationApproval, sendRegistrationRejection, sendNewRegistrationNotification };
