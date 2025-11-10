@@ -50,11 +50,14 @@ async function getItemByID(id) {
       c.name AS category_name,
       c.code AS category_code,
       d.name AS department_name,
-      d.code AS department_code
+      d.code AS department_code,
+      COUNT(u.id) AS unit_count
     FROM items i
+    LEFT JOIN item_units u ON u.item_id = i.id
     LEFT JOIN item_categories c ON c.id = i.category_id
     LEFT JOIN departments d ON d.id = i.department_id
     WHERE i.id = $1
+    GROUP BY i.id, c.name, c.code, d.name, d.code
   `;
 
   const { rows } = await db.query(query, [id]);

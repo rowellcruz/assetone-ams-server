@@ -2,10 +2,12 @@ import db from '../config/db.js';
 
 async function getAllDepartments(filters) {
   const { rows } = await db.query(`
-    SELECT d.*, COUNT(u.id) AS user_count
+    SELECT d.*, COUNT(u.id) AS user_count, l.name || ' - ' || sl.name AS full_location_name
     FROM departments d
     LEFT JOIN users u ON u.department_id = d.id
-    GROUP BY d.id
+    LEFT JOIN sub_locations sl ON d.sub_location_id = sl.id
+    LEFT JOIN locations l ON sl.location_id = l.id
+    GROUP BY d.id, l.name, sl.name
   `);
   return rows;
 }
@@ -16,10 +18,10 @@ async function getDepartmentByID(id) {
 }
 
 async function createDepartment(departmentData) {
-  const { name, code, created_by, updated_by } = departmentData;
+  const { name, code, sub_location_id, created_by, updated_by } = departmentData;
   const { rows } = await db.query(
-    "INSERT INTO departments (name, code, created_by, updated_by) VALUES ($1, $2, $3, $4) RETURNING id",
-    [name, code, created_by, updated_by]
+    "INSERT INTO departments (name, code, sub_location_id, created_by, updated_by) VALUES ($1, $2, $3, $4, $5) RETURNING id",
+    [name, code, sub_location_id, created_by, updated_by]
   );
   return { id: rows[0].id, ...departmentData };
 }

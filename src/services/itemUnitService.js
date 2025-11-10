@@ -27,8 +27,6 @@ export async function getItemUnitsByDepartmentID(itemId, departmentId) {
 export async function createItemUnit(itemUnitData) {
   const codes = await itemModel.getItemByID(itemUnitData.item_id);
 
-  const createdUnits = [];
-
   const batchQty = itemUnitData.batch_quantity || 1;
 
   for (let i = 0; i < batchQty; i++) {
@@ -44,21 +42,9 @@ export async function createItemUnit(itemUnitData) {
     };
 
     const unitData = await itemUnitModel.createItemUnit(dataToInsert);
-
-    await itemDepreciationModel.createItemDepreciation({
-      ...itemUnitData,
-      item_unit_id: unitData.id,
-    });
-
-    await itemCostModel.createItemCost({
-      ...itemUnitData,
-      item_unit_id: unitData.id,
-    });
-
-    createdUnits.push(unitData);
   }
 
-  return createdUnits;
+  return "Successfully created item unit(s).";
 }
 
 async function generateUnitTag({ department_code, category_code }) {

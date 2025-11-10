@@ -11,7 +11,7 @@ export const getUsers = async (req, res) => {
     filters.excludeStatus = "deleted";
   }
 
-  if (req.user.role === "gso_head") {
+  if (req.user.role === "asset_administrator") {
     filters.departmentId = null;
     filters.excludeRole = "system_administrator";
   }

@@ -14,25 +14,18 @@ async function getAllItemUnits(filters = {}) {
       cu.first_name || ' ' || cu.last_name AS created_by_name,
       uu.first_name || ' ' || uu.last_name AS updated_by_name,
       du.first_name || ' ' || du.last_name AS deleted_by_name,
-      id.method,
-      id.rate,
-      id.purchase_date,
-      id.useful_life,
-      id.accumulated_depreciation,
-      ic.purchase_price,
+      i.useful_life,
       -- Calculate remaining useful life
       CASE 
-        WHEN iu.acquisition_date IS NOT NULL AND id.useful_life IS NOT NULL THEN
+        WHEN iu.purchase_date IS NOT NULL AND i.useful_life IS NOT NULL THEN
           GREATEST(
             0, 
-            id.useful_life - EXTRACT(YEAR FROM AGE(CURRENT_DATE, iu.acquisition_date))
+            i.useful_life - EXTRACT(YEAR FROM AGE(CURRENT_DATE, iu.purchase_date))
           )
         ELSE NULL
       END AS remaining_useful_life
     FROM item_units iu
     LEFT JOIN items i ON iu.item_id = i.id
-    LEFT JOIN item_depreciation id ON id.item_unit_id = iu.id
-    LEFT JOIN item_costs ic ON ic.item_unit_id = iu.id
     LEFT JOIN departments d ON iu.owner_department_id = d.id
     LEFT JOIN sub_locations sl ON iu.sub_location_id = sl.id
     LEFT JOIN locations l ON sl.location_id = l.id
@@ -89,13 +82,14 @@ async function getAllItemUnits(filters = {}) {
 }
 
 async function getItemUnitByID(id) {
-  const { rows } = await db.query(`
+  const { rows } = await db.query(
+    `
     SELECT iu.*, d.name AS department_name 
     FROM item_units iu 
     LEFT JOIN departments d ON iu.owner_department_id = d.id 
-    WHERE iu.id = $1`, [
-    id,
-  ]);
+    WHERE iu.id = $1`,
+    [id]
+  );
   return rows[0] || null;
 }
 
@@ -160,7 +154,8 @@ async function createItemUnit(data) {
     specifications,
     sub_location_id,
     owner_department_id,
-    acquisition_date,
+    purchase_date,
+    purchase_cost,
     is_legacy = false,
     vendor_id,
     created_by,
@@ -179,13 +174,14 @@ async function createItemUnit(data) {
         specifications,
         sub_location_id,
         owner_department_id,
-    acquisition_date,
+        purchase_date,
+        purchase_cost,
         is_legacy,
         vendor_id,
         created_by,
         updated_by
       ) 
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)
      RETURNING id`,
     [
       item_id,
@@ -197,7 +193,8 @@ async function createItemUnit(data) {
       specifications || null,
       sub_location_id || null,
       owner_department_id,
-      acquisition_date,
+      purchase_date,
+    purchase_cost,
       is_legacy,
       vendor_id,
       created_by,
@@ -216,7 +213,8 @@ async function createItemUnit(data) {
     specifications,
     sub_location_id,
     owner_department_id,
-    acquisition_date,
+    purchase_date,
+    purchase_cost,
     is_legacy,
     vendor_id,
     created_by,
