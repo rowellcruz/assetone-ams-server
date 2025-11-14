@@ -18,14 +18,14 @@ async function getAllPending() {
 }
 
 async function create(registrationData) {
-  const { first_name, last_name, email, password, role, status = 'pending' } = registrationData;
+  const { first_name, last_name, email, role, status = 'pending' } = registrationData;
   
   const { rows } = await db.query(
     `INSERT INTO pending_registration 
-     (first_name, last_name, email, password, role, status) 
-     VALUES ($1, $2, $3, $4, $5, $6) 
+     (first_name, last_name, email, role, status) 
+     VALUES ($1, $2, $3, $4, $5) 
      RETURNING *`,
-    [first_name, last_name, email, password, role, status]
+    [first_name, last_name, email, role, status]
   );
   
   return rows[0];

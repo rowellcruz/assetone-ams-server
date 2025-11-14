@@ -4,22 +4,25 @@ import db from "../config/db.js";
 async function getAllItems(filters = {}) {
   let query = `
     SELECT 
-      i.*, 
-      c.name AS category_name,
+      i.*,
       d.name AS department_name,
       COUNT(u.id) AS unit_count
     FROM items i
     LEFT JOIN item_units u ON u.item_id = i.id
-    LEFT JOIN item_categories c ON c.id = i.category_id
     LEFT JOIN departments d ON d.id = i.department_id
   `;
 
   const conditions = [];
   const values = [];
 
-  if (filters.categoryId) {
-    values.push(filters.categoryId);
-    conditions.push(`i.category_id = $${values.length}`);
+  if (filters.name) {
+    values.push(filters.name);
+    conditions.push(`i.name = $${values.length}`);
+  }
+
+  if (filters.category) {
+    values.push(filters.category);
+    conditions.push(`i.category = $${values.length}`);
   }
 
   if (filters.departmentId) {
@@ -36,7 +39,7 @@ async function getAllItems(filters = {}) {
     query += " WHERE " + conditions.join(" AND ");
   }
 
-  query += " GROUP BY i.id, c.name, d.name";
+  query += " GROUP BY i.id, d.name";
 
   const { rows } = await db.query(query, values);
   return rows;
@@ -47,17 +50,14 @@ async function getItemByID(id) {
   const query = `
     SELECT 
       i.*, 
-      c.name AS category_name,
-      c.code AS category_code,
       d.name AS department_name,
       d.code AS department_code,
       COUNT(u.id) AS unit_count
     FROM items i
     LEFT JOIN item_units u ON u.item_id = i.id
-    LEFT JOIN item_categories c ON c.id = i.category_id
     LEFT JOIN departments d ON d.id = i.department_id
     WHERE i.id = $1
-    GROUP BY i.id, c.name, c.code, d.name, d.code
+    GROUP BY i.id, d.name, d.code
   `;
 
   const { rows } = await db.query(query, [id]);
@@ -66,18 +66,18 @@ async function getItemByID(id) {
 
 // Create a new item
 async function createItem(data) {
-  const { name, category_id, department_id, created_by, updated_by } =
+  const { name, category, department_id, created_by, updated_by } =
     data;
   const { rows } = await db.query(
-    `INSERT INTO items (name, category_id, department_id, created_by, updated_by)
+    `INSERT INTO items (name, category, department_id, created_by, updated_by)
      VALUES ($1, $2, $3, $4, $5)
      RETURNING id`,
-    [name, category_id, department_id, created_by, updated_by]
+    [name, category, department_id, created_by, updated_by]
   );
   return {
     id: rows[0].id,
     name,
-    category_id,
+    category,
     department_id,
     created_by,
     updated_by,

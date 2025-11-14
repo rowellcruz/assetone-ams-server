@@ -4,6 +4,14 @@ import * as itemDepreciationModel from "../models/itemDepreciationModel.js";
 import * as itemCostModel from "../models/itemCostModel.js";
 import * as relocationModel from "../models/relocationModel.js";
 
+const CATEGORY_CODES = {
+  "Furniture": "FUR",
+  "Appliances / Electronics": "ELEC",
+  "Tools / Equipment": "TOOL",
+  "Machinery / Mechanical Assets": "MECH",
+  "IT Equipment / Peripherals": "IT",
+};
+
 export async function getAllItemUnits(filters = {}) {
   return await itemUnitModel.getAllItemUnits(filters);
 }
@@ -27,12 +35,14 @@ export async function getItemUnitsByDepartmentID(itemId, departmentId) {
 export async function createItemUnit(itemUnitData) {
   const codes = await itemModel.getItemByID(itemUnitData.item_id);
 
+  const categoryCode = CATEGORY_CODES[codes.category] || "GEN";
+
   const batchQty = itemUnitData.batch_quantity || 1;
 
   for (let i = 0; i < batchQty; i++) {
     const unitTag = await generateUnitTag({
       department_code: codes?.department_code || "GSO",
-      category_code: codes.category_code,
+      category_code: categoryCode,
     });
 
     const dataToInsert = {
@@ -41,7 +51,7 @@ export async function createItemUnit(itemUnitData) {
       serial_number: itemUnitData.serial_numbers?.[i] || null,
     };
 
-    const unitData = await itemUnitModel.createItemUnit(dataToInsert);
+    await itemUnitModel.createItemUnit(dataToInsert);
   }
 
   return "Successfully created item unit(s).";
@@ -76,12 +86,18 @@ export async function deleteItemUnitsByIDs(ids) {
 
 export async function relocateItemUnit(id, user, data) {
   const { from_sub_location_id, to_sub_location_id, requested_from } = data;
+  const itemUnit = await itemUnitModel.getItemUnitByID(id);
+  if (!itemUnit) {
+    throw new Error("Item unit not found");
+  }
+  
   return await relocationModel.logRelocation(
     id,
     from_sub_location_id,
     to_sub_location_id,
     user.id,
-    requested_from
+    requested_from,
+    itemUnit.item_department_id
   );
 }
 

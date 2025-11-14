@@ -17,23 +17,8 @@ export const getVendorByID = async (req, res) => {
 };
 
 export const createVendor = async (req, res) => {
-  try {
-    const { asset_category_ids = [], ...vendorData } = req.body;
-
-    const createdVendor = await vendorService.createVendor(vendorData);
-
-    if (asset_category_ids.length > 0) {
-      await vendorService.addVendorOffers(createdVendor.id, asset_category_ids);
-    }
-
-    res.status(201).json({
-      ...createdVendor,
-      asset_category_ids,
-    });
-  } catch (err) {
-    console.error("Error creating vendor:", err);
-    res.status(500).json({ message: "Failed to create vendor", error: err.message });
-  }
+  const createdVendor = await vendorService.createVendor(req.body);
+  res.status(201).json(createdVendor);
 };
 
 export const deleteVendorsByIDs = async (req, res) => {

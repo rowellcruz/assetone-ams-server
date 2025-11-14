@@ -1,8 +1,22 @@
 import db from "../config/db.js";
 
 export async function getAllVendors(filters = {}) {
-  const result = await db.query("SELECT * FROM vendors");
-  return result.rows;
+  let query = `SELECT * FROM vendors`;
+
+  const conditions = [];
+  const values = [];
+
+  if (filters.name) {
+    values.push(filters.name);
+    conditions.push(`name = $${values.length}`);
+  }
+
+  if (conditions.length > 0) {
+    query += " WHERE " + conditions.join(" AND ");
+  }
+
+  const { rows } = await db.query(query, values);
+  return rows;
 }
 
 export async function getVendorByID(id) {

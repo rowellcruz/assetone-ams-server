@@ -23,6 +23,7 @@ import metricRoutes from "./routes/metricRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import borrowLogRoutes from "./routes/borrowLogRoutes.js";
+import relocationLogRoutes from "./routes/relocationLogRoutes.js";
 import testRoute from "./routes/testRoute.js";
 
 import errorHandler from "./middlewares/errorHandler.js";
@@ -93,6 +94,7 @@ app.use("/api/sub-locations", subLocationRoutes);
 app.use("/api/vendors", vendorRoutes);
 app.use("/api/metrics", metricRoutes);
 app.use("/api/borrow-log", borrowLogRoutes);
+app.use("/api/relocation-log", relocationLogRoutes);
 app.use("/api/test", testRoute);
 
 // Error handler

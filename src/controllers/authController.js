@@ -16,10 +16,10 @@ export async function login(req, res) {
 }
 
 export async function register(req, res) {
-  const { first_name, last_name, email, password, role } = req.body;
+  const { first_name, last_name, email, role } = req.body;
 
   try {
-    await authService.registerPending({ first_name, last_name, email, password, role });
+    await authService.registerPending({ first_name, last_name, email, role });
     res.status(200).json({ 
       message: "Registration submitted successfully! Please wait for administrator approval." 
     });

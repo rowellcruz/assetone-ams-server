@@ -22,7 +22,7 @@ export async function login(email, password) {
 }
 
 export async function registerPending(userData) {
-  const { first_name, last_name, email, password, role } = userData;
+  const { first_name, last_name, email, role } = userData;
   
   // Check if email already exists in users table
   const existingUser = await userModel.getUserDataByEmail(email);
@@ -36,15 +36,11 @@ export async function registerPending(userData) {
     throw new Error("Registration already pending approval");
   }
 
-  // Hash password
-  const hashedPassword = await bcrypt.hash(password, 10);
-
   // Create pending registration
   await pendingRegistrationModel.create({
     first_name,
     last_name,
     email,
-    password: hashedPassword,
     role,
     status: 'pending'
   });
@@ -53,18 +49,25 @@ export async function registerPending(userData) {
   // await mailer.sendNewRegistrationNotification(email, `${first_name} ${last_name}`, role);
 }
 
-export async function approveRegistration(pendingId, adminId) {
+export async function approveRegistration(pendingId, adminId, departmentId) {
   const pending = await pendingRegistrationModel.getById(pendingId);
   if (!pending) throw new Error("Pending registration not found");
   if (pending.status !== 'pending') throw new Error("Registration already processed");
 
-  // Create user in main users table
+  // Generate temporary password
+  const temporaryPassword = crypto.randomBytes(8).toString('hex');
+  
+  // Hash the temporary password
+  const hashedPassword = await bcrypt.hash(temporaryPassword, 10);
+
+  // Create user in main users table with temporary password
   const userData = {
     first_name: pending.first_name,
     last_name: pending.last_name,
     email: pending.email,
-    password: pending.password, // already hashed
+    password: hashedPassword, // hashed temporary password
     role: pending.role,
+    department_id: departmentId,
     created_by: adminId
   };
 
@@ -73,8 +76,8 @@ export async function approveRegistration(pendingId, adminId) {
   // Update pending registration status
   await pendingRegistrationModel.updateStatus(pendingId, 'approved', adminId);
 
-  // Send approval email to user
-  await mailer.sendRegistrationApproval(pending.email, pending.first_name);
+  // Send approval email to user with temporary password
+  await mailer.sendRegistrationApproval(pending.email, pending.first_name, temporaryPassword);
 
   return user;
 }

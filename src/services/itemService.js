@@ -147,6 +147,8 @@ export async function generateStickersPDF(unitIds) {
 }
 
 export async function createItem(itemData) {
+  const existingItem = await itemModel.getAllItems({ name: itemData.name });
+  if (existingItem.length > 0) throw new Error("Asset name already exists");
   return await itemModel.createItem(itemData);
 }
 

@@ -9,6 +9,28 @@ export const getSchedules = async (req, res) => {
   res.json(schedules);
 };
 
+export const getAllSchedulesWithTemplates = async (req, res) => {
+  const user = req.user;
+  const filters = {};
+  if (req.query.status) filters.status = req.query.status;
+  if (user.role === "property_custodian")
+    filters.departmentId = user.department_id;
+  const schedules = await scheduleService.getAllSchedulesWithTemplates(filters);
+  res.json(schedules);
+};
+
+export const getScheduleUnitsByTechnician = async (req, res) => {
+  const { id } = req.params;
+  const units = await scheduleService.getScheduleUnitsByTechnician(id);
+  res.json(units);
+};
+
+export const updateScheduleAssetStatus = async (req, res) => {
+  const { id, unitId } = req.params;
+  const scheduleAsset = await scheduleService.updateScheduleAsset(id, unitId);
+  res.json(scheduleAsset);
+};
+
 export const getScheduleOccurrencesByTemplateId = async (req, res) => {
   const { id } = req.params;
 
@@ -25,7 +47,9 @@ export const getAssignedAssetsByTemplateId = async (req, res) => {
 
 export const getScheduleOccurrencesByAssetUnitId = async (req, res) => {
   const { assetUnitId } = req.params;
-  const schedules = await scheduleService.getScheduleOccurrencesByAssetUnitId(assetUnitId);
+  const schedules = await scheduleService.getScheduleOccurrencesByAssetUnitId(
+    assetUnitId
+  );
   res.json(schedules);
 };
 

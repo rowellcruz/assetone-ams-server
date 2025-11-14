@@ -2,7 +2,7 @@ import db from "../config/db.js";
 
 async function getAllScheduleTemplates(filters = {}) {
   let query = `
-    SELECT st.*, a.type as asset_type
+    SELECT st.*, a.name as item_name
     FROM schedule_templates st
     LEFT JOIN items a ON st.item_id = a.id
   `;
@@ -24,7 +24,7 @@ async function getAllScheduleTemplates(filters = {}) {
 
 async function getScheduleTemplatesByID(id, filters = {}) {
   let query = `
-    SELECT st.*, a.type as asset_type
+    SELECT st.*, a.name as asset_name
     FROM schedule_templates st
     LEFT JOIN items a ON st.item_id = a.id
   `;

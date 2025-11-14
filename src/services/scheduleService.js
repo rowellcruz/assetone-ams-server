@@ -1,11 +1,43 @@
 import * as scheduleModel from "../models/scheduleModel.js";
 import * as scheduleTemplateModel from "../models/scheduleTemplateModel.js";
 import * as scheduleAssetsModel from "../models/scheduleAssetsModel.js";
+import * as itemUnitModel from "../models/itemUnitModel.js";
 import * as scheduleTechnicianModel from "../models/scheduleTechnicianModel.js";
 
 export async function getAllSchedules(filters = {}) {
   return await scheduleModel.getAllSchedules(filters);
 }
+
+export async function getAllSchedulesWithTemplates(filters = {}) {
+  const schedules = await scheduleModel.getAllSchedulesWithTemplates(filters);
+
+  const schedulesWithDetails = await Promise.all(
+    schedules.map(async (schedule) => {
+      const [assigned_technicians, assigned_assets] = await Promise.all([
+        scheduleTechnicianModel.getScheduleTechniciansByOccurrenceId(schedule.id),
+        scheduleAssetsModel.getAssignedAssetsByTemplateId(schedule.id),
+      ]);
+
+      // Check if all assigned assets are completed
+      const allAssetsCompleted =
+        assigned_assets.length > 0 &&
+        assigned_assets.every((a) => a.status === "completed");
+
+      // Override schedule status if applicable
+      const finalStatus = allAssetsCompleted ? "completed" : schedule.status;
+
+      return {
+        ...schedule,
+        status: finalStatus,
+        assigned_technicians,
+        assigned_assets,
+      };
+    })
+  );
+
+  return schedulesWithDetails;
+}
+
 
 export async function getScheduleOccurrencesByAssetUnitId(assetUnitId) {
   return await scheduleModel.getScheduleOccurrencesByAssetUnitId(assetUnitId);
@@ -32,6 +64,10 @@ export async function getScheduleByTemplateId(templateId) {
   return occurrencesWithTechnicians;
 }
 
+export async function getScheduleUnitsByTechnician(id) {
+  return await scheduleAssetsModel.getScheduleUnitsByTechnician(id);
+}
+
 export async function getAssignedAssetsByTemplateId(id) {
   return await scheduleAssetsModel.getAssignedAssetsByTemplateId(id);
 }
@@ -52,15 +88,20 @@ export async function updateScheduleOccurrencePartial(id, fieldsToUpdate) {
   );
 }
 
-export async function startScheduleOccurrence(id, startedBy, technicians = [], item_unit_ids) {
+export async function startScheduleOccurrence(id, startedBy, technicians = []) {
   const occurrence = await scheduleModel.getScheduleOccurrenceByID(id);
   if (!occurrence) throw new Error("Schedule not found");
+
+  const itemUnits = await itemUnitModel.getAllItemUnits({
+    unitsForMaintenance: true,
+  });
+  const item_unit_ids = itemUnits.map((unit) => unit.id);
 
   const startableStatuses = ["pending", "overdue"];
   if (!startableStatuses.includes(occurrence.status)) {
     throw new Error("Only pending or overdue schedules can be started");
   }
-  
+
   if (item_unit_ids) {
     await scheduleAssetsModel.assignAssets(id, item_unit_ids);
   }
@@ -94,6 +135,18 @@ export async function rejectScheduleOccurrence(id, scheduleData) {
   });
 
   return updated;
+}
+
+export async function updateScheduleAsset(id, unitId) {
+  console.log(id, unitId);
+  await scheduleAssetsModel.updateScheduleAssetStatus(id, unitId);
+
+  await itemUnitModel.updateItemUnitPartial(unitId, {
+    status: "available",
+    updated_at: new Date(),
+  });
+
+  return "OK";
 }
 
 export async function completeScheduleOccurrence(id, completedBy) {

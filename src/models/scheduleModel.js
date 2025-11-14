@@ -42,12 +42,56 @@ async function getScheduleOccurrencesByAssetUnitId(assetUnitId) {
         st.* 
      FROM schedule_occurrences so
      JOIN schedule_template_assets soa  
-       ON so.id = soa.schedule_occurrence_id 
+       ON so.id = soa.occurrence_id 
      LEFT JOIN schedule_templates st
        ON so.template_id = st.id
      WHERE soa.asset_unit_id = $1`,
     [assetUnitId]
   );
+  return rows;
+}
+
+async function getAllSchedulesWithTemplates(filters = {}) {
+  let query = `
+    SELECT 
+      so.*,
+      st.item_id,
+      st.description AS template_description,
+      i.name AS item_name,
+      i.department_id AS department_id,
+      COUNT(su.id) AS unit_count
+    FROM schedule_occurrences so
+    LEFT JOIN schedule_templates st 
+      ON so.template_id = st.id
+    LEFT JOIN items i
+      ON st.item_id = i.id
+    LEFT JOIN schedule_units su
+      ON so.id = su.occurrence_id
+  `;
+
+  const conditions = [];
+  const values = [];
+
+  if (filters.status) {
+    conditions.push(`so.status = $${values.length + 1}`);
+    values.push(filters.status);
+  }
+
+  if (filters.departmentId) {
+    conditions.push(`i.department_id = $${values.length + 1}`);
+    values.push(filters.departmentId);
+  }
+
+  if (conditions.length > 0) {
+    query += " WHERE " + conditions.join(" AND ");
+  }
+
+  query += `
+    GROUP BY 
+      so.id, st.item_id, st.description, i.name, i.department_id
+  `;
+
+  const { rows } = await db.query(query, values);
   return rows;
 }
 
@@ -169,6 +213,7 @@ export {
   getAllSchedules,
   getAllScheduleOccurrencesWithTemplate,
   getScheduleOccurrenceByID,
+  getAllSchedulesWithTemplates,
   getScheduleOccurrenceByTemplateId,
   getScheduleOccurrencesByAssetUnitId,
   createSchedule,

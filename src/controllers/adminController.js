@@ -22,8 +22,8 @@ export async function getPendingRegistrations(req, res) {
 
 export async function approveRegistration(req, res) {
   try {
-    const { pendingId, adminId } = req.body;
-    const user = await authService.approveRegistration(pendingId, adminId);
+    const { pendingId, adminId, departmentId } = req.body;
+    const user = await authService.approveRegistration(pendingId, adminId, departmentId);
     res.status(200).json({ 
       message: "Registration approved and user created successfully.",
       user 

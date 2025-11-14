@@ -20,6 +20,31 @@ async function getAssignedAssetsForOccurrence(templateId) {
   return enriched;
 }
 
+async function getScheduleUnitsByTechnician(userId) {
+  const { rows } = await db.query(
+    `SELECT 
+        su.*, 
+        au.unit_tag, 
+        i.name AS item_name,
+        d.name AS department_name,
+        CONCAT(l.name, ' - ', sl.name) AS location_name,
+        so.scheduled_date,
+        so.status AS occurrence_status
+      FROM schedule_units AS su
+      JOIN schedule_occurrences AS so ON su.occurrence_id = so.id
+      JOIN schedule_technicians AS st ON st.occurrence_id = so.id
+      JOIN item_units AS au ON su.item_unit_id = au.id
+      JOIN items AS i ON au.item_id = i.id
+      JOIN departments AS d ON au.owner_department_id = d.id
+      LEFT JOIN sub_locations AS sl ON au.sub_location_id = sl.id
+      LEFT JOIN locations AS l ON sl.location_id = l.id
+      WHERE st.user_id = $1`,
+    [userId]
+  );
+  return rows;
+}
+
+
 async function getAssignedAssetsByTemplateId(templateId) {
   const { rows } = await db.query(
     `SELECT 
@@ -29,10 +54,10 @@ async function getAssignedAssetsByTemplateId(templateId) {
        CONCAT(l.name, ' - ', sl.name) AS location_name
      FROM schedule_units AS sa
      JOIN item_units AS au ON sa.item_unit_id = au.id
-     JOIN departments AS d ON au.department_id = d.id
+     JOIN departments AS d ON au.owner_department_id = d.id
      LEFT JOIN sub_locations AS sl ON au.sub_location_id = sl.id
      LEFT JOIN locations AS l ON sl.location_id = l.id
-     WHERE sa.template_id = $1`,
+     WHERE sa.occurrence_id = $1`,
     [templateId]
   );
   return rows;
@@ -51,8 +76,24 @@ async function assignAssets(occurrence_id, item_unit_ids) {
   return { occurrence_id, item_unit_ids };
 }
 
+async function updateScheduleAssetStatus(occurrenceId, unitId) {
+  const { rows } = await db.query(
+    `
+    UPDATE schedule_units
+    SET status = 'completed'
+    WHERE id = $1 AND item_unit_id = $2
+    RETURNING *
+    `,
+    [occurrenceId, unitId]
+  );
+
+  return rows[0] || null;
+}
+
 export {
   getAssignedAssetsForOccurrence,
+  getScheduleUnitsByTechnician,
   getAssignedAssetsByTemplateId,
   assignAssets,
+  updateScheduleAssetStatus,
 };

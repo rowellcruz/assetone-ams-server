@@ -82,7 +82,7 @@ export const deleteItemUnitsByIDs = async (req, res) => {
 };
 
 export const relocateItemUnit = async (req, res) => {
-  const { id } = req.params;
+  const id = parseInt(req.params.id, 10); 
   const user = req.user;
   const relocate = await itemUnitService.relocateItemUnit(id, user, req.body);
   if (!relocate) {

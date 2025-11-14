@@ -1,5 +1,6 @@
 import express from 'express';
 import * as userController from '../controllers/userController.js';
+import * as scheduleController from '../controllers/scheduleController.js';
 import authenticate from '../middlewares/authMiddleware.js';
 import asyncHandler from '../utils/asyncHandler.js';
 
@@ -8,6 +9,7 @@ const MODULE = 'users';
 
 router.get('/', authenticate, asyncHandler(userController.getUsers));
 router.get('/me', authenticate, asyncHandler(userController.getMe));
+router.get('/:id/scheduled-units', authenticate, asyncHandler(scheduleController.getScheduleUnitsByTechnician));
 router.get('/:id', authenticate, asyncHandler(userController.getUserByID));
 router.post('/', authenticate, asyncHandler(userController.createUser, MODULE));
 router.post('/bulk-delete', authenticate, asyncHandler(userController.deleteUsersByIDs, MODULE));

@@ -26,16 +26,18 @@ async function logRelocation(
   from_sub_location_id,
   to_sub_location_id,
   requested_by,
-  requested_from
+  requested_from,
+  for_department
 ) {
   const { rows } = await db.query(
-    "INSERT INTO relocation_log (item_unit_id, from_sub_location_id, to_sub_location_id, requested_by, requested_from) VALUES ($1, $2, $3, $4) RETURNING id",
+    "INSERT INTO relocation_log (item_unit_id, from_sub_location_id, to_sub_location_id, requested_by, requested_from, for_department) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id",
     [
       item_unit_id,
       from_sub_location_id,
       to_sub_location_id,
       requested_by,
       requested_from,
+      for_department,
     ]
   );
   return rows[0];

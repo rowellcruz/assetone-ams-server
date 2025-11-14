@@ -10,6 +10,8 @@ async function getAllItemUnits(filters = {}) {
       v.contact_phone AS vendor_contact_number,
       v.address AS vendor_address,
       l.name || ' - ' || sl.name AS full_location_name,
+      l.name AS location_name,
+      sl.name AS sub_location_name,
       pc.first_name || ' ' || pc.last_name AS property_custodian_name,
       cu.first_name || ' ' || cu.last_name AS created_by_name,
       uu.first_name || ' ' || uu.last_name AS updated_by_name,
@@ -73,6 +75,10 @@ async function getAllItemUnits(filters = {}) {
     values.push(filters.status);
   }
 
+  if (filters.unitsForMaintenance === true) {
+    conditions.push(`(iu.status = 'available' OR iu.status = 'in_use')`);
+  }
+
   if (conditions.length > 0) {
     query += " WHERE " + conditions.join(" AND ");
   }
@@ -84,38 +90,188 @@ async function getAllItemUnits(filters = {}) {
 async function getItemUnitByID(id) {
   const { rows } = await db.query(
     `
-    SELECT iu.*, d.name AS department_name 
-    FROM item_units iu 
-    LEFT JOIN departments d ON iu.owner_department_id = d.id 
-    WHERE iu.id = $1`,
-    [id]
-  );
-  return rows[0] || null;
-}
-
-async function getItemUnitsByIds(ids) {
-  const placeholders = ids.map((_, i) => `$${i + 1}`).join(",");
-  const { rows } = await db.query(
-    `
-    SELECT iu.id, iu.unit_tag, i.name as item_name, iu.brand, d.name AS department_name, 
-      l.name || ' - ' || sl.name AS full_location_name
+    SELECT 
+      iu.*, 
+      i.name AS item_name,
+      i.department_id AS item_department_id,
+      d.name AS department_name,
+      v.name AS vendor_name,
+      v.contact_phone AS vendor_contact_number,
+      v.address AS vendor_address,
+      l.name || ' - ' || sl.name AS full_location_name,
+      l.name AS location_name,
+      sl.name AS sub_location_name,
+      pc.first_name || ' ' || pc.last_name AS property_custodian_name,
+      cu.first_name || ' ' || cu.last_name AS created_by_name,
+      uu.first_name || ' ' || uu.last_name AS updated_by_name,
+      du.first_name || ' ' || du.last_name AS deleted_by_name,
+      i.useful_life,
+      -- Calculate remaining useful life
+      CASE 
+        WHEN iu.purchase_date IS NOT NULL AND i.useful_life IS NOT NULL THEN
+          GREATEST(
+            0, 
+            i.useful_life - EXTRACT(YEAR FROM AGE(CURRENT_DATE, iu.purchase_date))
+          )
+        ELSE NULL
+      END AS remaining_useful_life,
+      -- Relocation info
+      rl.id AS relocation_log_id,
+      rl.status AS relocation_status,
+      rl.requested_at AS relocation_created_at,
+      rl.from_sub_location_id,
+      rl.to_sub_location_id,
+      rl.from_location_name,
+      rl.from_sub_location_name,
+      rl.to_location_name,
+      rl.to_sub_location_name,
+      CASE WHEN rl.status IS NOT NULL THEN 'under_relocation' ELSE 'available' END AS status
     FROM item_units iu
     LEFT JOIN items i ON iu.item_id = i.id
     LEFT JOIN departments d ON iu.owner_department_id = d.id
     LEFT JOIN sub_locations sl ON iu.sub_location_id = sl.id
     LEFT JOIN locations l ON sl.location_id = l.id
-    WHERE iu.id IN (${placeholders})`,
+    LEFT JOIN vendors v ON iu.vendor_id = v.id
+    LEFT JOIN users pc ON pc.role = 'property_custodian' 
+                      AND pc.department_id = iu.owner_department_id
+    LEFT JOIN users cu ON iu.created_by = cu.id
+    LEFT JOIN users uu ON iu.updated_by = uu.id
+    LEFT JOIN users du ON iu.deleted_by = du.id
+    LEFT JOIN LATERAL (
+      SELECT 
+        r.id,
+        r.status,
+        r.requested_at,
+        r.from_sub_location_id,
+        r.to_sub_location_id,
+        from_sl.name AS from_sub_location_name,
+        from_l.name AS from_location_name,
+        to_sl.name AS to_sub_location_name,
+        to_l.name AS to_location_name
+      FROM relocation_log r
+      LEFT JOIN sub_locations from_sl ON r.from_sub_location_id = from_sl.id
+      LEFT JOIN locations from_l ON from_sl.location_id = from_l.id
+      LEFT JOIN sub_locations to_sl ON r.to_sub_location_id = to_sl.id
+      LEFT JOIN locations to_l ON to_sl.location_id = to_l.id
+      WHERE r.item_unit_id = iu.id
+        AND r.status IN ('pending','in_progress')
+      ORDER BY r.requested_at DESC
+      LIMIT 1
+    ) rl ON TRUE
+    WHERE iu.id = $1
+    `,
+    [id]
+  );
+
+  return rows[0] || null;
+}
+async function getItemUnitsByIds(ids) {
+  if (!ids || ids.length === 0) return [];
+
+  const placeholders = ids.map((_, i) => `$${i + 1}`).join(",");
+
+  const { rows } = await db.query(
+    `
+    SELECT 
+      iu.id,
+      iu.unit_tag,
+      i.name AS item_name,
+      iu.brand,
+      d.name AS department_name,
+      l.name || ' - ' || sl.name AS full_location_name,
+      l.name AS location_name,
+      sl.name AS sub_location_name,
+      -- Relocation info
+      rl.id AS relocation_log_id,
+      rl.status AS relocation_status,
+      rl.created_at AS relocation_created_at,
+      rl.from_location_name AS relocation_from_location_name,
+      rl.from_sub_location_name AS relocation_from_sub_location_name,
+      rl.to_location_name AS relocation_to_location_name,
+      rl.to_sub_location_name AS relocation_to_sub_location_name,
+      CASE WHEN rl.status IS NOT NULL THEN 'under_relocation' ELSE 'available' END AS status
+    FROM item_units iu
+    LEFT JOIN items i ON iu.item_id = i.id
+    LEFT JOIN departments d ON iu.owner_department_id = d.id
+    LEFT JOIN sub_locations sl ON iu.sub_location_id = sl.id
+    LEFT JOIN locations l ON sl.location_id = l.id
+    LEFT JOIN LATERAL (
+      SELECT 
+        rl.id,
+        rl.status,
+        rl.created_at,
+        from_l.name AS from_location_name,
+        from_sl.name AS from_sub_location_name,
+        to_l.name AS to_location_name,
+        to_sl.name AS to_sub_location_name
+      FROM relocation_log rl
+      LEFT JOIN sub_locations from_sl ON rl.from_sub_location_id = from_sl.id
+      LEFT JOIN locations from_l ON from_sl.location_id = from_l.id
+      LEFT JOIN sub_locations to_sl ON rl.to_sub_location_id = to_sl.id
+      LEFT JOIN locations to_l ON to_sl.location_id = to_l.id
+      WHERE rl.item_unit_id = iu.id
+        AND rl.status IN ('pending', 'in_progress')
+      ORDER BY rl.created_at DESC
+      LIMIT 1
+    ) rl ON TRUE
+    WHERE iu.id IN (${placeholders})
+    `,
     ids
   );
+
   return rows;
 }
 
-async function getItemUnitsByDepartmentId(id) {
+async function getItemUnitsByDepartmentId(departmentId) {
   const { rows } = await db.query(
-    "SELECT * FROM item_units WHERE owner_department_id = $1",
-    [id]
+    `
+    SELECT 
+      iu.id,
+      iu.unit_tag,
+      i.name AS item_name,
+      iu.brand,
+      d.name AS department_name,
+      l.name || ' - ' || sl.name AS full_location_name,
+      l.name AS location_name,
+      sl.name AS sub_location_name,
+      rl.id AS relocation_log_id,
+      rl.status AS relocation_status,
+      rl.created_at AS relocation_created_at,
+      rl.from_location_name AS relocation_from_location_name,
+      rl.from_sub_location_name AS relocation_from_sub_location_name,
+      rl.to_location_name AS relocation_to_location_name,
+      rl.to_sub_location_name AS relocation_to_sub_location_name,
+      CASE WHEN rl.status IS NOT NULL THEN 'under_relocation' ELSE 'available' END AS status
+    FROM item_units iu
+    LEFT JOIN items i ON iu.item_id = i.id
+    LEFT JOIN departments d ON iu.owner_department_id = d.id
+    LEFT JOIN sub_locations sl ON iu.sub_location_id = sl.id
+    LEFT JOIN locations l ON sl.location_id = l.id
+    LEFT JOIN LATERAL (
+      SELECT 
+        r.id,
+        r.status,
+        r.created_at,
+        from_l.name AS from_location_name,
+        from_sl.name AS from_sub_location_name,
+        to_l.name AS to_location_name,
+        to_sl.name AS to_sub_location_name
+      FROM relocation_log r
+      LEFT JOIN sub_locations from_sl ON r.from_sub_location_id = from_sl.id
+      LEFT JOIN locations from_l ON from_sl.location_id = from_l.id
+      LEFT JOIN sub_locations to_sl ON r.to_sub_location_id = to_sl.id
+      LEFT JOIN locations to_l ON to_sl.location_id = to_l.id
+      WHERE r.item_unit_id = iu.id
+        AND r.status IN ('pending', 'in_progress')
+      ORDER BY r.created_at DESC
+      LIMIT 1
+    ) rl ON TRUE
+    WHERE iu.owner_department_id = $1
+    `,
+    [departmentId]
   );
-  return rows[0] || null;
+
+  return rows;
 }
 
 async function getReportedItemDataById(id) {
@@ -194,7 +350,7 @@ async function createItemUnit(data) {
       sub_location_id || null,
       owner_department_id,
       purchase_date,
-    purchase_cost,
+      purchase_cost,
       is_legacy,
       vendor_id,
       created_by,

@@ -2,13 +2,7 @@ import * as vendorModel from "../models/vendorModel.js";
 import * as vendorOfferModel from "../models/vendorOfferModel.js";
 
 export async function getAllVendors(filters = {}) {
-  const vendors = await vendorModel.getAllVendors(filters);
-  const offersMap = await vendorModel.getAllVendorOffersMap();
-
-  return vendors.map((vendor) => ({
-    ...vendor,
-    asset_category_ids: (offersMap[vendor.id] || []).map(o => o.id),
-  }));
+  return await vendorModel.getAllVendors(filters);
 }
 
 export async function getVendorByID(id) {
@@ -20,6 +14,11 @@ export async function getVendorByID(id) {
 }
 
 export async function createVendor(vendorData) {
+  const existingVendor = await vendorModel.getAllVendors({
+    name: vendorData.name,
+  });
+  
+  if (existingVendor.length > 0) throw new Error("Vendor already exists");
   return vendorModel.createVendor(vendorData);
 }
 
