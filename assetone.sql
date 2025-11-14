@@ -2,9 +2,9 @@
 -- PostgreSQL database dump
 --
 
-\restrict 97RloNO6LS4DgOtILVei3XP4gAfHTZtAg9E9tK7OxE2XBpDBaMn6ls9nCZN0RSd
+\restrict QnRslyplDGp2SAIaATL9POgK57H7BwMFjwnxmqFpY8gm21WJSDQJJLHaE3IYJUi
 
--- Dumped from database version 17.6 (Debian 17.6-2.pgdg12+1)
+-- Dumped from database version 17.6
 -- Dumped by pg_dump version 17.6
 
 SET statement_timeout = 0;
@@ -19,49 +19,12 @@ SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
 
---
--- Name: public; Type: SCHEMA; Schema: -; Owner: assetone_ams_db_5esl_user
---
-
--- *not* creating schema, since initdb creates it
-
-
-ALTER SCHEMA public OWNER TO assetone_ams_db_5esl_user;
-
---
--- Name: pgcrypto; Type: EXTENSION; Schema: -; Owner: -
---
-
-CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA public;
-
-
---
--- Name: EXTENSION pgcrypto; Type: COMMENT; Schema: -; Owner: 
---
-
-COMMENT ON EXTENSION pgcrypto IS 'cryptographic functions';
-
-
---
--- Name: procurement_status; Type: TYPE; Schema: public; Owner: assetone_ams_db_5esl_user
---
-
-CREATE TYPE public.procurement_status AS ENUM (
-    'for_approval',
-    'cancelled',
-    'processing',
-    'completed'
-);
-
-
-ALTER TYPE public.procurement_status OWNER TO assetone_ams_db_5esl_user;
-
 SET default_tablespace = '';
 
 SET default_table_access_method = heap;
 
 --
--- Name: activity_log; Type: TABLE; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: activity_log; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.activity_log (
@@ -78,10 +41,10 @@ CREATE TABLE public.activity_log (
 );
 
 
-ALTER TABLE public.activity_log OWNER TO assetone_ams_db_5esl_user;
+ALTER TABLE public.activity_log OWNER TO postgres;
 
 --
--- Name: activity_log_id_seq; Type: SEQUENCE; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: activity_log_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
 CREATE SEQUENCE public.activity_log_id_seq
@@ -92,17 +55,17 @@ CREATE SEQUENCE public.activity_log_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.activity_log_id_seq OWNER TO assetone_ams_db_5esl_user;
+ALTER SEQUENCE public.activity_log_id_seq OWNER TO postgres;
 
 --
--- Name: activity_log_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: activity_log_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE public.activity_log_id_seq OWNED BY public.activity_log.id;
 
 
 --
--- Name: borrow_logs; Type: TABLE; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: borrow_logs; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.borrow_logs (
@@ -119,10 +82,10 @@ CREATE TABLE public.borrow_logs (
 );
 
 
-ALTER TABLE public.borrow_logs OWNER TO assetone_ams_db_5esl_user;
+ALTER TABLE public.borrow_logs OWNER TO postgres;
 
 --
--- Name: borrow_logs_id_seq; Type: SEQUENCE; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: borrow_logs_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
 CREATE SEQUENCE public.borrow_logs_id_seq
@@ -133,17 +96,17 @@ CREATE SEQUENCE public.borrow_logs_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.borrow_logs_id_seq OWNER TO assetone_ams_db_5esl_user;
+ALTER SEQUENCE public.borrow_logs_id_seq OWNER TO postgres;
 
 --
--- Name: borrow_logs_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: borrow_logs_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE public.borrow_logs_id_seq OWNED BY public.borrow_logs.id;
 
 
 --
--- Name: departments; Type: TABLE; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: departments; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.departments (
@@ -155,14 +118,15 @@ CREATE TABLE public.departments (
     created_at timestamp with time zone DEFAULT now(),
     updated_at timestamp with time zone DEFAULT now(),
     deleted_at timestamp with time zone,
-    code character varying(100) NOT NULL
+    code character varying(100) NOT NULL,
+    sub_location_id integer
 );
 
 
-ALTER TABLE public.departments OWNER TO assetone_ams_db_5esl_user;
+ALTER TABLE public.departments OWNER TO postgres;
 
 --
--- Name: departments_id_seq; Type: SEQUENCE; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: departments_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
 CREATE SEQUENCE public.departments_id_seq
@@ -173,17 +137,17 @@ CREATE SEQUENCE public.departments_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.departments_id_seq OWNER TO assetone_ams_db_5esl_user;
+ALTER SEQUENCE public.departments_id_seq OWNER TO postgres;
 
 --
--- Name: departments_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: departments_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE public.departments_id_seq OWNED BY public.departments.id;
 
 
 --
--- Name: item_attachments; Type: TABLE; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: item_attachments; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.item_attachments (
@@ -198,10 +162,10 @@ CREATE TABLE public.item_attachments (
 );
 
 
-ALTER TABLE public.item_attachments OWNER TO assetone_ams_db_5esl_user;
+ALTER TABLE public.item_attachments OWNER TO postgres;
 
 --
--- Name: item_attachments_id_seq; Type: SEQUENCE; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: item_attachments_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
 CREATE SEQUENCE public.item_attachments_id_seq
@@ -212,17 +176,17 @@ CREATE SEQUENCE public.item_attachments_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.item_attachments_id_seq OWNER TO assetone_ams_db_5esl_user;
+ALTER SEQUENCE public.item_attachments_id_seq OWNER TO postgres;
 
 --
--- Name: item_attachments_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: item_attachments_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE public.item_attachments_id_seq OWNED BY public.item_attachments.id;
 
 
 --
--- Name: item_categories; Type: TABLE; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: item_categories; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.item_categories (
@@ -238,10 +202,10 @@ CREATE TABLE public.item_categories (
 );
 
 
-ALTER TABLE public.item_categories OWNER TO assetone_ams_db_5esl_user;
+ALTER TABLE public.item_categories OWNER TO postgres;
 
 --
--- Name: item_categories_id_seq; Type: SEQUENCE; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: item_categories_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
 CREATE SEQUENCE public.item_categories_id_seq
@@ -252,17 +216,17 @@ CREATE SEQUENCE public.item_categories_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.item_categories_id_seq OWNER TO assetone_ams_db_5esl_user;
+ALTER SEQUENCE public.item_categories_id_seq OWNER TO postgres;
 
 --
--- Name: item_categories_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: item_categories_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE public.item_categories_id_seq OWNED BY public.item_categories.id;
 
 
 --
--- Name: item_costs; Type: TABLE; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: item_costs; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.item_costs (
@@ -276,10 +240,10 @@ CREATE TABLE public.item_costs (
 );
 
 
-ALTER TABLE public.item_costs OWNER TO assetone_ams_db_5esl_user;
+ALTER TABLE public.item_costs OWNER TO postgres;
 
 --
--- Name: item_costs_id_seq; Type: SEQUENCE; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: item_costs_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
 CREATE SEQUENCE public.item_costs_id_seq
@@ -290,17 +254,17 @@ CREATE SEQUENCE public.item_costs_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.item_costs_id_seq OWNER TO assetone_ams_db_5esl_user;
+ALTER SEQUENCE public.item_costs_id_seq OWNER TO postgres;
 
 --
--- Name: item_costs_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: item_costs_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE public.item_costs_id_seq OWNED BY public.item_costs.id;
 
 
 --
--- Name: item_depreciation; Type: TABLE; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: item_depreciation; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.item_depreciation (
@@ -316,10 +280,10 @@ CREATE TABLE public.item_depreciation (
 );
 
 
-ALTER TABLE public.item_depreciation OWNER TO assetone_ams_db_5esl_user;
+ALTER TABLE public.item_depreciation OWNER TO postgres;
 
 --
--- Name: item_depreciation_id_seq; Type: SEQUENCE; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: item_depreciation_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
 CREATE SEQUENCE public.item_depreciation_id_seq
@@ -330,17 +294,17 @@ CREATE SEQUENCE public.item_depreciation_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.item_depreciation_id_seq OWNER TO assetone_ams_db_5esl_user;
+ALTER SEQUENCE public.item_depreciation_id_seq OWNER TO postgres;
 
 --
--- Name: item_depreciation_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: item_depreciation_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE public.item_depreciation_id_seq OWNED BY public.item_depreciation.id;
 
 
 --
--- Name: item_lifecycle; Type: TABLE; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: item_lifecycle; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.item_lifecycle (
@@ -353,10 +317,10 @@ CREATE TABLE public.item_lifecycle (
 );
 
 
-ALTER TABLE public.item_lifecycle OWNER TO assetone_ams_db_5esl_user;
+ALTER TABLE public.item_lifecycle OWNER TO postgres;
 
 --
--- Name: item_lifecycle_id_seq; Type: SEQUENCE; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: item_lifecycle_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
 CREATE SEQUENCE public.item_lifecycle_id_seq
@@ -367,17 +331,17 @@ CREATE SEQUENCE public.item_lifecycle_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.item_lifecycle_id_seq OWNER TO assetone_ams_db_5esl_user;
+ALTER SEQUENCE public.item_lifecycle_id_seq OWNER TO postgres;
 
 --
--- Name: item_lifecycle_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: item_lifecycle_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE public.item_lifecycle_id_seq OWNED BY public.item_lifecycle.id;
 
 
 --
--- Name: item_requests; Type: TABLE; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: item_requests; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.item_requests (
@@ -395,10 +359,10 @@ CREATE TABLE public.item_requests (
 );
 
 
-ALTER TABLE public.item_requests OWNER TO assetone_ams_db_5esl_user;
+ALTER TABLE public.item_requests OWNER TO postgres;
 
 --
--- Name: item_requests_id_seq; Type: SEQUENCE; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: item_requests_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
 CREATE SEQUENCE public.item_requests_id_seq
@@ -409,17 +373,17 @@ CREATE SEQUENCE public.item_requests_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.item_requests_id_seq OWNER TO assetone_ams_db_5esl_user;
+ALTER SEQUENCE public.item_requests_id_seq OWNER TO postgres;
 
 --
--- Name: item_requests_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: item_requests_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE public.item_requests_id_seq OWNED BY public.item_requests.id;
 
 
 --
--- Name: item_units; Type: TABLE; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: item_units; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.item_units (
@@ -428,7 +392,6 @@ CREATE TABLE public.item_units (
     serial_number character varying(255),
     unit_tag character varying(50),
     specifications text,
-    status character varying(50) DEFAULT 'available'::character varying,
     sub_location_id integer,
     is_legacy boolean DEFAULT false,
     owner_department_id bigint,
@@ -441,14 +404,16 @@ CREATE TABLE public.item_units (
     vendor_id bigint,
     brand character varying(255) NOT NULL,
     condition integer DEFAULT 100,
-    acquisition_date timestamp with time zone
+    purchase_date timestamp with time zone,
+    purchase_cost numeric(12,2),
+    status character varying
 );
 
 
-ALTER TABLE public.item_units OWNER TO assetone_ams_db_5esl_user;
+ALTER TABLE public.item_units OWNER TO postgres;
 
 --
--- Name: item_units_id_seq; Type: SEQUENCE; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: item_units_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
 CREATE SEQUENCE public.item_units_id_seq
@@ -459,23 +424,22 @@ CREATE SEQUENCE public.item_units_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.item_units_id_seq OWNER TO assetone_ams_db_5esl_user;
+ALTER SEQUENCE public.item_units_id_seq OWNER TO postgres;
 
 --
--- Name: item_units_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: item_units_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE public.item_units_id_seq OWNED BY public.item_units.id;
 
 
 --
--- Name: items; Type: TABLE; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: items; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.items (
     id bigint NOT NULL,
     name character varying(255) NOT NULL,
-    category_id bigint NOT NULL,
     department_id bigint,
     created_by bigint,
     updated_by bigint,
@@ -483,15 +447,22 @@ CREATE TABLE public.items (
     created_at timestamp with time zone DEFAULT now(),
     updated_at timestamp with time zone DEFAULT now(),
     deleted_at timestamp with time zone,
-    type character varying(50) DEFAULT 'asset'::character varying,
-    is_high_value boolean DEFAULT false
+    useful_life integer,
+    rul_percentage integer DEFAULT 33,
+    performance_percentage integer DEFAULT 33,
+    physical_percentage integer DEFAULT 34,
+    rul_multiplier numeric(3,1) DEFAULT 1.0,
+    performance_multiplier numeric(3,1) DEFAULT 1.0,
+    physical_multiplier numeric(3,1) DEFAULT 1.0,
+    category character varying(255),
+    condition_assessment_frequency character varying DEFAULT 'weekly'::character varying
 );
 
 
-ALTER TABLE public.items OWNER TO assetone_ams_db_5esl_user;
+ALTER TABLE public.items OWNER TO postgres;
 
 --
--- Name: items_for_distribution; Type: TABLE; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: items_for_distribution; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.items_for_distribution (
@@ -502,10 +473,10 @@ CREATE TABLE public.items_for_distribution (
 );
 
 
-ALTER TABLE public.items_for_distribution OWNER TO assetone_ams_db_5esl_user;
+ALTER TABLE public.items_for_distribution OWNER TO postgres;
 
 --
--- Name: items_for_distribution_id_seq; Type: SEQUENCE; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: items_for_distribution_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
 CREATE SEQUENCE public.items_for_distribution_id_seq
@@ -516,17 +487,17 @@ CREATE SEQUENCE public.items_for_distribution_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.items_for_distribution_id_seq OWNER TO assetone_ams_db_5esl_user;
+ALTER SEQUENCE public.items_for_distribution_id_seq OWNER TO postgres;
 
 --
--- Name: items_for_distribution_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: items_for_distribution_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE public.items_for_distribution_id_seq OWNED BY public.items_for_distribution.id;
 
 
 --
--- Name: items_id_seq; Type: SEQUENCE; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: items_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
 CREATE SEQUENCE public.items_id_seq
@@ -537,17 +508,17 @@ CREATE SEQUENCE public.items_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.items_id_seq OWNER TO assetone_ams_db_5esl_user;
+ALTER SEQUENCE public.items_id_seq OWNER TO postgres;
 
 --
--- Name: items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE public.items_id_seq OWNED BY public.items.id;
 
 
 --
--- Name: locations; Type: TABLE; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: locations; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.locations (
@@ -562,10 +533,10 @@ CREATE TABLE public.locations (
 );
 
 
-ALTER TABLE public.locations OWNER TO assetone_ams_db_5esl_user;
+ALTER TABLE public.locations OWNER TO postgres;
 
 --
--- Name: locations_id_seq; Type: SEQUENCE; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: locations_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
 CREATE SEQUENCE public.locations_id_seq
@@ -576,17 +547,17 @@ CREATE SEQUENCE public.locations_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.locations_id_seq OWNER TO assetone_ams_db_5esl_user;
+ALTER SEQUENCE public.locations_id_seq OWNER TO postgres;
 
 --
--- Name: locations_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: locations_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE public.locations_id_seq OWNED BY public.locations.id;
 
 
 --
--- Name: maintenance_history; Type: TABLE; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: maintenance_history; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.maintenance_history (
@@ -600,10 +571,10 @@ CREATE TABLE public.maintenance_history (
 );
 
 
-ALTER TABLE public.maintenance_history OWNER TO assetone_ams_db_5esl_user;
+ALTER TABLE public.maintenance_history OWNER TO postgres;
 
 --
--- Name: maintenance_history_id_seq; Type: SEQUENCE; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: maintenance_history_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
 CREATE SEQUENCE public.maintenance_history_id_seq
@@ -614,17 +585,17 @@ CREATE SEQUENCE public.maintenance_history_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.maintenance_history_id_seq OWNER TO assetone_ams_db_5esl_user;
+ALTER SEQUENCE public.maintenance_history_id_seq OWNER TO postgres;
 
 --
--- Name: maintenance_history_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: maintenance_history_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE public.maintenance_history_id_seq OWNED BY public.maintenance_history.id;
 
 
 --
--- Name: maintenance_requests; Type: TABLE; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: maintenance_requests; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.maintenance_requests (
@@ -641,10 +612,10 @@ CREATE TABLE public.maintenance_requests (
 );
 
 
-ALTER TABLE public.maintenance_requests OWNER TO assetone_ams_db_5esl_user;
+ALTER TABLE public.maintenance_requests OWNER TO postgres;
 
 --
--- Name: maintenance_requests_id_seq; Type: SEQUENCE; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: maintenance_requests_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
 CREATE SEQUENCE public.maintenance_requests_id_seq
@@ -655,17 +626,17 @@ CREATE SEQUENCE public.maintenance_requests_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.maintenance_requests_id_seq OWNER TO assetone_ams_db_5esl_user;
+ALTER SEQUENCE public.maintenance_requests_id_seq OWNER TO postgres;
 
 --
--- Name: maintenance_requests_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: maintenance_requests_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE public.maintenance_requests_id_seq OWNED BY public.maintenance_requests.id;
 
 
 --
--- Name: password_reset_tokens; Type: TABLE; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: password_reset_tokens; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.password_reset_tokens (
@@ -678,10 +649,10 @@ CREATE TABLE public.password_reset_tokens (
 );
 
 
-ALTER TABLE public.password_reset_tokens OWNER TO assetone_ams_db_5esl_user;
+ALTER TABLE public.password_reset_tokens OWNER TO postgres;
 
 --
--- Name: password_reset_tokens_id_seq; Type: SEQUENCE; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: password_reset_tokens_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
 CREATE SEQUENCE public.password_reset_tokens_id_seq
@@ -692,17 +663,17 @@ CREATE SEQUENCE public.password_reset_tokens_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.password_reset_tokens_id_seq OWNER TO assetone_ams_db_5esl_user;
+ALTER SEQUENCE public.password_reset_tokens_id_seq OWNER TO postgres;
 
 --
--- Name: password_reset_tokens_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: password_reset_tokens_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE public.password_reset_tokens_id_seq OWNED BY public.password_reset_tokens.id;
 
 
 --
--- Name: pending_registration; Type: TABLE; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: pending_registration; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.pending_registration (
@@ -714,15 +685,16 @@ CREATE TABLE public.pending_registration (
     status character varying(20) DEFAULT 'pending'::character varying,
     created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
     updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT pending_registration_role_check CHECK (((role)::text = ANY (ARRAY[('asset_administrator'::character varying)::text, ('property_custodian'::character varying)::text]))),
-    CONSTRAINT pending_registration_status_check CHECK (((status)::text = ANY (ARRAY[('pending'::character varying)::text, ('approved'::character varying)::text, ('rejected'::character varying)::text])))
+    department_id integer,
+    CONSTRAINT pending_registration_role_check CHECK (((role)::text = ANY ((ARRAY['asset_administrator'::character varying, 'property_custodian'::character varying, 'technician'::character varying])::text[]))),
+    CONSTRAINT pending_registration_status_check CHECK (((status)::text = ANY ((ARRAY['pending'::character varying, 'approved'::character varying, 'rejected'::character varying])::text[])))
 );
 
 
-ALTER TABLE public.pending_registration OWNER TO assetone_ams_db_5esl_user;
+ALTER TABLE public.pending_registration OWNER TO postgres;
 
 --
--- Name: pending_registration_id_seq; Type: SEQUENCE; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: pending_registration_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
 CREATE SEQUENCE public.pending_registration_id_seq
@@ -734,17 +706,17 @@ CREATE SEQUENCE public.pending_registration_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.pending_registration_id_seq OWNER TO assetone_ams_db_5esl_user;
+ALTER SEQUENCE public.pending_registration_id_seq OWNER TO postgres;
 
 --
--- Name: pending_registration_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: pending_registration_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE public.pending_registration_id_seq OWNED BY public.pending_registration.id;
 
 
 --
--- Name: pr_sequences; Type: TABLE; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: pr_sequences; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.pr_sequences (
@@ -753,10 +725,10 @@ CREATE TABLE public.pr_sequences (
 );
 
 
-ALTER TABLE public.pr_sequences OWNER TO assetone_ams_db_5esl_user;
+ALTER TABLE public.pr_sequences OWNER TO postgres;
 
 --
--- Name: procurement_attachments; Type: TABLE; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: procurement_attachments; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.procurement_attachments (
@@ -772,10 +744,10 @@ CREATE TABLE public.procurement_attachments (
 );
 
 
-ALTER TABLE public.procurement_attachments OWNER TO assetone_ams_db_5esl_user;
+ALTER TABLE public.procurement_attachments OWNER TO postgres;
 
 --
--- Name: procurement_attachments_id_seq; Type: SEQUENCE; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: procurement_attachments_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
 CREATE SEQUENCE public.procurement_attachments_id_seq
@@ -786,17 +758,17 @@ CREATE SEQUENCE public.procurement_attachments_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.procurement_attachments_id_seq OWNER TO assetone_ams_db_5esl_user;
+ALTER SEQUENCE public.procurement_attachments_id_seq OWNER TO postgres;
 
 --
--- Name: procurement_attachments_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: procurement_attachments_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE public.procurement_attachments_id_seq OWNED BY public.procurement_attachments.id;
 
 
 --
--- Name: procurement_finalizations; Type: TABLE; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: procurement_finalizations; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.procurement_finalizations (
@@ -807,10 +779,10 @@ CREATE TABLE public.procurement_finalizations (
 );
 
 
-ALTER TABLE public.procurement_finalizations OWNER TO assetone_ams_db_5esl_user;
+ALTER TABLE public.procurement_finalizations OWNER TO postgres;
 
 --
--- Name: procurement_finalizations_id_seq; Type: SEQUENCE; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: procurement_finalizations_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
 CREATE SEQUENCE public.procurement_finalizations_id_seq
@@ -821,17 +793,17 @@ CREATE SEQUENCE public.procurement_finalizations_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.procurement_finalizations_id_seq OWNER TO assetone_ams_db_5esl_user;
+ALTER SEQUENCE public.procurement_finalizations_id_seq OWNER TO postgres;
 
 --
--- Name: procurement_finalizations_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: procurement_finalizations_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE public.procurement_finalizations_id_seq OWNED BY public.procurement_finalizations.id;
 
 
 --
--- Name: purchase_order_items; Type: TABLE; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: purchase_order_items; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.purchase_order_items (
@@ -852,10 +824,10 @@ CREATE TABLE public.purchase_order_items (
 );
 
 
-ALTER TABLE public.purchase_order_items OWNER TO assetone_ams_db_5esl_user;
+ALTER TABLE public.purchase_order_items OWNER TO postgres;
 
 --
--- Name: purchase_order_items_id_seq; Type: SEQUENCE; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: purchase_order_items_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
 CREATE SEQUENCE public.purchase_order_items_id_seq
@@ -867,17 +839,17 @@ CREATE SEQUENCE public.purchase_order_items_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.purchase_order_items_id_seq OWNER TO assetone_ams_db_5esl_user;
+ALTER SEQUENCE public.purchase_order_items_id_seq OWNER TO postgres;
 
 --
--- Name: purchase_order_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: purchase_order_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE public.purchase_order_items_id_seq OWNED BY public.purchase_order_items.id;
 
 
 --
--- Name: purchase_orders; Type: TABLE; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: purchase_orders; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.purchase_orders (
@@ -892,10 +864,10 @@ CREATE TABLE public.purchase_orders (
 );
 
 
-ALTER TABLE public.purchase_orders OWNER TO assetone_ams_db_5esl_user;
+ALTER TABLE public.purchase_orders OWNER TO postgres;
 
 --
--- Name: purchase_orders_id_seq; Type: SEQUENCE; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: purchase_orders_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
 CREATE SEQUENCE public.purchase_orders_id_seq
@@ -906,17 +878,17 @@ CREATE SEQUENCE public.purchase_orders_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.purchase_orders_id_seq OWNER TO assetone_ams_db_5esl_user;
+ALTER SEQUENCE public.purchase_orders_id_seq OWNER TO postgres;
 
 --
--- Name: purchase_orders_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: purchase_orders_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE public.purchase_orders_id_seq OWNED BY public.purchase_orders.id;
 
 
 --
--- Name: purchase_requests; Type: TABLE; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: purchase_requests; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.purchase_requests (
@@ -937,10 +909,10 @@ CREATE TABLE public.purchase_requests (
 );
 
 
-ALTER TABLE public.purchase_requests OWNER TO assetone_ams_db_5esl_user;
+ALTER TABLE public.purchase_requests OWNER TO postgres;
 
 --
--- Name: purchase_requests_id_seq; Type: SEQUENCE; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: purchase_requests_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
 CREATE SEQUENCE public.purchase_requests_id_seq
@@ -951,17 +923,17 @@ CREATE SEQUENCE public.purchase_requests_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.purchase_requests_id_seq OWNER TO assetone_ams_db_5esl_user;
+ALTER SEQUENCE public.purchase_requests_id_seq OWNER TO postgres;
 
 --
--- Name: purchase_requests_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: purchase_requests_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE public.purchase_requests_id_seq OWNED BY public.purchase_requests.id;
 
 
 --
--- Name: relocation_log; Type: TABLE; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: relocation_log; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.relocation_log (
@@ -974,14 +946,15 @@ CREATE TABLE public.relocation_log (
     status character varying(20) DEFAULT 'pending'::character varying NOT NULL,
     requested_at timestamp without time zone DEFAULT now() NOT NULL,
     completed_at timestamp without time zone,
-    requested_from bigint
+    requested_from bigint,
+    for_department integer
 );
 
 
-ALTER TABLE public.relocation_log OWNER TO assetone_ams_db_5esl_user;
+ALTER TABLE public.relocation_log OWNER TO postgres;
 
 --
--- Name: relocation_log_id_seq; Type: SEQUENCE; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: relocation_log_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
 CREATE SEQUENCE public.relocation_log_id_seq
@@ -993,17 +966,52 @@ CREATE SEQUENCE public.relocation_log_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.relocation_log_id_seq OWNER TO assetone_ams_db_5esl_user;
+ALTER SEQUENCE public.relocation_log_id_seq OWNER TO postgres;
 
 --
--- Name: relocation_log_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: relocation_log_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE public.relocation_log_id_seq OWNED BY public.relocation_log.id;
 
 
 --
--- Name: requested_items; Type: TABLE; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: relocation_technicians; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.relocation_technicians (
+    id integer NOT NULL,
+    relocation_log_id integer NOT NULL,
+    user_id integer NOT NULL
+);
+
+
+ALTER TABLE public.relocation_technicians OWNER TO postgres;
+
+--
+-- Name: relocation_technicians_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.relocation_technicians_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.relocation_technicians_id_seq OWNER TO postgres;
+
+--
+-- Name: relocation_technicians_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.relocation_technicians_id_seq OWNED BY public.relocation_technicians.id;
+
+
+--
+-- Name: requested_items; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.requested_items (
@@ -1014,10 +1022,10 @@ CREATE TABLE public.requested_items (
 );
 
 
-ALTER TABLE public.requested_items OWNER TO assetone_ams_db_5esl_user;
+ALTER TABLE public.requested_items OWNER TO postgres;
 
 --
--- Name: requested_items_id_seq; Type: SEQUENCE; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: requested_items_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
 CREATE SEQUENCE public.requested_items_id_seq
@@ -1028,17 +1036,17 @@ CREATE SEQUENCE public.requested_items_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.requested_items_id_seq OWNER TO assetone_ams_db_5esl_user;
+ALTER SEQUENCE public.requested_items_id_seq OWNER TO postgres;
 
 --
--- Name: requested_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: requested_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE public.requested_items_id_seq OWNED BY public.requested_items.id;
 
 
 --
--- Name: schedule_occurrences; Type: TABLE; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: schedule_occurrences; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.schedule_occurrences (
@@ -1063,10 +1071,10 @@ CREATE TABLE public.schedule_occurrences (
 );
 
 
-ALTER TABLE public.schedule_occurrences OWNER TO assetone_ams_db_5esl_user;
+ALTER TABLE public.schedule_occurrences OWNER TO postgres;
 
 --
--- Name: schedule_occurrences_id_seq; Type: SEQUENCE; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: schedule_occurrences_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
 CREATE SEQUENCE public.schedule_occurrences_id_seq
@@ -1077,17 +1085,17 @@ CREATE SEQUENCE public.schedule_occurrences_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.schedule_occurrences_id_seq OWNER TO assetone_ams_db_5esl_user;
+ALTER SEQUENCE public.schedule_occurrences_id_seq OWNER TO postgres;
 
 --
--- Name: schedule_occurrences_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: schedule_occurrences_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE public.schedule_occurrences_id_seq OWNED BY public.schedule_occurrences.id;
 
 
 --
--- Name: schedule_technicians; Type: TABLE; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: schedule_technicians; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.schedule_technicians (
@@ -1098,10 +1106,10 @@ CREATE TABLE public.schedule_technicians (
 );
 
 
-ALTER TABLE public.schedule_technicians OWNER TO assetone_ams_db_5esl_user;
+ALTER TABLE public.schedule_technicians OWNER TO postgres;
 
 --
--- Name: schedule_technicians_id_seq; Type: SEQUENCE; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: schedule_technicians_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
 CREATE SEQUENCE public.schedule_technicians_id_seq
@@ -1112,17 +1120,17 @@ CREATE SEQUENCE public.schedule_technicians_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.schedule_technicians_id_seq OWNER TO assetone_ams_db_5esl_user;
+ALTER SEQUENCE public.schedule_technicians_id_seq OWNER TO postgres;
 
 --
--- Name: schedule_technicians_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: schedule_technicians_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE public.schedule_technicians_id_seq OWNED BY public.schedule_technicians.id;
 
 
 --
--- Name: schedule_templates; Type: TABLE; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: schedule_templates; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.schedule_templates (
@@ -1147,10 +1155,10 @@ CREATE TABLE public.schedule_templates (
 );
 
 
-ALTER TABLE public.schedule_templates OWNER TO assetone_ams_db_5esl_user;
+ALTER TABLE public.schedule_templates OWNER TO postgres;
 
 --
--- Name: schedule_templates_id_seq; Type: SEQUENCE; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: schedule_templates_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
 CREATE SEQUENCE public.schedule_templates_id_seq
@@ -1161,17 +1169,17 @@ CREATE SEQUENCE public.schedule_templates_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.schedule_templates_id_seq OWNER TO assetone_ams_db_5esl_user;
+ALTER SEQUENCE public.schedule_templates_id_seq OWNER TO postgres;
 
 --
--- Name: schedule_templates_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: schedule_templates_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE public.schedule_templates_id_seq OWNED BY public.schedule_templates.id;
 
 
 --
--- Name: schedule_units; Type: TABLE; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: schedule_units; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.schedule_units (
@@ -1182,10 +1190,10 @@ CREATE TABLE public.schedule_units (
 );
 
 
-ALTER TABLE public.schedule_units OWNER TO assetone_ams_db_5esl_user;
+ALTER TABLE public.schedule_units OWNER TO postgres;
 
 --
--- Name: schedule_units_id_seq; Type: SEQUENCE; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: schedule_units_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
 CREATE SEQUENCE public.schedule_units_id_seq
@@ -1196,17 +1204,17 @@ CREATE SEQUENCE public.schedule_units_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.schedule_units_id_seq OWNER TO assetone_ams_db_5esl_user;
+ALTER SEQUENCE public.schedule_units_id_seq OWNER TO postgres;
 
 --
--- Name: schedule_units_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: schedule_units_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE public.schedule_units_id_seq OWNED BY public.schedule_units.id;
 
 
 --
--- Name: sub_locations; Type: TABLE; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: sub_locations; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.sub_locations (
@@ -1222,10 +1230,10 @@ CREATE TABLE public.sub_locations (
 );
 
 
-ALTER TABLE public.sub_locations OWNER TO assetone_ams_db_5esl_user;
+ALTER TABLE public.sub_locations OWNER TO postgres;
 
 --
--- Name: sub_locations_id_seq; Type: SEQUENCE; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: sub_locations_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
 CREATE SEQUENCE public.sub_locations_id_seq
@@ -1236,17 +1244,17 @@ CREATE SEQUENCE public.sub_locations_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.sub_locations_id_seq OWNER TO assetone_ams_db_5esl_user;
+ALTER SEQUENCE public.sub_locations_id_seq OWNER TO postgres;
 
 --
--- Name: sub_locations_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: sub_locations_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE public.sub_locations_id_seq OWNED BY public.sub_locations.id;
 
 
 --
--- Name: users; Type: TABLE; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: users; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.users (
@@ -1269,10 +1277,10 @@ CREATE TABLE public.users (
 );
 
 
-ALTER TABLE public.users OWNER TO assetone_ams_db_5esl_user;
+ALTER TABLE public.users OWNER TO postgres;
 
 --
--- Name: users_id_seq; Type: SEQUENCE; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: users_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
 ALTER TABLE public.users ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
@@ -1286,7 +1294,7 @@ ALTER TABLE public.users ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
 
 
 --
--- Name: vendor_offers; Type: TABLE; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: vendor_offers; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.vendor_offers (
@@ -1302,10 +1310,10 @@ CREATE TABLE public.vendor_offers (
 );
 
 
-ALTER TABLE public.vendor_offers OWNER TO assetone_ams_db_5esl_user;
+ALTER TABLE public.vendor_offers OWNER TO postgres;
 
 --
--- Name: vendor_offers_id_seq; Type: SEQUENCE; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: vendor_offers_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
 CREATE SEQUENCE public.vendor_offers_id_seq
@@ -1316,17 +1324,17 @@ CREATE SEQUENCE public.vendor_offers_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.vendor_offers_id_seq OWNER TO assetone_ams_db_5esl_user;
+ALTER SEQUENCE public.vendor_offers_id_seq OWNER TO postgres;
 
 --
--- Name: vendor_offers_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: vendor_offers_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE public.vendor_offers_id_seq OWNED BY public.vendor_offers.id;
 
 
 --
--- Name: vendors; Type: TABLE; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: vendors; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.vendors (
@@ -1345,10 +1353,10 @@ CREATE TABLE public.vendors (
 );
 
 
-ALTER TABLE public.vendors OWNER TO assetone_ams_db_5esl_user;
+ALTER TABLE public.vendors OWNER TO postgres;
 
 --
--- Name: vendors_id_seq; Type: SEQUENCE; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: vendors_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
 CREATE SEQUENCE public.vendors_id_seq
@@ -1359,277 +1367,277 @@ CREATE SEQUENCE public.vendors_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.vendors_id_seq OWNER TO assetone_ams_db_5esl_user;
+ALTER SEQUENCE public.vendors_id_seq OWNER TO postgres;
 
 --
--- Name: vendors_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: vendors_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE public.vendors_id_seq OWNED BY public.vendors.id;
 
 
 --
--- Name: activity_log id; Type: DEFAULT; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: activity_log id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.activity_log ALTER COLUMN id SET DEFAULT nextval('public.activity_log_id_seq'::regclass);
 
 
 --
--- Name: borrow_logs id; Type: DEFAULT; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: borrow_logs id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.borrow_logs ALTER COLUMN id SET DEFAULT nextval('public.borrow_logs_id_seq'::regclass);
 
 
 --
--- Name: departments id; Type: DEFAULT; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: departments id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.departments ALTER COLUMN id SET DEFAULT nextval('public.departments_id_seq'::regclass);
 
 
 --
--- Name: item_attachments id; Type: DEFAULT; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: item_attachments id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.item_attachments ALTER COLUMN id SET DEFAULT nextval('public.item_attachments_id_seq'::regclass);
 
 
 --
--- Name: item_categories id; Type: DEFAULT; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: item_categories id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.item_categories ALTER COLUMN id SET DEFAULT nextval('public.item_categories_id_seq'::regclass);
 
 
 --
--- Name: item_costs id; Type: DEFAULT; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: item_costs id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.item_costs ALTER COLUMN id SET DEFAULT nextval('public.item_costs_id_seq'::regclass);
 
 
 --
--- Name: item_depreciation id; Type: DEFAULT; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: item_depreciation id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.item_depreciation ALTER COLUMN id SET DEFAULT nextval('public.item_depreciation_id_seq'::regclass);
 
 
 --
--- Name: item_lifecycle id; Type: DEFAULT; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: item_lifecycle id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.item_lifecycle ALTER COLUMN id SET DEFAULT nextval('public.item_lifecycle_id_seq'::regclass);
 
 
 --
--- Name: item_requests id; Type: DEFAULT; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: item_requests id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.item_requests ALTER COLUMN id SET DEFAULT nextval('public.item_requests_id_seq'::regclass);
 
 
 --
--- Name: item_units id; Type: DEFAULT; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: item_units id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.item_units ALTER COLUMN id SET DEFAULT nextval('public.item_units_id_seq'::regclass);
 
 
 --
--- Name: items id; Type: DEFAULT; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: items id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.items ALTER COLUMN id SET DEFAULT nextval('public.items_id_seq'::regclass);
 
 
 --
--- Name: items_for_distribution id; Type: DEFAULT; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: items_for_distribution id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.items_for_distribution ALTER COLUMN id SET DEFAULT nextval('public.items_for_distribution_id_seq'::regclass);
 
 
 --
--- Name: locations id; Type: DEFAULT; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: locations id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.locations ALTER COLUMN id SET DEFAULT nextval('public.locations_id_seq'::regclass);
 
 
 --
--- Name: maintenance_history id; Type: DEFAULT; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: maintenance_history id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.maintenance_history ALTER COLUMN id SET DEFAULT nextval('public.maintenance_history_id_seq'::regclass);
 
 
 --
--- Name: maintenance_requests id; Type: DEFAULT; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: maintenance_requests id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.maintenance_requests ALTER COLUMN id SET DEFAULT nextval('public.maintenance_requests_id_seq'::regclass);
 
 
 --
--- Name: password_reset_tokens id; Type: DEFAULT; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: password_reset_tokens id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.password_reset_tokens ALTER COLUMN id SET DEFAULT nextval('public.password_reset_tokens_id_seq'::regclass);
 
 
 --
--- Name: pending_registration id; Type: DEFAULT; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: pending_registration id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.pending_registration ALTER COLUMN id SET DEFAULT nextval('public.pending_registration_id_seq'::regclass);
 
 
 --
--- Name: procurement_attachments id; Type: DEFAULT; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: procurement_attachments id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.procurement_attachments ALTER COLUMN id SET DEFAULT nextval('public.procurement_attachments_id_seq'::regclass);
 
 
 --
--- Name: procurement_finalizations id; Type: DEFAULT; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: procurement_finalizations id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.procurement_finalizations ALTER COLUMN id SET DEFAULT nextval('public.procurement_finalizations_id_seq'::regclass);
 
 
 --
--- Name: purchase_order_items id; Type: DEFAULT; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: purchase_order_items id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.purchase_order_items ALTER COLUMN id SET DEFAULT nextval('public.purchase_order_items_id_seq'::regclass);
 
 
 --
--- Name: purchase_orders id; Type: DEFAULT; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: purchase_orders id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.purchase_orders ALTER COLUMN id SET DEFAULT nextval('public.purchase_orders_id_seq'::regclass);
 
 
 --
--- Name: purchase_requests id; Type: DEFAULT; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: purchase_requests id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.purchase_requests ALTER COLUMN id SET DEFAULT nextval('public.purchase_requests_id_seq'::regclass);
 
 
 --
--- Name: relocation_log id; Type: DEFAULT; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: relocation_log id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.relocation_log ALTER COLUMN id SET DEFAULT nextval('public.relocation_log_id_seq'::regclass);
 
 
 --
--- Name: requested_items id; Type: DEFAULT; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: relocation_technicians id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.relocation_technicians ALTER COLUMN id SET DEFAULT nextval('public.relocation_technicians_id_seq'::regclass);
+
+
+--
+-- Name: requested_items id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.requested_items ALTER COLUMN id SET DEFAULT nextval('public.requested_items_id_seq'::regclass);
 
 
 --
--- Name: schedule_occurrences id; Type: DEFAULT; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: schedule_occurrences id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.schedule_occurrences ALTER COLUMN id SET DEFAULT nextval('public.schedule_occurrences_id_seq'::regclass);
 
 
 --
--- Name: schedule_technicians id; Type: DEFAULT; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: schedule_technicians id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.schedule_technicians ALTER COLUMN id SET DEFAULT nextval('public.schedule_technicians_id_seq'::regclass);
 
 
 --
--- Name: schedule_templates id; Type: DEFAULT; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: schedule_templates id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.schedule_templates ALTER COLUMN id SET DEFAULT nextval('public.schedule_templates_id_seq'::regclass);
 
 
 --
--- Name: schedule_units id; Type: DEFAULT; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: schedule_units id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.schedule_units ALTER COLUMN id SET DEFAULT nextval('public.schedule_units_id_seq'::regclass);
 
 
 --
--- Name: sub_locations id; Type: DEFAULT; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: sub_locations id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.sub_locations ALTER COLUMN id SET DEFAULT nextval('public.sub_locations_id_seq'::regclass);
 
 
 --
--- Name: vendor_offers id; Type: DEFAULT; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: vendor_offers id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.vendor_offers ALTER COLUMN id SET DEFAULT nextval('public.vendor_offers_id_seq'::regclass);
 
 
 --
--- Name: vendors id; Type: DEFAULT; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: vendors id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.vendors ALTER COLUMN id SET DEFAULT nextval('public.vendors_id_seq'::regclass);
 
 
 --
--- Data for Name: activity_log; Type: TABLE DATA; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Data for Name: activity_log; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.activity_log (id, user_id, module, action, endpoint, method, request_body, ip_address, user_agent, created_at) FROM stdin;
-1	1	users	UPDATE	/api/users/1	PATCH	{"status": "inactive"}	::1	Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0	2025-10-26 13:05:24.201616+00
-2	1	users	UPDATE	/api/users/1	PATCH	{"status": "active"}	::1	Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0	2025-10-26 13:05:50.761398+00
-3	1	users	VIEW	/api/users/me	GET	\N	::1	Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0	2025-10-26 13:05:50.915975+00
-4	1	users	UPDATE	/api/users/1	PATCH	{"status": "inactive"}	::1	Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0	2025-10-26 13:06:34.03437+00
-5	\N	auth	CREATE	/api/auth/login	POST	{"email": "cruzrowellt11@gmail.com", "password": "password123"}	::1	Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0	2025-10-26 13:06:34.763901+00
-6	1	users	UPDATE	/api/users/1	PATCH	{"status": "active"}	::1	Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0	2025-10-26 13:06:34.893167+00
-7	1	users	VIEW	/api/users/me	GET	\N	::1	Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0	2025-10-26 13:06:34.902973+00
-8	1	users	VIEW	/api/users/me	GET	\N	::1	Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0	2025-10-26 13:09:16.03299+00
-9	1	users	VIEW	/api/users/me	GET	\N	::1	Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0	2025-10-26 13:09:16.047529+00
+1	1	users	UPDATE	/api/users/1	PATCH	{"status": "inactive"}	::1	Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0	2025-10-26 21:05:24.201616+08
+2	1	users	UPDATE	/api/users/1	PATCH	{"status": "active"}	::1	Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0	2025-10-26 21:05:50.761398+08
+3	1	users	VIEW	/api/users/me	GET	\N	::1	Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0	2025-10-26 21:05:50.915975+08
+4	1	users	UPDATE	/api/users/1	PATCH	{"status": "inactive"}	::1	Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0	2025-10-26 21:06:34.03437+08
+5	\N	auth	CREATE	/api/auth/login	POST	{"email": "cruzrowellt11@gmail.com", "password": "password123"}	::1	Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0	2025-10-26 21:06:34.763901+08
+6	1	users	UPDATE	/api/users/1	PATCH	{"status": "active"}	::1	Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0	2025-10-26 21:06:34.893167+08
+7	1	users	VIEW	/api/users/me	GET	\N	::1	Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0	2025-10-26 21:06:34.902973+08
+8	1	users	VIEW	/api/users/me	GET	\N	::1	Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0	2025-10-26 21:09:16.03299+08
+9	1	users	VIEW	/api/users/me	GET	\N	::1	Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0	2025-10-26 21:09:16.047529+08
 \.
 
 
 --
--- Data for Name: borrow_logs; Type: TABLE DATA; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Data for Name: borrow_logs; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.borrow_logs (id, item_unit_id, borrowed_by, lend_by, borrowed_at, returned_at, status, remarks, purpose, due_date) FROM stdin;
+25	352	Rowell	77	2025-11-14 15:59:07.124427+08	\N	borrowed	\N	Temporary usage	2025-11-15 00:00:00+08
 \.
 
 
 --
--- Data for Name: departments; Type: TABLE DATA; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Data for Name: departments; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.departments (id, name, created_by, updated_by, deleted_by, created_at, updated_at, deleted_at, code) FROM stdin;
-3	Information Technology	5	5	\N	2025-11-04 20:27:58.985455+00	2025-11-04 20:27:58.985455+00	\N	IT
-4	General Services Office	5	5	\N	2025-11-04 20:27:58.985455+00	2025-11-04 20:27:58.985455+00	\N	GSO
-5	Finance	5	5	\N	2025-11-04 20:27:58.985455+00	2025-11-04 20:27:58.985455+00	\N	FIN
-6	Marketing	5	5	\N	2025-11-04 20:27:58.985455+00	2025-11-04 20:27:58.985455+00	\N	MKT
-7	Operations	5	5	\N	2025-11-04 20:27:58.985455+00	2025-11-04 20:27:58.985455+00	\N	OPS
-8	Customer Service	5	5	\N	2025-11-04 20:27:58.985455+00	2025-11-04 20:27:58.985455+00	\N	CS
-9	Research and Development	5	5	\N	2025-11-04 20:27:58.985455+00	2025-11-04 20:27:58.985455+00	\N	RND
-10	Music	5	5	\N	2025-11-04 20:27:58.985455+00	2025-11-04 20:27:58.985455+00	\N	MSC
-11	Quality Assurance	5	5	\N	2025-11-04 20:27:58.985455+00	2025-11-04 20:27:58.985455+00	\N	QA
-12	Legal	5	5	\N	2025-11-04 20:27:58.985455+00	2025-11-04 20:27:58.985455+00	\N	LEGAL
+COPY public.departments (id, name, created_by, updated_by, deleted_by, created_at, updated_at, deleted_at, code, sub_location_id) FROM stdin;
+16	IT Department	74	74	74	2025-11-12 11:01:04.317407+08	2025-11-12 11:01:16.757+08	2025-11-12 11:01:16.757+08	ITSS	31
+18	General Services Office	74	74	\N	2025-11-13 20:41:10.231358+08	2025-11-13 20:41:10.231358+08	\N	GSO	\N
 \.
 
 
 --
--- Data for Name: item_attachments; Type: TABLE DATA; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Data for Name: item_attachments; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.item_attachments (id, item_id, file_name, file_path, mime_type, context, created_at, updated_at) FROM stdin;
@@ -1637,63 +1645,55 @@ COPY public.item_attachments (id, item_id, file_name, file_path, mime_type, cont
 
 
 --
--- Data for Name: item_categories; Type: TABLE DATA; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Data for Name: item_categories; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.item_categories (id, name, code, created_by, updated_by, deleted_by, created_at, updated_at, deleted_at) FROM stdin;
-4	Office Supplies	OFFS	5	\N	\N	2025-11-04 20:52:48.26315+00	2025-11-04 20:52:48.26315+00	\N
-5	Computer Equipment	COMPQ	5	\N	\N	2025-11-04 20:52:48.26315+00	2025-11-04 20:52:48.26315+00	\N
-6	Networking Devices	NETDV	5	\N	\N	2025-11-04 20:52:48.26315+00	2025-11-04 20:52:48.26315+00	\N
-8	Furniture	FURNI	5	\N	\N	2025-11-04 20:52:48.26315+00	2025-11-04 20:52:48.26315+00	\N
-9	Laboratory Equipment	LABEQ	5	\N	\N	2025-11-04 20:52:48.26315+00	2025-11-04 20:52:48.26315+00	\N
-10	Audio Visual Equipment	AUDIO	5	\N	\N	2025-11-04 20:52:48.26315+00	2025-11-04 20:52:48.26315+00	\N
-11	Maintenance Tools	TOOLM	5	\N	\N	2025-11-04 20:52:48.26315+00	2025-11-04 20:52:48.26315+00	\N
-12	Software Licenses	SOFTL	5	\N	\N	2025-11-04 20:52:48.26315+00	2025-11-04 20:52:48.26315+00	\N
-13	Cleaning Supplies	CLNSP	5	\N	\N	2025-11-04 20:52:48.26315+00	2025-11-04 20:52:48.26315+00	\N
-7	Electrical Supplies	ELECS	5	5	\N	2025-11-04 20:52:48.26315+00	2025-11-04 20:53:14.028+00	\N
 \.
 
 
 --
--- Data for Name: item_costs; Type: TABLE DATA; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Data for Name: item_costs; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.item_costs (id, item_unit_id, purchase_price, additional_cost, total_cost, created_at, updated_at) FROM stdin;
-292	297	25000.00	\N	\N	2025-11-04 20:58:52.231525+00	2025-11-04 20:58:52.231525+00
-293	298	2001.00	\N	\N	2025-11-04 21:14:26.394977+00	2025-11-04 21:14:26.394977+00
-294	299	2001.00	\N	\N	2025-11-04 21:14:26.405403+00	2025-11-04 21:14:26.405403+00
-295	300	2001.00	\N	\N	2025-11-04 21:14:26.410698+00	2025-11-04 21:14:26.410698+00
-296	301	2001.00	\N	\N	2025-11-04 21:14:26.415881+00	2025-11-04 21:14:26.415881+00
-297	302	2001.00	\N	\N	2025-11-04 21:14:26.422364+00	2025-11-04 21:14:26.422364+00
-298	303	20000.00	\N	\N	2025-11-06 12:00:05.853873+00	2025-11-06 12:00:05.853873+00
-299	304	20000.00	\N	\N	2025-11-06 12:00:05.879929+00	2025-11-06 12:00:05.879929+00
-300	305	20000.00	\N	\N	2025-11-06 12:00:05.897845+00	2025-11-06 12:00:05.897845+00
-301	306	20000.00	\N	\N	2025-11-06 12:00:05.932367+00	2025-11-06 12:00:05.932367+00
-302	307	20000.00	\N	\N	2025-11-06 12:00:05.954457+00	2025-11-06 12:00:05.954457+00
+292	297	25000.00	\N	\N	2025-11-05 04:58:52.231525+08	2025-11-05 04:58:52.231525+08
+293	298	2001.00	\N	\N	2025-11-05 05:14:26.394977+08	2025-11-05 05:14:26.394977+08
+294	299	2001.00	\N	\N	2025-11-05 05:14:26.405403+08	2025-11-05 05:14:26.405403+08
+295	300	2001.00	\N	\N	2025-11-05 05:14:26.410698+08	2025-11-05 05:14:26.410698+08
+296	301	2001.00	\N	\N	2025-11-05 05:14:26.415881+08	2025-11-05 05:14:26.415881+08
+297	302	2001.00	\N	\N	2025-11-05 05:14:26.422364+08	2025-11-05 05:14:26.422364+08
+298	303	20000.00	\N	\N	2025-11-06 20:00:05.853873+08	2025-11-06 20:00:05.853873+08
+299	304	20000.00	\N	\N	2025-11-06 20:00:05.879929+08	2025-11-06 20:00:05.879929+08
+300	305	20000.00	\N	\N	2025-11-06 20:00:05.897845+08	2025-11-06 20:00:05.897845+08
+301	306	20000.00	\N	\N	2025-11-06 20:00:05.932367+08	2025-11-06 20:00:05.932367+08
+302	307	20000.00	\N	\N	2025-11-06 20:00:05.954457+08	2025-11-06 20:00:05.954457+08
+303	308	5.00	\N	\N	2025-11-10 23:19:57.051928+08	2025-11-10 23:19:57.051928+08
 \.
 
 
 --
--- Data for Name: item_depreciation; Type: TABLE DATA; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Data for Name: item_depreciation; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.item_depreciation (id, item_unit_id, method, purchase_date, rate, useful_life, accumulated_depreciation, updated_by, updated_at) FROM stdin;
-295	297	straight_line	2024-10-09	0.20	5	0.00	\N	2025-11-04 20:58:52.219857+00
-296	298	\N	\N	\N	\N	0.00	\N	2025-11-04 21:14:26.392321+00
-297	299	\N	\N	\N	\N	0.00	\N	2025-11-04 21:14:26.404364+00
-298	300	\N	\N	\N	\N	0.00	\N	2025-11-04 21:14:26.409812+00
-299	301	\N	\N	\N	\N	0.00	\N	2025-11-04 21:14:26.414988+00
-300	302	\N	\N	\N	\N	0.00	\N	2025-11-04 21:14:26.421467+00
-301	303	straight_line	2025-10-30	0.20	5	0.00	\N	2025-11-06 12:00:05.817764+00
-302	304	straight_line	2025-10-30	0.20	5	0.00	\N	2025-11-06 12:00:05.870313+00
-303	305	straight_line	2025-10-30	0.20	5	0.00	\N	2025-11-06 12:00:05.896925+00
-304	306	straight_line	2025-10-30	0.20	5	0.00	\N	2025-11-06 12:00:05.931412+00
-305	307	straight_line	2025-10-30	0.20	5	0.00	\N	2025-11-06 12:00:05.953508+00
+295	297	straight_line	2024-10-09	0.20	5	0.00	\N	2025-11-05 04:58:52.219857+08
+296	298	\N	\N	\N	5	0.00	\N	2025-11-05 05:14:26.392321+08
+297	299	\N	\N	\N	5	0.00	\N	2025-11-05 05:14:26.404364+08
+298	300	\N	\N	\N	5	0.00	\N	2025-11-05 05:14:26.409812+08
+299	301	\N	\N	\N	5	0.00	\N	2025-11-05 05:14:26.414988+08
+300	302	\N	\N	\N	5	0.00	\N	2025-11-05 05:14:26.421467+08
+301	303	straight_line	2025-10-30	0.20	5	0.00	\N	2025-11-06 20:00:05.817764+08
+302	304	straight_line	2025-10-30	0.20	5	0.00	\N	2025-11-06 20:00:05.870313+08
+303	305	straight_line	2025-10-30	0.20	5	0.00	\N	2025-11-06 20:00:05.896925+08
+304	306	straight_line	2025-10-30	0.20	5	0.00	\N	2025-11-06 20:00:05.931412+08
+305	307	straight_line	2025-10-30	0.20	5	0.00	\N	2025-11-06 20:00:05.953508+08
+306	308	\N	2020-10-27	\N	\N	0.00	\N	2025-11-10 23:19:56.957418+08
 \.
 
 
 --
--- Data for Name: item_lifecycle; Type: TABLE DATA; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Data for Name: item_lifecycle; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.item_lifecycle (id, item_unit_id, total_cost, maintenance_cost, repair_cost, updated_at) FROM stdin;
@@ -1701,7 +1701,7 @@ COPY public.item_lifecycle (id, item_unit_id, total_cost, maintenance_cost, repa
 
 
 --
--- Data for Name: item_requests; Type: TABLE DATA; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Data for Name: item_requests; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.item_requests (id, item_id, quantity, reason, remarks, status, date_required, requested_by, requested_at, reviewed_by, reviewed_at) FROM stdin;
@@ -1709,34 +1709,50 @@ COPY public.item_requests (id, item_id, quantity, reason, remarks, status, date_
 
 
 --
--- Data for Name: item_units; Type: TABLE DATA; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Data for Name: item_units; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.item_units (id, item_id, serial_number, unit_tag, specifications, status, sub_location_id, is_legacy, owner_department_id, created_by, updated_by, deleted_by, created_at, updated_at, deleted_at, vendor_id, brand, condition, acquisition_date) FROM stdin;
-302	22	MNO-456	IT-COMPQ-0006	\N	available	\N	f	3	2	2	\N	2025-11-04 21:14:26.42023+00	2025-11-04 21:14:26.42023+00	\N	11	HP	100	2025-11-04 21:14:26.417+00
-303	22	\N	IT-COMPQ-0007	\N	available	21	t	3	5	5	\N	2025-11-06 12:00:05.78821+00	2025-11-06 12:00:05.78821+00	\N	\N	HEHE-006	100	\N
-304	22	\N	IT-COMPQ-0008	\N	available	21	t	3	5	5	\N	2025-11-06 12:00:05.869242+00	2025-11-06 12:00:05.869242+00	\N	\N	HEHE-006	100	\N
-305	22	\N	IT-COMPQ-0009	\N	available	21	t	3	5	5	\N	2025-11-06 12:00:05.89539+00	2025-11-06 12:00:05.89539+00	\N	\N	HEHE-006	100	\N
-307	22	\N	IT-COMPQ-0011	\N	available	21	t	3	5	5	\N	2025-11-06 12:00:05.943947+00	2025-11-06 12:00:05.943947+00	\N	\N	HEHE-006	100	\N
-297	22	DLL-599	IT-COMPQ-0001	\N	available	30	t	9	5	5	\N	2025-11-04 20:58:52.216757+00	2025-11-04 20:58:52.216757+00	\N	\N	Dell	100	\N
-298	22	ABC-123	IT-COMPQ-0002	\N	available	\N	f	9	2	2	\N	2025-11-04 21:14:26.39024+00	2025-11-04 21:14:26.39024+00	\N	11	HP	100	2025-11-04 21:14:26.387+00
-300	22	GHI-789	IT-COMPQ-0004	\N	available	21	f	9	2	1	\N	2025-11-04 21:14:26.408589+00	2025-11-04 21:14:26.408589+00	\N	11	HP	100	2025-11-04 21:14:26.406+00
-301	22	JKL-123	IT-COMPQ-0005	\N	available	\N	f	9	2	1	\N	2025-11-04 21:14:26.413935+00	2025-11-04 21:14:26.413935+00	\N	11	HP	100	2025-11-04 21:14:26.411+00
-299	22	DEF-456	IT-COMPQ-0003	\N	available	\N	f	9	2	1	\N	2025-11-04 21:14:26.403298+00	2025-11-04 21:14:26.403298+00	\N	11	HP	100	2025-11-04 21:14:26.4+00
-306	22	\N	IT-COMPQ-0010	\N	available	21	t	3	5	5	\N	2025-11-06 12:00:05.911652+00	2025-11-06 12:00:05.911652+00	\N	\N	HEHE-006	100	\N
+COPY public.item_units (id, item_id, serial_number, unit_tag, specifications, sub_location_id, is_legacy, owner_department_id, created_by, updated_by, deleted_by, created_at, updated_at, deleted_at, vendor_id, brand, condition, purchase_date, purchase_cost, status) FROM stdin;
+347	39	\N	ITSS-IT-0001	\N	31	t	\N	75	75	\N	2025-11-14 12:15:43.885213+08	2025-11-14 12:15:43.885213+08	\N	32	HP	100	2025-11-08 00:00:00+08	\N	under_maintenance
+348	39	\N	ITSS-IT-0002	\N	31	t	\N	75	75	\N	2025-11-14 12:15:43.996659+08	2025-11-14 12:15:43.996659+08	\N	32	HP	100	2025-11-08 00:00:00+08	\N	under_maintenance
+349	39	\N	ITSS-IT-0003	\N	31	t	\N	75	75	\N	2025-11-14 12:15:44.005122+08	2025-11-14 12:15:44.005122+08	\N	32	HP	100	2025-11-08 00:00:00+08	\N	under_maintenance
+350	39	\N	ITSS-IT-0004	\N	31	t	\N	75	75	\N	2025-11-14 12:15:44.014116+08	2025-11-14 12:15:44.014116+08	\N	32	HP	100	2025-11-08 00:00:00+08	\N	under_maintenance
+351	39	\N	ITSS-IT-0005	\N	31	t	\N	75	75	\N	2025-11-14 12:15:44.022562+08	2025-11-14 12:15:44.022562+08	\N	32	HP	100	2025-11-08 00:00:00+08	\N	under_maintenance
+353	39	\N	ITSS-IT-0007	\N	\N	t	16	76	76	\N	2025-11-14 12:37:03.953427+08	2025-11-14 12:37:03.953427+08	\N	31	asd	100	2025-11-14 00:00:00+08	\N	in_use
+352	39	\N	ITSS-IT-0006	\N	\N	t	16	76	76	\N	2025-11-14 12:36:31.954105+08	2025-11-14 12:36:31.954105+08	\N	23	gege	100	2025-11-14 00:00:00+08	\N	borrowed
+341	40	\N	GSO-IT-0005	\N	31	t	\N	74	74	\N	2025-11-13 20:24:43.183576+08	2025-11-13 20:24:43.183576+08	\N	\N	gege	100	2025-11-13 00:00:00+08	\N	available
+342	40	\N	GSO-IT-0006	\N	31	t	\N	74	74	\N	2025-11-13 20:24:43.196985+08	2025-11-13 20:24:43.196985+08	\N	\N	gege	100	2025-11-13 00:00:00+08	\N	available
+343	40	\N	GSO-IT-0007	\N	31	t	\N	74	74	\N	2025-11-13 20:24:43.209905+08	2025-11-13 20:24:43.209905+08	\N	\N	gege	100	2025-11-13 00:00:00+08	\N	available
+344	40	\N	GSO-IT-0008	\N	31	t	\N	74	74	\N	2025-11-13 20:24:43.221453+08	2025-11-13 20:24:43.221453+08	\N	\N	gege	100	2025-11-13 00:00:00+08	\N	available
+345	40	\N	GSO-IT-0009	\N	31	t	\N	74	74	\N	2025-11-13 20:24:43.236986+08	2025-11-13 20:24:43.236986+08	\N	\N	gege	100	2025-11-13 00:00:00+08	\N	available
+346	40	\N	GSO-IT-0010	\N	31	t	\N	74	74	\N	2025-11-13 20:24:43.249794+08	2025-11-13 20:24:43.249794+08	\N	\N	gege	100	2025-11-13 00:00:00+08	\N	available
+337	40	\N	GSO-IT-0001	\N	31	t	\N	74	74	\N	2025-11-13 20:24:43.121081+08	2025-11-13 20:24:43.121081+08	\N	\N	gege	100	2025-11-13 00:00:00+08	\N	in_use
+338	40	\N	GSO-IT-0002	\N	31	t	\N	74	74	\N	2025-11-13 20:24:43.137984+08	2025-11-13 20:24:43.137984+08	\N	\N	gege	100	2025-11-13 00:00:00+08	\N	in_use
+339	40	\N	GSO-IT-0003	\N	31	t	\N	74	74	\N	2025-11-13 20:24:43.153478+08	2025-11-13 20:24:43.153478+08	\N	\N	gege	100	2025-11-13 00:00:00+08	\N	in_use
+340	40	\N	GSO-IT-0004	\N	31	t	\N	74	74	\N	2025-11-13 20:24:43.166399+08	2025-11-13 20:24:43.166399+08	\N	\N	gege	100	2025-11-13 00:00:00+08	\N	in_use
 \.
 
 
 --
--- Data for Name: items; Type: TABLE DATA; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Data for Name: items; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.items (id, name, category_id, department_id, created_by, updated_by, deleted_by, created_at, updated_at, deleted_at, type, is_high_value) FROM stdin;
+COPY public.items (id, name, department_id, created_by, updated_by, deleted_by, created_at, updated_at, deleted_at, useful_life, rul_percentage, performance_percentage, physical_percentage, rul_multiplier, performance_multiplier, physical_multiplier, category, condition_assessment_frequency) FROM stdin;
+32	Aircon	\N	74	74	\N	2025-11-13 15:46:41.731334+08	2025-11-13 15:46:41.731334+08	\N	\N	33	33	34	1.0	1.0	1.0	Appliances / Electronics	weekly
+33	Desktop PC	\N	74	74	\N	2025-11-13 15:48:39.914004+08	2025-11-13 15:48:39.914004+08	\N	\N	33	33	34	1.0	1.0	1.0	IT Equipment / Peripherals	weekly
+34	Keyboard	\N	74	74	\N	2025-11-13 15:49:15.395359+08	2025-11-13 15:49:15.395359+08	\N	\N	33	33	34	1.0	1.0	1.0	IT Equipment / Peripherals	weekly
+35	Projector	\N	74	74	\N	2025-11-13 15:51:53.751937+08	2025-11-13 15:51:53.751937+08	\N	\N	33	33	34	1.0	1.0	1.0	Appliances / Electronics	weekly
+36	Television	\N	74	74	\N	2025-11-13 15:53:20.505552+08	2025-11-13 15:53:20.505552+08	\N	\N	33	33	34	1.0	1.0	1.0	IT Equipment / Peripherals	weekly
+37	Monitor	\N	74	74	\N	2025-11-13 15:54:46.190018+08	2025-11-13 15:54:46.190018+08	\N	\N	33	33	34	1.0	1.0	1.0	IT Equipment / Peripherals	weekly
+38	Printer	\N	74	74	\N	2025-11-13 15:56:06.251382+08	2025-11-13 15:56:06.251382+08	\N	\N	33	33	34	1.0	1.0	1.0	IT Equipment / Peripherals	weekly
+40	Tablet	16	74	75	\N	2025-11-13 15:58:11.13743+08	2025-11-14 12:04:40.972+08	\N	5	33	34	33	1.0	1.0	1.0	IT Equipment / Peripherals	weekly
+31	Laptop	\N	74	74	\N	2025-11-13 15:38:56.837661+08	2025-11-13 15:45:22.106+08	\N	\N	20	20	60	0.6	0.6	1.8	IT Equipment / Peripherals	weekly
+39	Mouse	16	74	76	\N	2025-11-13 15:57:24.878054+08	2025-11-14 14:21:52.872+08	\N	5	33	34	33	1.0	1.0	1.0	IT Equipment / Peripherals	weekly
 \.
 
 
 --
--- Data for Name: items_for_distribution; Type: TABLE DATA; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Data for Name: items_for_distribution; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.items_for_distribution (id, purchase_request_id, item_unit_id, received_at) FROM stdin;
@@ -1749,20 +1765,16 @@ COPY public.items_for_distribution (id, purchase_request_id, item_unit_id, recei
 
 
 --
--- Data for Name: locations; Type: TABLE DATA; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Data for Name: locations; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.locations (id, name, created_by, updated_by, deleted_by, created_at, updated_at, deleted_at) FROM stdin;
-4	Annex Building	\N	\N	\N	2025-11-04 20:29:59.036817+00	2025-11-04 20:29:59.036817+00	\N
-5	Laboratory Complex	\N	\N	\N	2025-11-04 20:29:59.036817+00	2025-11-04 20:29:59.036817+00	\N
-3	Main Campus	\N	5	\N	2025-11-04 20:29:59.036817+00	2025-11-04 20:34:37.467+00	\N
-7	Sports Complex	\N	5	\N	2025-11-04 20:29:59.036817+00	2025-11-04 20:54:37.86+00	\N
-6	Library & Resource Center	\N	5	\N	2025-11-04 20:29:59.036817+00	2025-11-04 20:54:43.492+00	\N
+8	Aula Magna	74	74	\N	2025-11-12 10:46:54.87916+08	2025-11-12 10:46:54.87916+08	\N
 \.
 
 
 --
--- Data for Name: maintenance_history; Type: TABLE DATA; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Data for Name: maintenance_history; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.maintenance_history (id, item_unit_id, occurrence_id, performed_by, maintenance_type, description, performed_at) FROM stdin;
@@ -1770,32 +1782,38 @@ COPY public.maintenance_history (id, item_unit_id, occurrence_id, performed_by, 
 
 
 --
--- Data for Name: maintenance_requests; Type: TABLE DATA; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Data for Name: maintenance_requests; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.maintenance_requests (id, item_unit_id, impact, urgency, status, description, requested_by, requested_at, reviewed_by, reviewed_at) FROM stdin;
+2	350	4	4	pending	hehe	rowellcruz145@gmail.com	2025-11-14 15:20:11.055141+08	\N	\N
 \.
 
 
 --
--- Data for Name: password_reset_tokens; Type: TABLE DATA; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Data for Name: password_reset_tokens; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.password_reset_tokens (id, user_id, token_hash, expires_at, used, created_at) FROM stdin;
+11	76	f00f8e902850993182948c041be2d7d5cbaccd6621f0819662a50631d3660f57	2025-11-14 20:31:12.786	f	2025-11-14 20:21:12.794839
 \.
 
 
 --
--- Data for Name: pending_registration; Type: TABLE DATA; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Data for Name: pending_registration; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.pending_registration (id, first_name, last_name, email, role, status, created_at, updated_at) FROM stdin;
-12	Rowell	Cruz	cruzrowellt11@gmail.com	asset_administrator	approved	2025-11-14 03:57:35.088002	2025-11-14 03:57:50.118332
+COPY public.pending_registration (id, first_name, last_name, email, role, status, created_at, updated_at, department_id) FROM stdin;
+18	Rowell	Cruz	cruzrowellt11@gmail.com	asset_administrator	approved	2025-11-14 12:24:29.789938	2025-11-14 12:24:37.686196	\N
+19	Rowell	Cruz	rowellcruz145@gmail.com	property_custodian	approved	2025-11-14 13:05:43.031522	2025-11-14 13:09:10.19056	\N
+20	Rowell	Cruz	cruz.rowell00510@dyci.edu.ph	technician	approved	2025-11-14 13:10:32.676838	2025-11-14 13:11:05.408414	\N
+21	Rowell	Cruz	first.acc145@gmail.com	technician	approved	2025-11-14 13:11:55.256359	2025-11-14 13:12:05.326133	\N
+22	Rowell	Cruz	cruz.rowell00510@gmail.com	technician	approved	2025-11-14 13:14:45.894266	2025-11-14 13:15:03.206416	\N
 \.
 
 
 --
--- Data for Name: pr_sequences; Type: TABLE DATA; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Data for Name: pr_sequences; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.pr_sequences (date_key, seq) FROM stdin;
@@ -1804,17 +1822,17 @@ COPY public.pr_sequences (date_key, seq) FROM stdin;
 
 
 --
--- Data for Name: procurement_attachments; Type: TABLE DATA; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Data for Name: procurement_attachments; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.procurement_attachments (id, purchase_request_id, file_name, file_path, uploaded_at, updated_at, mime_type, uploaded_by, module) FROM stdin;
-40	20	purchase-requisition-20.pdf	1762290765556-971311466.pdf	2025-11-04 21:12:45.562979+00	2025-11-04 21:12:45.562979+00	application/pdf	2	approved_prf
-41	20	stickers.pdf	1762290813965-132211168.pdf	2025-11-04 21:13:34.020998+00	2025-11-04 21:13:34.020998+00	application/pdf	2	approved_pof
+40	20	purchase-requisition-20.pdf	1762290765556-971311466.pdf	2025-11-05 05:12:45.562979+08	2025-11-05 05:12:45.562979+08	application/pdf	2	approved_prf
+41	20	stickers.pdf	1762290813965-132211168.pdf	2025-11-05 05:13:34.020998+08	2025-11-05 05:13:34.020998+08	application/pdf	2	approved_pof
 \.
 
 
 --
--- Data for Name: procurement_finalizations; Type: TABLE DATA; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Data for Name: procurement_finalizations; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.procurement_finalizations (id, purchase_order_id, finalized_at, remarks) FROM stdin;
@@ -1822,43 +1840,52 @@ COPY public.procurement_finalizations (id, purchase_order_id, finalized_at, rema
 
 
 --
--- Data for Name: purchase_order_items; Type: TABLE DATA; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Data for Name: purchase_order_items; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.purchase_order_items (id, purchase_order_id, item_name, quantity, unit_price, specifications, created_at, updated_at, brand, acquired_date, useful_life) FROM stdin;
-11	30	Laptop	5	2001.00	RAM:32 GB	2025-11-05 05:13:36.501142	2025-11-05 05:13:36.501142	HP	2025-11-04 21:14:26.314+00	\N
+11	30	Laptop	5	2001.00	RAM:32 GB	2025-11-05 05:13:36.501142	2025-11-05 05:13:36.501142	HP	2025-11-05 05:14:26.314+08	\N
 \.
 
 
 --
--- Data for Name: purchase_orders; Type: TABLE DATA; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Data for Name: purchase_orders; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.purchase_orders (id, po_number, vendor_id, created_at, updated_at, purchase_request_id, status, delivered_at) FROM stdin;
-30	\N	11	2025-11-04 21:13:36.498598+00	2025-11-04 21:14:28.539+00	20	delivered	2025-11-04 21:14:28.539+00
+30	\N	11	2025-11-05 05:13:36.498598+08	2025-11-05 05:14:28.539+08	20	delivered	2025-11-05 05:14:28.539+08
 \.
 
 
 --
--- Data for Name: purchase_requests; Type: TABLE DATA; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Data for Name: purchase_requests; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.purchase_requests (id, control_number, date_required, requested_by, requested_at, status, item_category_id, reason, remarks, reviewed_by, reviewed_at, updated_at, updated_by, planned_cost) FROM stdin;
-20	PR-20251104-0001	2025-11-26 21:11:00+00	2	2025-11-04 21:12:03.508+00	for_distribution	5	For stock	\N	\N	\N	2025-11-04 21:14:28.477+00	2	5000.00
+20	PR-20251104-0001	2025-11-27 05:11:00+08	2	2025-11-05 05:12:03.508+08	for_distribution	5	For stock	\N	\N	\N	2025-11-05 05:14:28.477+08	2	5000.00
 \.
 
 
 --
--- Data for Name: relocation_log; Type: TABLE DATA; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Data for Name: relocation_log; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.relocation_log (id, item_unit_id, from_sub_location_id, to_sub_location_id, requested_by, completed_by, status, requested_at, completed_at, requested_from) FROM stdin;
-1	299	\N	24	1	\N	pending	2025-11-05 17:31:50.061192	\N	\N
+COPY public.relocation_log (id, item_unit_id, from_sub_location_id, to_sub_location_id, requested_by, completed_by, status, requested_at, completed_at, requested_from, for_department) FROM stdin;
+15	319	21	22	69	\N	completed	2025-11-11 12:16:23.86273	2025-11-11 16:05:42.871	\N	15
 \.
 
 
 --
--- Data for Name: requested_items; Type: TABLE DATA; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Data for Name: relocation_technicians; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.relocation_technicians (id, relocation_log_id, user_id) FROM stdin;
+4	15	68
+\.
+
+
+--
+-- Data for Name: requested_items; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.requested_items (id, purchase_request_id, item_description, quantity) FROM stdin;
@@ -1867,339 +1894,346 @@ COPY public.requested_items (id, purchase_request_id, item_description, quantity
 
 
 --
--- Data for Name: schedule_occurrences; Type: TABLE DATA; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Data for Name: schedule_occurrences; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.schedule_occurrences (id, template_id, scheduled_date, status, review_remarks, skipped_reason, created_by, updated_by, started_by, completed_by, skipped_by, reviewed_by, created_at, updated_at, started_at, completed_at, skipped_at, reviewed_at) FROM stdin;
-21	19	2025-11-06 09:00:00+00	pending	\N	\N	\N	\N	\N	\N	\N	\N	2025-11-04 21:07:47.684239+00	2025-11-04 21:07:47.684239+00	\N	\N	\N	\N
-22	20	2025-11-01 21:10:00+00	skipped	\N	hehe	\N	\N	\N	\N	5	\N	2025-11-04 21:10:52.788653+00	2025-11-04 21:10:52.788653+00	\N	\N	2025-11-05 13:18:31.548+00	\N
-23	20	2025-11-29 21:10:00+00	pending	\N	\N	\N	\N	\N	\N	\N	\N	2025-11-05 13:18:31.594263+00	2025-11-05 13:18:31.594263+00	\N	\N	\N	\N
+25	22	2025-11-15 00:18:00+08	in_progress	\N	\N	\N	\N	77	\N	\N	\N	2025-11-14 12:18:44.052338+08	2025-11-14 12:18:44.052338+08	2025-11-14 14:25:15.483+08	\N	\N	\N
 \.
 
 
 --
--- Data for Name: schedule_technicians; Type: TABLE DATA; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Data for Name: schedule_technicians; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.schedule_technicians (id, occurrence_id, user_id, assigned_at) FROM stdin;
+4	25	80	2025-11-14 14:25:15.489209+08
+5	25	79	2025-11-14 14:25:15.489209+08
+6	25	78	2025-11-14 14:25:15.489209+08
 \.
 
 
 --
--- Data for Name: schedule_templates; Type: TABLE DATA; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Data for Name: schedule_templates; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.schedule_templates (id, type, title, description, frequency_value, frequency_unit, grace_period_value, grace_period_unit, status, start_date, end_date, created_by, updated_by, stopped_by, created_at, updated_at, stopped_at, item_id) FROM stdin;
-19	PM	Weekly inspection	Perform weekly inspection of laptops to check hardware functionality, software updates, battery health, cleanliness, and proper configuration. Document any issues and report for maintenance if necessary.	4	days	5	hours	active	2025-11-06 09:00:00+00	2026-01-04 21:07:00+00	5	5	\N	2025-11-04 21:07:47.680447+00	2025-11-04 21:07:47.308+00	\N	22
-20	PM	System Performance Review	Check operating system updates, software performance, and storage health. Clean temporary files and optimize system settings for smooth operation	4	weeks	1	days	active	2025-11-01 21:10:00+00	2025-12-30 21:10:00+00	5	5	\N	2025-11-04 21:10:52.736692+00	2025-11-04 21:10:52.356+00	\N	22
+22	PM	\N	Cleaning ventilation	1	weeks	\N	\N	active	2025-11-15 00:18:00+08	\N	74	74	\N	2025-11-14 12:18:43.958913+08	2025-11-14 12:18:43.796+08	\N	39
 \.
 
 
 --
--- Data for Name: schedule_units; Type: TABLE DATA; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Data for Name: schedule_units; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.schedule_units (id, occurrence_id, item_unit_id, status) FROM stdin;
+8	25	352	pending
+9	25	337	pending
+10	25	346	pending
+11	25	347	pending
+12	25	348	pending
+13	25	349	pending
+14	25	350	pending
+15	25	351	pending
+16	25	343	pending
+17	25	342	pending
+18	25	339	pending
+19	25	344	pending
+20	25	341	pending
+21	25	340	pending
+22	25	338	pending
+23	25	345	pending
 \.
 
 
 --
--- Data for Name: sub_locations; Type: TABLE DATA; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Data for Name: sub_locations; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.sub_locations (id, location_id, name, created_by, updated_by, deleted_by, created_at, updated_at, deleted_at) FROM stdin;
-6	1	Building A	\N	\N	\N	2025-11-04 20:29:59.13958+00	2025-11-04 20:29:59.13958+00	\N
-7	1	Building B	\N	\N	\N	2025-11-04 20:29:59.13958+00	2025-11-04 20:29:59.13958+00	\N
-8	1	Building C	\N	\N	\N	2025-11-04 20:29:59.13958+00	2025-11-04 20:29:59.13958+00	\N
-9	1	Administration Office	\N	\N	\N	2025-11-04 20:29:59.13958+00	2025-11-04 20:29:59.13958+00	\N
-10	1	Cafeteria	\N	\N	\N	2025-11-04 20:29:59.13958+00	2025-11-04 20:29:59.13958+00	\N
-11	2	Room 101	\N	\N	\N	2025-11-04 20:29:59.232958+00	2025-11-04 20:29:59.232958+00	\N
-12	2	Room 102	\N	\N	\N	2025-11-04 20:29:59.232958+00	2025-11-04 20:29:59.232958+00	\N
-13	2	Room 103	\N	\N	\N	2025-11-04 20:29:59.232958+00	2025-11-04 20:29:59.232958+00	\N
-14	2	Conference Hall	\N	\N	\N	2025-11-04 20:29:59.232958+00	2025-11-04 20:29:59.232958+00	\N
-15	2	Staff Lounge	\N	\N	\N	2025-11-04 20:29:59.232958+00	2025-11-04 20:29:59.232958+00	\N
-17	3	Chemistry Lab	\N	\N	\N	2025-11-04 20:29:59.269602+00	2025-11-04 20:29:59.269602+00	\N
-18	3	Biology Lab	\N	\N	\N	2025-11-04 20:29:59.269602+00	2025-11-04 20:29:59.269602+00	\N
-19	3	Computer Lab	\N	\N	\N	2025-11-04 20:29:59.269602+00	2025-11-04 20:29:59.269602+00	\N
-20	3	Robotics Lab	\N	\N	\N	2025-11-04 20:29:59.269602+00	2025-11-04 20:29:59.269602+00	\N
-21	4	Reading Area	\N	\N	\N	2025-11-04 20:29:59.308206+00	2025-11-04 20:29:59.308206+00	\N
-22	4	Computer Room	\N	\N	\N	2025-11-04 20:29:59.308206+00	2025-11-04 20:29:59.308206+00	\N
-23	4	Archives	\N	\N	\N	2025-11-04 20:29:59.308206+00	2025-11-04 20:29:59.308206+00	\N
-24	4	Reference Section	\N	\N	\N	2025-11-04 20:29:59.308206+00	2025-11-04 20:29:59.308206+00	\N
-25	4	Audio-Visual Room	\N	\N	\N	2025-11-04 20:29:59.308206+00	2025-11-04 20:29:59.308206+00	\N
-26	5	Gymnasium	\N	\N	\N	2025-11-04 20:29:59.348266+00	2025-11-04 20:29:59.348266+00	\N
-27	5	Swimming Pool	\N	\N	\N	2025-11-04 20:29:59.348266+00	2025-11-04 20:29:59.348266+00	\N
-28	5	Tennis Courts	\N	\N	\N	2025-11-04 20:29:59.348266+00	2025-11-04 20:29:59.348266+00	\N
-29	5	Football Field	\N	\N	\N	2025-11-04 20:29:59.348266+00	2025-11-04 20:29:59.348266+00	\N
-30	5	Locker Rooms	\N	\N	\N	2025-11-04 20:29:59.348266+00	2025-11-04 20:29:59.348266+00	\N
-16	3	Physics Lab	\N	5	\N	2025-11-04 20:29:59.269602+00	2025-11-04 20:30:10.555+00	\N
+31	8	Room 101	74	74	\N	2025-11-12 10:46:54.87916+08	2025-11-12 10:46:54.87916+08	\N
 \.
 
 
 --
--- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.users (id, first_name, last_name, email, password, role, department_id, status, created_by, updated_by, disabled_by, deleted_by, created_at, updated_at, disabled_at, deleted_at) FROM stdin;
-1	System	Admin	samms.dyci@gmail.com	$2b$10$75WdYiTrGU1P2TwiIU6VJeqlM5PWeA3X64SdEJwMsfuvdA5s197rq	system_administrator	\N	inactive	\N	1	1	\N	2025-10-16 10:13:18.932041+00	2025-10-16 03:03:52.015+00	2025-10-16 03:03:52.015+00	\N
-75	Rowell	Cruz	cruzrowellt11@gmail.com	$2b$10$jWG1sI2tXeOPjWSSqloFWub/bKo2XHLlSsohZkX2kGdtzpsj5TNJi	asset_administrator	\N	active	\N	\N	\N	\N	2025-11-14 03:57:49.959467+00	2025-11-14 03:57:49.959467+00	\N	\N
+80	Rowell	Cruz	cruz.rowell00510@gmail.com	$2b$10$NVMfIIH.lsKC291PLwYbs.xFI/aYvdrgmVLH/4ylWbqW42WL4Lawy	technician	16	inactive	\N	\N	\N	\N	2025-11-14 13:15:03.162648+08	2025-11-14 13:15:03.162648+08	\N	\N
+76	Rowell	Cruz	cruzrowellt11@gmail.com	$2b$10$JNYgbJEHLRYbBCqgaWjjpOyQUIl6JUF46AzVZumL5o0LDLlsPjPBm	asset_administrator	\N	inactive	\N	\N	\N	\N	2025-11-14 12:24:37.68389+08	2025-11-14 12:24:37.68389+08	\N	\N
+1	System	Admin	samms.dyci@gmail.com	$2b$10$DP20MeyrxyUje4ChAENW4O8uBsONc97al9Q7e403I7ADbX2w7ZDye	system_administrator	\N	inactive	\N	1	1	\N	2025-10-16 18:13:18.932041+08	2025-10-16 11:03:52.015+08	2025-10-16 11:03:52.015+08	\N
+77	Rowell	Cruz	rowellcruz145@gmail.com	$2b$10$IWe4LMuIzxd.hLQNVme6vuEhEV/hs/iAjC9ruojlWlxDxxCcZnIq6	property_custodian	16	inactive	\N	\N	\N	\N	2025-11-14 13:09:10.132355+08	2025-11-14 13:09:10.132355+08	\N	\N
+78	Rowell	Cruz	cruz.rowell00510@dyci.edu.ph	$2b$10$vO3sfahIwn1qJOGVl4XX4.8BVNgm28m6rjC/wdOxrCnoX31zDWHkG	technician	16	inactive	\N	\N	\N	\N	2025-11-14 13:11:05.405173+08	2025-11-14 13:11:05.405173+08	\N	\N
+79	Rowell	Cruz	first.acc145@gmail.com	$2b$10$bkFEo0uVeiocKnqna99cHOcryBJTn4o61lS3R7b1LdyboeETLd0Dm	technician	16	inactive	\N	\N	\N	\N	2025-11-14 13:12:05.322885+08	2025-11-14 13:12:05.322885+08	\N	\N
 \.
 
 
 --
--- Data for Name: vendor_offers; Type: TABLE DATA; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Data for Name: vendor_offers; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.vendor_offers (id, vendor_id, item_category_id, item_id, offer_details, price, valid_until, created_at, updated_at) FROM stdin;
-36	16	8	\N	\N	\N	\N	2025-11-04 21:04:01.939605+00	2025-11-04 21:04:01.939605+00
-37	16	9	\N	\N	\N	\N	2025-11-04 21:04:01.939605+00	2025-11-04 21:04:01.939605+00
-40	12	4	\N	\N	\N	\N	2025-11-04 21:05:09.771769+00	2025-11-04 21:05:09.771769+00
-41	12	5	\N	\N	\N	\N	2025-11-04 21:05:09.771769+00	2025-11-04 21:05:09.771769+00
-42	12	4	\N	\N	\N	\N	2025-11-04 21:05:09.772078+00	2025-11-04 21:05:09.772078+00
-43	12	5	\N	\N	\N	\N	2025-11-04 21:05:09.772078+00	2025-11-04 21:05:09.772078+00
+36	16	8	\N	\N	\N	\N	2025-11-05 05:04:01.939605+08	2025-11-05 05:04:01.939605+08
+37	16	9	\N	\N	\N	\N	2025-11-05 05:04:01.939605+08	2025-11-05 05:04:01.939605+08
+40	12	4	\N	\N	\N	\N	2025-11-05 05:05:09.771769+08	2025-11-05 05:05:09.771769+08
+41	12	5	\N	\N	\N	\N	2025-11-05 05:05:09.771769+08	2025-11-05 05:05:09.771769+08
+42	12	4	\N	\N	\N	\N	2025-11-05 05:05:09.772078+08	2025-11-05 05:05:09.772078+08
+43	12	5	\N	\N	\N	\N	2025-11-05 05:05:09.772078+08	2025-11-05 05:05:09.772078+08
 \.
 
 
 --
--- Data for Name: vendors; Type: TABLE DATA; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Data for Name: vendors; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.vendors (id, name, contact_person, contact_email, contact_phone, address, created_by, updated_by, deleted_by, created_at, updated_at, deleted_at) FROM stdin;
-11	Tech Solutions Inc.	Alice Reyes	alice.reyes@techsolutions.com	0917-123-4567	123 Innovation St., Makati City	5	\N	\N	2025-11-04 21:03:48.314532+00	2025-11-04 21:03:48.314532+00	\N
-13	Lab Equipment Supply	Rina Cruz	rina.cruz@labequip.com	0933-555-7890	12 Science Blvd., Taguig City	5	\N	\N	2025-11-04 21:03:48.314532+00	2025-11-04 21:03:48.314532+00	\N
-14	Clean & Safe Products	John Lim	john.lim@cleansafe.com	0944-321-0987	88 Hygiene Rd., Mandaluyong City	5	\N	\N	2025-11-04 21:03:48.314532+00	2025-11-04 21:03:48.314532+00	\N
-15	Furniture World	Maria Torres	maria.torres@furnitureworld.com	0955-654-3210	77 Home Lane, Pasig City	5	\N	\N	2025-11-04 21:03:48.314532+00	2025-11-04 21:03:48.314532+00	\N
-16	Vendor A	Neil Raphael Ramos	vendor.a@email.com	asd	321 Secure Lane, Safety Town, FL 33101	5	5	5	2025-11-04 21:04:01.93655+00	2025-11-04 21:04:09.34+00	2025-11-04 21:04:09.34+00
-12	Office Essentials Co.	Mark Santos	mark.santos@officeessentials.com	0922-987-6543	45 Business Ave., Quezon City	5	5	\N	2025-11-04 21:03:48.314532+00	2025-11-04 21:05:09.765+00	\N
+23	Tech Solutions Inc.	Maria Lopez	maria.lopez@techsolutions.com	+63 912 345 6789	123 IT Park, Quezon City, Philippines	1	1	\N	2025-11-14 12:15:08.679088+08	2025-11-14 12:15:08.679088+08	\N
+24	OfficePro Supplies	Juan Dela Cruz	juan.delacruz@officepro.ph	+63 923 456 7890	45 Makati Ave, Makati City, Philippines	1	1	\N	2025-11-14 12:15:08.679088+08	2025-11-14 12:15:08.679088+08	\N
+25	ElectroHub	Angela Reyes	angela.reyes@electrohub.com	+63 934 567 8901	78 Electronics St, Pasig City, Philippines	1	1	\N	2025-11-14 12:15:08.679088+08	2025-11-14 12:15:08.679088+08	\N
+26	FurnitureWorld	Ramon Santos	ramon.santos@furnitureworld.ph	+63 945 678 9012	12 Furniture Rd, Mandaluyong City, Philippines	1	1	\N	2025-11-14 12:15:08.679088+08	2025-11-14 12:15:08.679088+08	\N
+27	Mechanical Masters	Lito Navarro	lito.navarro@mechmasters.ph	+63 956 789 0123	34 Mechanics Lane, Taguig City, Philippines	1	1	\N	2025-11-14 12:15:08.679088+08	2025-11-14 12:15:08.679088+08	\N
+28	Peripherals Plus	Grace Tan	grace.tan@peripheralsplus.com	+63 967 890 1234	56 Tech Blvd, Quezon City, Philippines	1	1	\N	2025-11-14 12:15:08.679088+08	2025-11-14 12:15:08.679088+08	\N
+29	Green Energy Co.	Carlos Mendoza	carlos.mendoza@greenenergy.ph	+63 978 901 2345	89 Solar Park, Pasig City, Philippines	1	1	\N	2025-11-14 12:15:08.679088+08	2025-11-14 12:15:08.679088+08	\N
+30	Tools & Equipment Ph	Melissa Cruz	melissa.cruz@toolsph.com	+63 989 012 3456	23 Industrial Ave, Makati City, Philippines	1	1	\N	2025-11-14 12:15:08.679088+08	2025-11-14 12:15:08.679088+08	\N
+31	Appliances Central	Ricardo Villanueva	ricardo.villanueva@appliancescentral.ph	+63 990 123 4567	67 Appliance St, Mandaluyong City, Philippines	1	1	\N	2025-11-14 12:15:08.679088+08	2025-11-14 12:15:08.679088+08	\N
+32	Smart IT Solutions	Jocelyn Ramos	jocelyn.ramos@smartit.ph	+63 901 234 5678	101 Techno Park, Taguig City, Philippines	1	1	\N	2025-11-14 12:15:08.679088+08	2025-11-14 12:15:08.679088+08	\N
 \.
 
 
 --
--- Name: activity_log_id_seq; Type: SEQUENCE SET; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: activity_log_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
 SELECT pg_catalog.setval('public.activity_log_id_seq', 9, true);
 
 
 --
--- Name: borrow_logs_id_seq; Type: SEQUENCE SET; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: borrow_logs_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.borrow_logs_id_seq', 24, true);
-
-
---
--- Name: departments_id_seq; Type: SEQUENCE SET; Schema: public; Owner: assetone_ams_db_5esl_user
---
-
-SELECT pg_catalog.setval('public.departments_id_seq', 12, true);
+SELECT pg_catalog.setval('public.borrow_logs_id_seq', 25, true);
 
 
 --
--- Name: item_attachments_id_seq; Type: SEQUENCE SET; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: departments_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.departments_id_seq', 20, true);
+
+
+--
+-- Name: item_attachments_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
 SELECT pg_catalog.setval('public.item_attachments_id_seq', 1, false);
 
 
 --
--- Name: item_categories_id_seq; Type: SEQUENCE SET; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: item_categories_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
 SELECT pg_catalog.setval('public.item_categories_id_seq', 13, true);
 
 
 --
--- Name: item_costs_id_seq; Type: SEQUENCE SET; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: item_costs_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.item_costs_id_seq', 302, true);
-
-
---
--- Name: item_depreciation_id_seq; Type: SEQUENCE SET; Schema: public; Owner: assetone_ams_db_5esl_user
---
-
-SELECT pg_catalog.setval('public.item_depreciation_id_seq', 305, true);
+SELECT pg_catalog.setval('public.item_costs_id_seq', 303, true);
 
 
 --
--- Name: item_lifecycle_id_seq; Type: SEQUENCE SET; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: item_depreciation_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.item_depreciation_id_seq', 306, true);
+
+
+--
+-- Name: item_lifecycle_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
 SELECT pg_catalog.setval('public.item_lifecycle_id_seq', 1, false);
 
 
 --
--- Name: item_requests_id_seq; Type: SEQUENCE SET; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: item_requests_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
 SELECT pg_catalog.setval('public.item_requests_id_seq', 1, false);
 
 
 --
--- Name: item_units_id_seq; Type: SEQUENCE SET; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: item_units_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.item_units_id_seq', 307, true);
+SELECT pg_catalog.setval('public.item_units_id_seq', 353, true);
 
 
 --
--- Name: items_for_distribution_id_seq; Type: SEQUENCE SET; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: items_for_distribution_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
 SELECT pg_catalog.setval('public.items_for_distribution_id_seq', 112, true);
 
 
 --
--- Name: items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.items_id_seq', 22, true);
-
-
---
--- Name: locations_id_seq; Type: SEQUENCE SET; Schema: public; Owner: assetone_ams_db_5esl_user
---
-
-SELECT pg_catalog.setval('public.locations_id_seq', 7, true);
+SELECT pg_catalog.setval('public.items_id_seq', 40, true);
 
 
 --
--- Name: maintenance_history_id_seq; Type: SEQUENCE SET; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: locations_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.locations_id_seq', 8, true);
+
+
+--
+-- Name: maintenance_history_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
 SELECT pg_catalog.setval('public.maintenance_history_id_seq', 1, false);
 
 
 --
--- Name: maintenance_requests_id_seq; Type: SEQUENCE SET; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: maintenance_requests_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.maintenance_requests_id_seq', 1, true);
-
-
---
--- Name: password_reset_tokens_id_seq; Type: SEQUENCE SET; Schema: public; Owner: assetone_ams_db_5esl_user
---
-
-SELECT pg_catalog.setval('public.password_reset_tokens_id_seq', 4, true);
+SELECT pg_catalog.setval('public.maintenance_requests_id_seq', 2, true);
 
 
 --
--- Name: pending_registration_id_seq; Type: SEQUENCE SET; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: password_reset_tokens_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.pending_registration_id_seq', 12, true);
+SELECT pg_catalog.setval('public.password_reset_tokens_id_seq', 11, true);
 
 
 --
--- Name: procurement_attachments_id_seq; Type: SEQUENCE SET; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: pending_registration_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.pending_registration_id_seq', 22, true);
+
+
+--
+-- Name: procurement_attachments_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
 SELECT pg_catalog.setval('public.procurement_attachments_id_seq', 41, true);
 
 
 --
--- Name: procurement_finalizations_id_seq; Type: SEQUENCE SET; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: procurement_finalizations_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
 SELECT pg_catalog.setval('public.procurement_finalizations_id_seq', 1, false);
 
 
 --
--- Name: purchase_order_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: purchase_order_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
 SELECT pg_catalog.setval('public.purchase_order_items_id_seq', 11, true);
 
 
 --
--- Name: purchase_orders_id_seq; Type: SEQUENCE SET; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: purchase_orders_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
 SELECT pg_catalog.setval('public.purchase_orders_id_seq', 30, true);
 
 
 --
--- Name: purchase_requests_id_seq; Type: SEQUENCE SET; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: purchase_requests_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
 SELECT pg_catalog.setval('public.purchase_requests_id_seq', 20, true);
 
 
 --
--- Name: relocation_log_id_seq; Type: SEQUENCE SET; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: relocation_log_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.relocation_log_id_seq', 1, true);
+SELECT pg_catalog.setval('public.relocation_log_id_seq', 15, true);
 
 
 --
--- Name: requested_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: relocation_technicians_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.relocation_technicians_id_seq', 4, true);
+
+
+--
+-- Name: requested_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
 SELECT pg_catalog.setval('public.requested_items_id_seq', 20, true);
 
 
 --
--- Name: schedule_occurrences_id_seq; Type: SEQUENCE SET; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: schedule_occurrences_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.schedule_occurrences_id_seq', 23, true);
-
-
---
--- Name: schedule_technicians_id_seq; Type: SEQUENCE SET; Schema: public; Owner: assetone_ams_db_5esl_user
---
-
-SELECT pg_catalog.setval('public.schedule_technicians_id_seq', 1, true);
+SELECT pg_catalog.setval('public.schedule_occurrences_id_seq', 25, true);
 
 
 --
--- Name: schedule_templates_id_seq; Type: SEQUENCE SET; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: schedule_technicians_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.schedule_templates_id_seq', 20, true);
-
-
---
--- Name: schedule_units_id_seq; Type: SEQUENCE SET; Schema: public; Owner: assetone_ams_db_5esl_user
---
-
-SELECT pg_catalog.setval('public.schedule_units_id_seq', 2, true);
+SELECT pg_catalog.setval('public.schedule_technicians_id_seq', 6, true);
 
 
 --
--- Name: sub_locations_id_seq; Type: SEQUENCE SET; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: schedule_templates_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.sub_locations_id_seq', 30, true);
-
-
---
--- Name: users_id_seq; Type: SEQUENCE SET; Schema: public; Owner: assetone_ams_db_5esl_user
---
-
-SELECT pg_catalog.setval('public.users_id_seq', 75, true);
+SELECT pg_catalog.setval('public.schedule_templates_id_seq', 22, true);
 
 
 --
--- Name: vendor_offers_id_seq; Type: SEQUENCE SET; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: schedule_units_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.schedule_units_id_seq', 23, true);
+
+
+--
+-- Name: sub_locations_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.sub_locations_id_seq', 31, true);
+
+
+--
+-- Name: users_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.users_id_seq', 80, true);
+
+
+--
+-- Name: vendor_offers_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
 SELECT pg_catalog.setval('public.vendor_offers_id_seq', 43, true);
 
 
 --
--- Name: vendors_id_seq; Type: SEQUENCE SET; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: vendors_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.vendors_id_seq', 16, true);
+SELECT pg_catalog.setval('public.vendors_id_seq', 32, true);
 
 
 --
--- Name: activity_log activity_log_pkey; Type: CONSTRAINT; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: activity_log activity_log_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.activity_log
@@ -2207,7 +2241,7 @@ ALTER TABLE ONLY public.activity_log
 
 
 --
--- Name: borrow_logs borrow_logs_pkey; Type: CONSTRAINT; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: borrow_logs borrow_logs_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.borrow_logs
@@ -2215,7 +2249,7 @@ ALTER TABLE ONLY public.borrow_logs
 
 
 --
--- Name: departments departments_code_key; Type: CONSTRAINT; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: departments departments_code_key; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.departments
@@ -2223,7 +2257,7 @@ ALTER TABLE ONLY public.departments
 
 
 --
--- Name: departments departments_pkey; Type: CONSTRAINT; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: departments departments_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.departments
@@ -2231,7 +2265,7 @@ ALTER TABLE ONLY public.departments
 
 
 --
--- Name: item_attachments item_attachments_pkey; Type: CONSTRAINT; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: item_attachments item_attachments_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.item_attachments
@@ -2239,7 +2273,7 @@ ALTER TABLE ONLY public.item_attachments
 
 
 --
--- Name: item_categories item_categories_code_key; Type: CONSTRAINT; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: item_categories item_categories_code_key; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.item_categories
@@ -2247,7 +2281,7 @@ ALTER TABLE ONLY public.item_categories
 
 
 --
--- Name: item_categories item_categories_pkey; Type: CONSTRAINT; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: item_categories item_categories_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.item_categories
@@ -2255,7 +2289,7 @@ ALTER TABLE ONLY public.item_categories
 
 
 --
--- Name: item_costs item_costs_pkey; Type: CONSTRAINT; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: item_costs item_costs_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.item_costs
@@ -2263,7 +2297,7 @@ ALTER TABLE ONLY public.item_costs
 
 
 --
--- Name: item_depreciation item_depreciation_pkey; Type: CONSTRAINT; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: item_depreciation item_depreciation_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.item_depreciation
@@ -2271,7 +2305,7 @@ ALTER TABLE ONLY public.item_depreciation
 
 
 --
--- Name: item_lifecycle item_lifecycle_pkey; Type: CONSTRAINT; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: item_lifecycle item_lifecycle_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.item_lifecycle
@@ -2279,7 +2313,7 @@ ALTER TABLE ONLY public.item_lifecycle
 
 
 --
--- Name: item_requests item_requests_pkey; Type: CONSTRAINT; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: item_requests item_requests_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.item_requests
@@ -2287,7 +2321,7 @@ ALTER TABLE ONLY public.item_requests
 
 
 --
--- Name: item_units item_units_pkey; Type: CONSTRAINT; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: item_units item_units_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.item_units
@@ -2295,7 +2329,7 @@ ALTER TABLE ONLY public.item_units
 
 
 --
--- Name: items_for_distribution items_for_distribution_pkey; Type: CONSTRAINT; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: items_for_distribution items_for_distribution_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.items_for_distribution
@@ -2303,7 +2337,7 @@ ALTER TABLE ONLY public.items_for_distribution
 
 
 --
--- Name: items items_pkey; Type: CONSTRAINT; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: items items_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.items
@@ -2311,7 +2345,7 @@ ALTER TABLE ONLY public.items
 
 
 --
--- Name: locations locations_pkey; Type: CONSTRAINT; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: locations locations_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.locations
@@ -2319,7 +2353,7 @@ ALTER TABLE ONLY public.locations
 
 
 --
--- Name: maintenance_history maintenance_history_pkey; Type: CONSTRAINT; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: maintenance_history maintenance_history_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.maintenance_history
@@ -2327,7 +2361,7 @@ ALTER TABLE ONLY public.maintenance_history
 
 
 --
--- Name: maintenance_requests maintenance_requests_pkey; Type: CONSTRAINT; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: maintenance_requests maintenance_requests_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.maintenance_requests
@@ -2335,7 +2369,7 @@ ALTER TABLE ONLY public.maintenance_requests
 
 
 --
--- Name: password_reset_tokens password_reset_tokens_pkey; Type: CONSTRAINT; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: password_reset_tokens password_reset_tokens_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.password_reset_tokens
@@ -2343,7 +2377,7 @@ ALTER TABLE ONLY public.password_reset_tokens
 
 
 --
--- Name: pending_registration pending_registration_email_key; Type: CONSTRAINT; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: pending_registration pending_registration_email_key; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.pending_registration
@@ -2351,7 +2385,7 @@ ALTER TABLE ONLY public.pending_registration
 
 
 --
--- Name: pending_registration pending_registration_pkey; Type: CONSTRAINT; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: pending_registration pending_registration_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.pending_registration
@@ -2359,7 +2393,7 @@ ALTER TABLE ONLY public.pending_registration
 
 
 --
--- Name: pr_sequences pr_sequences_pkey; Type: CONSTRAINT; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: pr_sequences pr_sequences_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.pr_sequences
@@ -2367,7 +2401,7 @@ ALTER TABLE ONLY public.pr_sequences
 
 
 --
--- Name: procurement_attachments procurement_attachments_pkey; Type: CONSTRAINT; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: procurement_attachments procurement_attachments_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.procurement_attachments
@@ -2375,7 +2409,7 @@ ALTER TABLE ONLY public.procurement_attachments
 
 
 --
--- Name: procurement_finalizations procurement_finalizations_pkey; Type: CONSTRAINT; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: procurement_finalizations procurement_finalizations_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.procurement_finalizations
@@ -2383,7 +2417,7 @@ ALTER TABLE ONLY public.procurement_finalizations
 
 
 --
--- Name: purchase_order_items purchase_order_items_pkey; Type: CONSTRAINT; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: purchase_order_items purchase_order_items_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.purchase_order_items
@@ -2391,7 +2425,7 @@ ALTER TABLE ONLY public.purchase_order_items
 
 
 --
--- Name: purchase_orders purchase_orders_pkey; Type: CONSTRAINT; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: purchase_orders purchase_orders_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.purchase_orders
@@ -2399,7 +2433,7 @@ ALTER TABLE ONLY public.purchase_orders
 
 
 --
--- Name: purchase_requests purchase_requests_control_number_key; Type: CONSTRAINT; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: purchase_requests purchase_requests_control_number_key; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.purchase_requests
@@ -2407,7 +2441,7 @@ ALTER TABLE ONLY public.purchase_requests
 
 
 --
--- Name: purchase_requests purchase_requests_pkey; Type: CONSTRAINT; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: purchase_requests purchase_requests_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.purchase_requests
@@ -2415,7 +2449,7 @@ ALTER TABLE ONLY public.purchase_requests
 
 
 --
--- Name: relocation_log relocation_log_pkey; Type: CONSTRAINT; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: relocation_log relocation_log_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.relocation_log
@@ -2423,7 +2457,15 @@ ALTER TABLE ONLY public.relocation_log
 
 
 --
--- Name: requested_items requested_items_pkey; Type: CONSTRAINT; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: relocation_technicians relocation_technicians_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.relocation_technicians
+    ADD CONSTRAINT relocation_technicians_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: requested_items requested_items_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.requested_items
@@ -2431,7 +2473,7 @@ ALTER TABLE ONLY public.requested_items
 
 
 --
--- Name: schedule_occurrences schedule_occurrences_pkey; Type: CONSTRAINT; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: schedule_occurrences schedule_occurrences_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.schedule_occurrences
@@ -2439,7 +2481,7 @@ ALTER TABLE ONLY public.schedule_occurrences
 
 
 --
--- Name: schedule_technicians schedule_technicians_pkey; Type: CONSTRAINT; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: schedule_technicians schedule_technicians_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.schedule_technicians
@@ -2447,7 +2489,7 @@ ALTER TABLE ONLY public.schedule_technicians
 
 
 --
--- Name: schedule_templates schedule_templates_pkey; Type: CONSTRAINT; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: schedule_templates schedule_templates_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.schedule_templates
@@ -2455,7 +2497,7 @@ ALTER TABLE ONLY public.schedule_templates
 
 
 --
--- Name: schedule_units schedule_units_pkey; Type: CONSTRAINT; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: schedule_units schedule_units_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.schedule_units
@@ -2463,7 +2505,7 @@ ALTER TABLE ONLY public.schedule_units
 
 
 --
--- Name: sub_locations sub_locations_pkey; Type: CONSTRAINT; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: sub_locations sub_locations_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.sub_locations
@@ -2471,7 +2513,7 @@ ALTER TABLE ONLY public.sub_locations
 
 
 --
--- Name: users users_pkey; Type: CONSTRAINT; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: users users_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.users
@@ -2479,7 +2521,7 @@ ALTER TABLE ONLY public.users
 
 
 --
--- Name: vendor_offers vendor_offers_pkey; Type: CONSTRAINT; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: vendor_offers vendor_offers_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.vendor_offers
@@ -2487,7 +2529,7 @@ ALTER TABLE ONLY public.vendor_offers
 
 
 --
--- Name: vendors vendors_pkey; Type: CONSTRAINT; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: vendors vendors_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.vendors
@@ -2495,14 +2537,14 @@ ALTER TABLE ONLY public.vendors
 
 
 --
--- Name: idx_password_reset_token_hash; Type: INDEX; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: idx_password_reset_token_hash; Type: INDEX; Schema: public; Owner: postgres
 --
 
 CREATE INDEX idx_password_reset_token_hash ON public.password_reset_tokens USING btree (token_hash);
 
 
 --
--- Name: borrow_logs borrow_logs_item_unit_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: borrow_logs borrow_logs_item_unit_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.borrow_logs
@@ -2510,7 +2552,7 @@ ALTER TABLE ONLY public.borrow_logs
 
 
 --
--- Name: borrow_logs borrow_logs_lend_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: borrow_logs borrow_logs_lend_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.borrow_logs
@@ -2518,7 +2560,7 @@ ALTER TABLE ONLY public.borrow_logs
 
 
 --
--- Name: password_reset_tokens password_reset_tokens_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: password_reset_tokens password_reset_tokens_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.password_reset_tokens
@@ -2526,7 +2568,7 @@ ALTER TABLE ONLY public.password_reset_tokens
 
 
 --
--- Name: purchase_order_items purchase_order_items_purchase_order_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: assetone_ams_db_5esl_user
+-- Name: purchase_order_items purchase_order_items_purchase_order_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.purchase_order_items
@@ -2534,297 +2576,8 @@ ALTER TABLE ONLY public.purchase_order_items
 
 
 --
--- Name: SCHEMA public; Type: ACL; Schema: -; Owner: assetone_ams_db_5esl_user
---
-
-REVOKE USAGE ON SCHEMA public FROM PUBLIC;
-GRANT ALL ON SCHEMA public TO PUBLIC;
-GRANT ALL ON SCHEMA public TO postgres;
-
-
---
--- Name: FUNCTION armor(bytea); Type: ACL; Schema: public; Owner: postgres
---
-
-GRANT ALL ON FUNCTION public.armor(bytea) TO assetone_ams_db_5esl_user;
-
-
---
--- Name: FUNCTION armor(bytea, text[], text[]); Type: ACL; Schema: public; Owner: postgres
---
-
-GRANT ALL ON FUNCTION public.armor(bytea, text[], text[]) TO assetone_ams_db_5esl_user;
-
-
---
--- Name: FUNCTION crypt(text, text); Type: ACL; Schema: public; Owner: postgres
---
-
-GRANT ALL ON FUNCTION public.crypt(text, text) TO assetone_ams_db_5esl_user;
-
-
---
--- Name: FUNCTION dearmor(text); Type: ACL; Schema: public; Owner: postgres
---
-
-GRANT ALL ON FUNCTION public.dearmor(text) TO assetone_ams_db_5esl_user;
-
-
---
--- Name: FUNCTION decrypt(bytea, bytea, text); Type: ACL; Schema: public; Owner: postgres
---
-
-GRANT ALL ON FUNCTION public.decrypt(bytea, bytea, text) TO assetone_ams_db_5esl_user;
-
-
---
--- Name: FUNCTION decrypt_iv(bytea, bytea, bytea, text); Type: ACL; Schema: public; Owner: postgres
---
-
-GRANT ALL ON FUNCTION public.decrypt_iv(bytea, bytea, bytea, text) TO assetone_ams_db_5esl_user;
-
-
---
--- Name: FUNCTION digest(bytea, text); Type: ACL; Schema: public; Owner: postgres
---
-
-GRANT ALL ON FUNCTION public.digest(bytea, text) TO assetone_ams_db_5esl_user;
-
-
---
--- Name: FUNCTION digest(text, text); Type: ACL; Schema: public; Owner: postgres
---
-
-GRANT ALL ON FUNCTION public.digest(text, text) TO assetone_ams_db_5esl_user;
-
-
---
--- Name: FUNCTION encrypt(bytea, bytea, text); Type: ACL; Schema: public; Owner: postgres
---
-
-GRANT ALL ON FUNCTION public.encrypt(bytea, bytea, text) TO assetone_ams_db_5esl_user;
-
-
---
--- Name: FUNCTION encrypt_iv(bytea, bytea, bytea, text); Type: ACL; Schema: public; Owner: postgres
---
-
-GRANT ALL ON FUNCTION public.encrypt_iv(bytea, bytea, bytea, text) TO assetone_ams_db_5esl_user;
-
-
---
--- Name: FUNCTION gen_random_bytes(integer); Type: ACL; Schema: public; Owner: postgres
---
-
-GRANT ALL ON FUNCTION public.gen_random_bytes(integer) TO assetone_ams_db_5esl_user;
-
-
---
--- Name: FUNCTION gen_random_uuid(); Type: ACL; Schema: public; Owner: postgres
---
-
-GRANT ALL ON FUNCTION public.gen_random_uuid() TO assetone_ams_db_5esl_user;
-
-
---
--- Name: FUNCTION gen_salt(text); Type: ACL; Schema: public; Owner: postgres
---
-
-GRANT ALL ON FUNCTION public.gen_salt(text) TO assetone_ams_db_5esl_user;
-
-
---
--- Name: FUNCTION gen_salt(text, integer); Type: ACL; Schema: public; Owner: postgres
---
-
-GRANT ALL ON FUNCTION public.gen_salt(text, integer) TO assetone_ams_db_5esl_user;
-
-
---
--- Name: FUNCTION hmac(bytea, bytea, text); Type: ACL; Schema: public; Owner: postgres
---
-
-GRANT ALL ON FUNCTION public.hmac(bytea, bytea, text) TO assetone_ams_db_5esl_user;
-
-
---
--- Name: FUNCTION hmac(text, text, text); Type: ACL; Schema: public; Owner: postgres
---
-
-GRANT ALL ON FUNCTION public.hmac(text, text, text) TO assetone_ams_db_5esl_user;
-
-
---
--- Name: FUNCTION pgp_armor_headers(text, OUT key text, OUT value text); Type: ACL; Schema: public; Owner: postgres
---
-
-GRANT ALL ON FUNCTION public.pgp_armor_headers(text, OUT key text, OUT value text) TO assetone_ams_db_5esl_user;
-
-
---
--- Name: FUNCTION pgp_key_id(bytea); Type: ACL; Schema: public; Owner: postgres
---
-
-GRANT ALL ON FUNCTION public.pgp_key_id(bytea) TO assetone_ams_db_5esl_user;
-
-
---
--- Name: FUNCTION pgp_pub_decrypt(bytea, bytea); Type: ACL; Schema: public; Owner: postgres
---
-
-GRANT ALL ON FUNCTION public.pgp_pub_decrypt(bytea, bytea) TO assetone_ams_db_5esl_user;
-
-
---
--- Name: FUNCTION pgp_pub_decrypt(bytea, bytea, text); Type: ACL; Schema: public; Owner: postgres
---
-
-GRANT ALL ON FUNCTION public.pgp_pub_decrypt(bytea, bytea, text) TO assetone_ams_db_5esl_user;
-
-
---
--- Name: FUNCTION pgp_pub_decrypt(bytea, bytea, text, text); Type: ACL; Schema: public; Owner: postgres
---
-
-GRANT ALL ON FUNCTION public.pgp_pub_decrypt(bytea, bytea, text, text) TO assetone_ams_db_5esl_user;
-
-
---
--- Name: FUNCTION pgp_pub_decrypt_bytea(bytea, bytea); Type: ACL; Schema: public; Owner: postgres
---
-
-GRANT ALL ON FUNCTION public.pgp_pub_decrypt_bytea(bytea, bytea) TO assetone_ams_db_5esl_user;
-
-
---
--- Name: FUNCTION pgp_pub_decrypt_bytea(bytea, bytea, text); Type: ACL; Schema: public; Owner: postgres
---
-
-GRANT ALL ON FUNCTION public.pgp_pub_decrypt_bytea(bytea, bytea, text) TO assetone_ams_db_5esl_user;
-
-
---
--- Name: FUNCTION pgp_pub_decrypt_bytea(bytea, bytea, text, text); Type: ACL; Schema: public; Owner: postgres
---
-
-GRANT ALL ON FUNCTION public.pgp_pub_decrypt_bytea(bytea, bytea, text, text) TO assetone_ams_db_5esl_user;
-
-
---
--- Name: FUNCTION pgp_pub_encrypt(text, bytea); Type: ACL; Schema: public; Owner: postgres
---
-
-GRANT ALL ON FUNCTION public.pgp_pub_encrypt(text, bytea) TO assetone_ams_db_5esl_user;
-
-
---
--- Name: FUNCTION pgp_pub_encrypt(text, bytea, text); Type: ACL; Schema: public; Owner: postgres
---
-
-GRANT ALL ON FUNCTION public.pgp_pub_encrypt(text, bytea, text) TO assetone_ams_db_5esl_user;
-
-
---
--- Name: FUNCTION pgp_pub_encrypt_bytea(bytea, bytea); Type: ACL; Schema: public; Owner: postgres
---
-
-GRANT ALL ON FUNCTION public.pgp_pub_encrypt_bytea(bytea, bytea) TO assetone_ams_db_5esl_user;
-
-
---
--- Name: FUNCTION pgp_pub_encrypt_bytea(bytea, bytea, text); Type: ACL; Schema: public; Owner: postgres
---
-
-GRANT ALL ON FUNCTION public.pgp_pub_encrypt_bytea(bytea, bytea, text) TO assetone_ams_db_5esl_user;
-
-
---
--- Name: FUNCTION pgp_sym_decrypt(bytea, text); Type: ACL; Schema: public; Owner: postgres
---
-
-GRANT ALL ON FUNCTION public.pgp_sym_decrypt(bytea, text) TO assetone_ams_db_5esl_user;
-
-
---
--- Name: FUNCTION pgp_sym_decrypt(bytea, text, text); Type: ACL; Schema: public; Owner: postgres
---
-
-GRANT ALL ON FUNCTION public.pgp_sym_decrypt(bytea, text, text) TO assetone_ams_db_5esl_user;
-
-
---
--- Name: FUNCTION pgp_sym_decrypt_bytea(bytea, text); Type: ACL; Schema: public; Owner: postgres
---
-
-GRANT ALL ON FUNCTION public.pgp_sym_decrypt_bytea(bytea, text) TO assetone_ams_db_5esl_user;
-
-
---
--- Name: FUNCTION pgp_sym_decrypt_bytea(bytea, text, text); Type: ACL; Schema: public; Owner: postgres
---
-
-GRANT ALL ON FUNCTION public.pgp_sym_decrypt_bytea(bytea, text, text) TO assetone_ams_db_5esl_user;
-
-
---
--- Name: FUNCTION pgp_sym_encrypt(text, text); Type: ACL; Schema: public; Owner: postgres
---
-
-GRANT ALL ON FUNCTION public.pgp_sym_encrypt(text, text) TO assetone_ams_db_5esl_user;
-
-
---
--- Name: FUNCTION pgp_sym_encrypt(text, text, text); Type: ACL; Schema: public; Owner: postgres
---
-
-GRANT ALL ON FUNCTION public.pgp_sym_encrypt(text, text, text) TO assetone_ams_db_5esl_user;
-
-
---
--- Name: FUNCTION pgp_sym_encrypt_bytea(bytea, text); Type: ACL; Schema: public; Owner: postgres
---
-
-GRANT ALL ON FUNCTION public.pgp_sym_encrypt_bytea(bytea, text) TO assetone_ams_db_5esl_user;
-
-
---
--- Name: FUNCTION pgp_sym_encrypt_bytea(bytea, text, text); Type: ACL; Schema: public; Owner: postgres
---
-
-GRANT ALL ON FUNCTION public.pgp_sym_encrypt_bytea(bytea, text, text) TO assetone_ams_db_5esl_user;
-
-
---
--- Name: DEFAULT PRIVILEGES FOR SEQUENCES; Type: DEFAULT ACL; Schema: -; Owner: postgres
---
-
-ALTER DEFAULT PRIVILEGES FOR ROLE postgres GRANT ALL ON SEQUENCES TO assetone_ams_db_5esl_user;
-
-
---
--- Name: DEFAULT PRIVILEGES FOR TYPES; Type: DEFAULT ACL; Schema: -; Owner: postgres
---
-
-ALTER DEFAULT PRIVILEGES FOR ROLE postgres GRANT ALL ON TYPES TO assetone_ams_db_5esl_user;
-
-
---
--- Name: DEFAULT PRIVILEGES FOR FUNCTIONS; Type: DEFAULT ACL; Schema: -; Owner: postgres
---
-
-ALTER DEFAULT PRIVILEGES FOR ROLE postgres GRANT ALL ON FUNCTIONS TO assetone_ams_db_5esl_user;
-
-
---
--- Name: DEFAULT PRIVILEGES FOR TABLES; Type: DEFAULT ACL; Schema: -; Owner: postgres
---
-
-ALTER DEFAULT PRIVILEGES FOR ROLE postgres GRANT ALL ON TABLES TO assetone_ams_db_5esl_user;
-
-
---
 -- PostgreSQL database dump complete
 --
 
-\unrestrict 97RloNO6LS4DgOtILVei3XP4gAfHTZtAg9E9tK7OxE2XBpDBaMn6ls9nCZN0RSd
+\unrestrict QnRslyplDGp2SAIaATL9POgK57H7BwMFjwnxmqFpY8gm21WJSDQJJLHaE3IYJUi
 
