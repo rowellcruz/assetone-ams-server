@@ -29,12 +29,16 @@ import testRoute from "./routes/testRoute.js";
 import errorHandler from "./middlewares/errorHandler.js";
 
 const app = express();
-const allowedOrigins = process.env.CLIENT_URLS.split(",");
 
-// CORS
+// Allowed client URLs
+const allowedOrigins = process.env.CLIENT_URLS.split(","); 
+// Example: "https://assetone-client.vercel.app,http://localhost:5173"
+
+// CORS middleware
 app.use(
   cors({
     origin: (origin, callback) => {
+      // Allow requests with no origin (like mobile apps or Postman)
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
@@ -42,21 +46,29 @@ app.use(
       }
     },
     credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"], // explicitly allow preflight
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
-// CSP via Helmet
+// Helmet with relaxed connect-src to allow client and server communication
 app.use(
-  helmet.contentSecurityPolicy({
-    useDefaults: true,
-    directives: {
-      "default-src": ["'self'"],
-      "connect-src": ["'self'", "http://localhost:5000"],
-      "script-src": ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
-      "style-src": ["'self'", "'unsafe-inline'"],
-      "img-src": ["'self'", "data:"],
-      "font-src": ["'self'", "https:", "data:"],
-      "object-src": ["'none'"],
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        "default-src": ["'self'"],
+        "connect-src": [
+          "'self'",
+          "http://localhost:5000",
+          "https://assetone-client.vercel.app",
+          "https://assetone-ams-server.onrender.com"
+        ],
+        "script-src": ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+        "style-src": ["'self'", "'unsafe-inline'"],
+        "img-src": ["'self'", "data:"],
+        "font-src": ["'self'", "https:", "data:"],
+        "object-src": ["'none'"],
+      },
     },
   })
 );
