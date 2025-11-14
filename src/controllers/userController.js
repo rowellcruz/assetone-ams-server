@@ -1,18 +1,18 @@
 import * as userService from "../services/userService.js";
 
 export const getUsers = async (req, res) => {
+  const user = req.user;
   const filters = {
     role: req.query.role,
     departmentId: req.query.departmentId,
     isActive: req.query.isActive,
   };
 
-  if(req.user.role !== "system_administrator") {
+  if(user.role !== "system_administrator") {
     filters.excludeStatus = "deleted";
   }
 
-  if (req.user.role === "asset_administrator") {
-    filters.departmentId = null;
+  if (user.role === "asset_administrator") {
     filters.excludeRole = "system_administrator";
   }
 

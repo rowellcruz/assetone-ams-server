@@ -1,7 +1,11 @@
 import db from "../config/db.js";
 
 async function getMaintenanceRequests() {
-  const { rows } = await db.query(`SELECT * FROM maintenance_requests`);
+  const { rows } = await db.query(`
+    SELECT mr.*, i.name AS item_name, iu.unit_tag, iu.serial_number
+    FROM maintenance_requests mr 
+    LEFT JOIN item_units iu ON mr.item_unit_id = iu.id
+    LEFT JOIN items i ON iu.item_id = i.id`);
   return rows;
 }
 

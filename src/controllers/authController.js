@@ -7,7 +7,14 @@ export async function login(req, res) {
     const { token, user } = await authService.login(email, password);
     res.json({
       token,
-      user: { id: user.id, first_name: user.first_name, last_name: user.last_name, email: user.email, role: user.role, status: user.status },
+      user: {
+        id: user.id,
+        first_name: user.first_name,
+        last_name: user.last_name,
+        email: user.email,
+        role: user.role,
+        status: user.status,
+      },
     });
   } catch (err) {
     console.error("Login error:", err.message);
@@ -20,8 +27,9 @@ export async function register(req, res) {
 
   try {
     await authService.registerPending({ first_name, last_name, email, role });
-    res.status(200).json({ 
-      message: "Registration submitted successfully! Please wait for administrator approval." 
+    res.status(200).json({
+      message:
+        "Registration submitted successfully! Please wait for administrator approval.",
     });
   } catch (err) {
     console.error("Registration error:", err.message);
@@ -31,30 +39,40 @@ export async function register(req, res) {
 
 export async function requestPasswordReset(req, res) {
   const { email } = req.body;
-  if (!email) return res.status(400).json({ message: 'Email is required.' });
+  if (!email) return res.status(400).json({ message: "Email is required." });
 
   try {
     await authService.handlePasswordResetRequest(email);
   } catch (err) {
-    console.error('requestPasswordReset error:', err);
+    console.error("requestPasswordReset error:", err);
   }
   res.status(200).json({
-    message: 'If the email exists, a password reset link has been sent (link expires in 10 minutes).'
+    message:
+      "If the email exists, a password reset link has been sent (link expires in 10 minutes).",
   });
 }
 
 export async function resetPassword(req, res) {
   const { token, password } = req.body;
-  if (!token || !password) return res.status(400).json({ message: 'Token and new password are required.' });
+  if (!token || !password)
+    return res
+      .status(400)
+      .json({ message: "Token and new password are required." });
 
   try {
     await authService.handlePasswordResetConfirmation(token, password);
-    res.status(200).json({ message: 'Password has been updated.' });
+    res.status(200).json({ message: "Password has been updated." });
   } catch (err) {
-    console.error('resetPassword error:', err);
-    if (err.message === 'InvalidOrExpiredToken') {
-      return res.status(400).json({ message: 'Invalid or expired token.' });
+    console.error("resetPassword error:", err);
+    if (err.message === "InvalidOrExpiredToken") {
+      return res.status(400).json({ message: "Invalid or expired token." });
     }
-    res.status(500).json({ message: 'An error occurred.' });
+    res.status(500).json({ message: "An error occurred." });
   }
+}
+
+export async function changePassword(req, res) {
+  const { id } = req.params;
+  await authService.changePassword(id, req.body);
+  res.status(200).json({ message: "Password has been updated." });
 }

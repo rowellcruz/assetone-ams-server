@@ -15,6 +15,8 @@ export const getAllSchedulesWithTemplates = async (req, res) => {
   if (req.query.status) filters.status = req.query.status;
   if (user.role === "property_custodian")
     filters.departmentId = user.department_id;
+  if (user.role === "asset_administrator")
+    filters.status = "completed";
   const schedules = await scheduleService.getAllSchedulesWithTemplates(filters);
   res.json(schedules);
 };

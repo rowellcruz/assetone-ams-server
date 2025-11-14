@@ -4,6 +4,7 @@ import {
   requestPasswordReset,
   resetPassword,
   register,
+  changePassword
 } from "../controllers/authController.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import authenticate from "../middlewares/authMiddleware.js";
@@ -19,8 +20,12 @@ router.post(
 );
 router.post(
   "/reset-password",
-  authenticate,
   asyncHandler(resetPassword, MODULE)
+);
+
+router.post(
+  "/change-password/:id",
+  asyncHandler(changePassword, MODULE)
 );
 
 export default router;

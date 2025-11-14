@@ -32,12 +32,12 @@ async function getAllUsers(filters = {}) {
   const values = [];
 
   if (filters.excludeRole) {
-    conditions.push(`role != $${values.length + 1}`);
+    conditions.push(`u.role != $${values.length + 1}`);
     values.push(filters.excludeRole);
   }
 
   if (filters.excludeStatus) {
-    conditions.push(`status != $${values.length + 1}`);
+    conditions.push(`u.status != $${values.length + 1}`);
     values.push(filters.excludeStatus);
   }
 
@@ -47,9 +47,9 @@ async function getAllUsers(filters = {}) {
   }
 
   if (filters.departmentId === null) {
-    conditions.push("department_id IS NULL");
+    conditions.push("u.department_id IS NULL");
   } else if (filters.departmentId) {
-    conditions.push(`department_id = $${values.length + 1}`);
+    conditions.push(`u.department_id = $${values.length + 1}`);
     values.push(filters.departmentId);
   }
 
@@ -84,6 +84,7 @@ async function getUserDataById(id) {
     `
     SELECT
       u.id, u.first_name, u.last_name, u.email, u.role,
+      u.password,
       u.department_id,
       d.name AS department_name, 
       u.status, 

@@ -44,12 +44,11 @@ export const getItems = async (filters = {}) => {
 export const getItemUnits = async (filters = {}, limit = 50) => {
   let query = `
     SELECT 
-      iu.unit_tag,
-      iu.brand,
-      iu.condition,
-      iu.status,
-      iu.acquisition_date,
-      d.name AS department_name
+      iu.unit_tag AS Unit Tag,
+      iu.brand AS Brand,
+      iu.status AS Status,
+      iu.acquisition_date AS Purchase Date,
+      d.name AS Department Name
     FROM item_units iu
     LEFT JOIN departments d ON iu.owner_department_id = d.id
   `;

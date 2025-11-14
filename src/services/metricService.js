@@ -2,6 +2,16 @@ import * as itemDistributionModel from "../models/itemDistributionModel.js";
 import * as purchaseRequestModel from "../models/purchaseRequestModel.js";
 import * as purchaseOrderModel from "../models/purchaseOrderModel.js";
 import * as itemUnitModel from "../models/itemUnitModel.js";
+import * as borrowLogModel from "../models/borrowLogModel.js";
+
+const ALL_CONDITIONS = [
+  "Excellent",
+  "Very Good",
+  "Good",
+  "Average",
+  "Fair",
+  "Poor",
+];
 
 export async function getOrderOnTime() {
   const items = await itemDistributionModel.getItemsForDistribution({
@@ -102,7 +112,9 @@ export async function getLeadTimeTrend() {
 }
 
 export async function getUnusedAssets() {
-  const availableAssets = await itemUnitModel.getAllItemUnits({ status: "available" });
+  const availableAssets = await itemUnitModel.getAllItemUnits({
+    status: "available",
+  });
   const totalAssets = await itemUnitModel.getAllItemUnits();
 
   const unusedCount = availableAssets.length;
@@ -131,4 +143,29 @@ export async function getLostAssets() {
     total_assets: totalCount,
     lost_percentage: Number(percentage.toFixed(2)),
   };
+}
+
+export async function getMostBorrowedAssets() {
+  return await borrowLogModel.getMostBorrowedAssets();
+}
+
+export async function getConditionCounts() {
+  const rows = await itemUnitModel.getConditionCounts();
+
+  const map = Object.fromEntries(
+    rows.map((r) => [r.condition, Number(r.value)])
+  );
+
+  return ALL_CONDITIONS.map((condition) => ({
+    condition,
+    value: map[condition] || 0,
+  }));
+}
+
+export async function getMaitnenanceWorkLoad() {
+  return await itemUnitModel.getMaintenanceLoad();
+}
+
+export async function getAssetUtilization() {
+  return await itemUnitModel.getUtilization();
 }

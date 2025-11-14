@@ -117,22 +117,10 @@ export async function handlePasswordResetRequest(email) {
     expires_at: expiresAt,
   });
 
-  // send confirmation email with link
-  const clientUrls = process.env.CLIENT_URLS
-    ? process.env.CLIENT_URLS.split(",").map((url) => url.trim())
-    : ["https://assetone-client.vercel.app"];
-
-  const frontendUrl =
-    process.env.NODE_ENV === "development"
-      ? clientUrls.find((url) => url.includes("localhost")) || clientUrls[0]
-      : clientUrls[0];
-
-  const resetLink = `${frontendUrl}/reset-password?token=${rawToken}`;
-
-  await mailer.sendResetConfirmation(user.email, resetLink);
+  // send confirmation email with raw token - mailer will create the link
+  await mailer.sendResetConfirmation(user.email, rawToken);
 }
 
-// Called by /reset-password API after user clicks link and enters new password
 export async function handlePasswordResetConfirmation(rawToken, newPassword) {
   const tokenHash = crypto.createHash("sha256").update(rawToken).digest("hex");
   const resetRecord = await resetModel.findByTokenHash(tokenHash);
@@ -151,4 +139,20 @@ export async function handlePasswordResetConfirmation(rawToken, newPassword) {
 
   // mark token used
   await resetModel.markUsed(resetRecord.id);
+}
+
+export async function changePassword(id, passwordData) {
+  const user = await userModel.getUserDataById(id);
+  if (!user) throw new Error("User not found");
+
+  // Check if the provided oldPassword matches the user's current password
+  console.log(user);
+  const isOldPasswordCorrect = await bcrypt.compare(passwordData.oldPassword, user.password);
+  if (!isOldPasswordCorrect) {
+    throw new Error("Current password is incorrect");
+  }
+
+  // Hash and update the new password
+  const hashedNewPassword = await bcrypt.hash(passwordData.newPassword, 10);
+  await userModel.updatePassword(user.id, hashedNewPassword);
 }

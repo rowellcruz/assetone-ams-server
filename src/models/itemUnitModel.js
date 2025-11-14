@@ -299,12 +299,56 @@ async function getItemUnitsFromDepartment(id) {
   return rows;
 }
 
+async function getConditionCounts() {
+  const query = `
+    SELECT
+      CASE 
+        WHEN condition BETWEEN 91 AND 100 THEN 'Excellent'
+        WHEN condition BETWEEN 76 AND 90  THEN 'Very Good'
+        WHEN condition BETWEEN 61 AND 75  THEN 'Good'
+        WHEN condition BETWEEN 46 AND 60  THEN 'Average'
+        WHEN condition BETWEEN 31 AND 45  THEN 'Fair'
+        WHEN condition BETWEEN 1  AND 30  THEN 'Poor'
+      END AS condition,
+      COUNT(*) AS value
+    FROM item_units
+    GROUP BY condition
+    ORDER BY value DESC;
+
+  `;
+  const { rows } = await db.query(query);
+  return rows;
+}
+
+async function getMaintenanceLoad() {
+  const query = `
+    SELECT
+      COUNT(*) FILTER (WHERE status = 'under_maintenance') AS under_maintenance,
+      COUNT(*) AS total_assets
+    FROM item_units;
+  `;
+  const { rows } = await db.query(query);
+  return rows[0];
+}
+
+
+async function getUtilization() {
+  const query = `
+    SELECT
+      COUNT(*) FILTER (WHERE status IN ('in_use', 'borrowed')) AS utilized_assets,
+      COUNT(*) AS total_assets
+    FROM item_units;
+  `;
+  const { rows } = await db.query(query);
+  return rows[0];
+}
+
 async function createItemUnit(data) {
   const {
     item_id,
     brand,
     status,
-    condition,
+    condition =100,
     unit_tag,
     serial_number,
     specifications,
@@ -428,6 +472,9 @@ export {
   getItemUnitsByDepartmentId,
   getReportedItemDataById,
   getItemUnitsByIds,
+  getConditionCounts,
+  getMaintenanceLoad,
+  getUtilization,
   getItemUnitsFromDepartment,
   getLastUnitTag,
   createItemUnit,

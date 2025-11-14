@@ -1,7 +1,8 @@
 import nodemailer from "nodemailer";
 
-const senderName = "Asset Management System";
+const senderName = "SAMMS - Smart Asset Maintenance and Monitoring System";
 const senderEmail = process.env.EMAIL_USER; // your Gmail address
+const clientUrl = process.env.VITE_URL;
 
 // Configure Nodemailer Gmail transporter
 const transporter = nodemailer.createTransport({
@@ -39,6 +40,7 @@ export async function sendRegistrationApproval(email, firstName, temporaryPasswo
         <p>Your registration for the Asset Management System has been approved.</p>
         <p><strong>Your temporary password is: ${temporaryPassword}</strong></p>
         <p>Please log in to the system using your email and this temporary password.</p>
+        <p><a href="${clientUrl}" target="_blank">${clientUrl}</a></p>
         <p><strong>For security reasons, we recommend that you change your password after your first login.</strong></p>
         <br>
         <p>Best regards,<br>Asset Management Team</p>
@@ -107,6 +109,37 @@ export async function sendNewRegistrationNotification(email, fullName, role) {
     return info;
   } catch (error) {
     console.error("Error sending registration notification:", error.message);
+    throw error;
+  }
+}
+
+export async function sendResetConfirmation(email, rawToken) {
+  try {
+    // Create reset link using VITE_URL
+    const resetLink = `${clientUrl}/reset-password?token=${rawToken}`;
+
+    const mailOptions = {
+      from: `"${senderName}" <${senderEmail}>`,
+      to: email,
+      subject: "Password Reset Request - Asset Management System",
+      html: `
+        <h2>Password Reset Request</h2>
+        <p>We received a request to reset your password for the Asset Management System.</p>
+        <p>Click the link below to reset your password (this link will expire in 10 minutes):</p>
+        <p><a href="${resetLink}" target="_blank">Reset Your Password</a></p>
+        <p>If you did not request a password reset, please ignore this email.</p>
+        <br>
+        <p><strong>Note:</strong> For security reasons, this link can only be used once.</p>
+        <br>
+        <p>Best regards,<br>Asset Management Team</p>
+      `,
+    };
+
+    const info = await transporter.sendMail(mailOptions);
+    console.log(`Password reset email sent to ${email}`, info.messageId);
+    return info;
+  } catch (error) {
+    console.error("Error sending password reset email:", error.message);
     throw error;
   }
 }
