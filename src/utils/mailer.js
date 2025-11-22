@@ -28,20 +28,21 @@ export async function verifyEmailConnection() {
 verifyEmailConnection();
 
 // Send registration approval email with temporary password
-export async function sendRegistrationApproval(email, firstName, temporaryPassword) {
+export async function sendRegistrationApproval(email, firstName, temporaryPassword, assignedRole) {
   try {
     const mailOptions = {
       from: `"${senderName}" <${senderEmail}>`,
       to: email,
-      subject: "Registration Approved - Asset Management System",
+      subject: "Registration Approved - AssetONE",
       html: `
         <h2>Registration Approved</h2>
         <p>Dear ${firstName},</p>
         <p>Your registration for the Asset Management System has been approved.</p>
+        <p><strong>Assigned Role: ${assignedRole}</strong></p>
         <p><strong>Your temporary password is: ${temporaryPassword}</strong></p>
         <p>Please log in to the system using your email and this temporary password.</p>
         <p><a href="${clientUrl}" target="_blank">${clientUrl}</a></p>
-        <p><strong>For security reasons, we recommend that you change your password after your first login.</strong></p>
+        <p><strong>For security reasons, change your password after your first login.</strong></p>
         <br>
         <p>Best regards,<br>Asset Management Team</p>
       `,

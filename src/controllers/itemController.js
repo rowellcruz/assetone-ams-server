@@ -2,7 +2,7 @@ import * as itemService from "../services/itemService.js";
 
 export const getItems = async (req, res) => {
   const filters = {
-    categoryId: req.query.categoryId,
+    departmentId: req.query.departmentId,
   };
 
   const items = await itemService.getAllItems(filters);

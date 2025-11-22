@@ -45,7 +45,7 @@ async function getScheduleUnitsByTechnician(userId) {
 }
 
 
-async function getAssignedAssetsByTemplateId(templateId) {
+async function getAssignedAssetsByOccurrenceId(occurrenceId) {
   const { rows } = await db.query(
     `SELECT 
        sa.*, 
@@ -58,7 +58,7 @@ async function getAssignedAssetsByTemplateId(templateId) {
      LEFT JOIN sub_locations AS sl ON au.sub_location_id = sl.id
      LEFT JOIN locations AS l ON sl.location_id = l.id
      WHERE sa.occurrence_id = $1`,
-    [templateId]
+    [occurrenceId]
   );
   return rows;
 }
@@ -76,15 +76,16 @@ async function assignAssets(occurrence_id, item_unit_ids) {
   return { occurrence_id, item_unit_ids };
 }
 
-async function updateScheduleAssetStatus(occurrenceId, unitId) {
+async function updateScheduleAssetStatus(occurrenceId, unitId, review) {
   const { rows } = await db.query(
     `
     UPDATE schedule_units
-    SET status = 'completed'
-    WHERE id = $1 AND item_unit_id = $2
+    SET status = 'completed',
+    review = $3
+    WHERE occurrence_id = $1 AND item_unit_id = $2
     RETURNING *
     `,
-    [occurrenceId, unitId]
+    [occurrenceId, unitId, review]
   );
 
   return rows[0] || null;
@@ -93,7 +94,7 @@ async function updateScheduleAssetStatus(occurrenceId, unitId) {
 export {
   getAssignedAssetsForOccurrence,
   getScheduleUnitsByTechnician,
-  getAssignedAssetsByTemplateId,
+  getAssignedAssetsByOccurrenceId,
   assignAssets,
   updateScheduleAssetStatus,
 };

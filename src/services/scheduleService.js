@@ -14,21 +14,14 @@ export async function getAllSchedulesWithTemplates(filters = {}) {
   const schedulesWithDetails = await Promise.all(
     schedules.map(async (schedule) => {
       const [assigned_technicians, assigned_assets] = await Promise.all([
-        scheduleTechnicianModel.getScheduleTechniciansByOccurrenceId(schedule.id),
-        scheduleAssetsModel.getAssignedAssetsByTemplateId(schedule.id),
+        scheduleTechnicianModel.getScheduleTechniciansByOccurrenceId(
+          schedule.id
+        ),
+        scheduleAssetsModel.getAssignedAssetsByOccurrenceId(schedule.id),
       ]);
-
-      // Check if all assigned assets are completed
-      const allAssetsCompleted =
-        assigned_assets.length > 0 &&
-        assigned_assets.every((a) => a.status === "completed");
-
-      // Override schedule status if applicable
-      const finalStatus = allAssetsCompleted ? "completed" : schedule.status;
 
       return {
         ...schedule,
-        status: finalStatus,
         assigned_technicians,
         assigned_assets,
       };
@@ -38,6 +31,28 @@ export async function getAllSchedulesWithTemplates(filters = {}) {
   return schedulesWithDetails;
 }
 
+export async function getScheduleById(id) {
+  const schedules = await scheduleModel.getAllSchedulesWithTemplates({
+    occurrenceId: id,
+  });
+
+  if (schedules.length === 0) {
+    throw new Error("Schedule not found");
+  }
+
+  const schedule = schedules[0];
+
+  const [assigned_technicians, assigned_assets] = await Promise.all([
+    scheduleTechnicianModel.getScheduleTechniciansByOccurrenceId(schedule.id),
+    scheduleAssetsModel.getAssignedAssetsByOccurrenceId(schedule.id),
+  ]);
+
+  return {
+    ...schedule,
+    assigned_technicians,
+    assigned_assets,
+  };
+}
 
 export async function getScheduleOccurrencesByAssetUnitId(assetUnitId) {
   return await scheduleModel.getScheduleOccurrencesByAssetUnitId(assetUnitId);
@@ -88,21 +103,36 @@ export async function updateScheduleOccurrencePartial(id, fieldsToUpdate) {
   );
 }
 
-export async function startScheduleOccurrence(id, startedBy, technicians = []) {
+export async function startScheduleOccurrence(
+  id,
+  startedBy,
+  technicians = [],
+  departmentId
+) {
+  const template =
+    await scheduleTemplateModel.getScheduleTemplatesByOccurrenceId(id);
   const occurrence = await scheduleModel.getScheduleOccurrenceByID(id);
   if (!occurrence) throw new Error("Schedule not found");
 
-  const itemUnits = await itemUnitModel.getAllItemUnits({
-    unitsForMaintenance: true,
-  });
-  const item_unit_ids = itemUnits.map((unit) => unit.id);
+  let item_unit_ids;
+
+  if (template.type === "CM") {
+    item_unit_ids = template.item_unit_id ? [template.item_unit_id] : [];
+  } else {
+    const itemUnits = await itemUnitModel.getAllItemUnits({
+      unitsForMaintenance: true,
+      technicianDepartmentId: departmentId,
+      itemId: template.item_id,
+    });
+    item_unit_ids = itemUnits.map((unit) => unit.id);
+  }
 
   const startableStatuses = ["pending", "overdue"];
   if (!startableStatuses.includes(occurrence.status)) {
     throw new Error("Only pending or overdue schedules can be started");
   }
 
-  if (item_unit_ids) {
+  if (item_unit_ids.length > 0) {
     await scheduleAssetsModel.assignAssets(id, item_unit_ids);
   }
 
@@ -119,6 +149,16 @@ export async function startScheduleOccurrence(id, startedBy, technicians = []) {
   });
 
   await scheduleTechnicianModel.addTechniciansToOccurrence(id, technicians);
+
+  const unitStatus =
+    template.type === "CM" ? "under_repair" : "under_maintenance";
+
+  for (const unitId of item_unit_ids) {
+    await itemUnitModel.updateItemUnitPartial(unitId, {
+      status: unitStatus,
+      updated_at: new Date(),
+    });
+  }
 
   return updated;
 }
@@ -137,16 +177,28 @@ export async function rejectScheduleOccurrence(id, scheduleData) {
   return updated;
 }
 
-export async function updateScheduleAsset(id, unitId) {
-  console.log(id, unitId);
-  await scheduleAssetsModel.updateScheduleAssetStatus(id, unitId);
+export async function updateScheduleAsset(id, unitId, performanceRating, physicalRating, review) {
+
+  const updatedScheduledAsset = await scheduleAssetsModel.updateScheduleAssetStatus(id, unitId, review);
+
+  const item = await itemUnitModel.getItemUnitByID(unitId);
+
+  const usefulLifeRating =
+    item.remaining_useful_life && item.useful_life
+      ? item.remaining_useful_life / item.useful_life
+      : 0;
+
+  const newCondition =
+    ((performanceRating / 100 + physicalRating / 100 + usefulLifeRating) / 3) *
+    100;
 
   await itemUnitModel.updateItemUnitPartial(unitId, {
     status: "available",
+    condition: parseInt(newCondition),
     updated_at: new Date(),
   });
 
-  return "OK";
+  return updatedScheduledAsset;
 }
 
 export async function completeScheduleOccurrence(id, completedBy) {

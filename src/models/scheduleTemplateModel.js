@@ -58,6 +58,20 @@ async function getScheduleTemplatesByAssetID(assetId, filters = {}) {
   return rows;
 }
 
+async function getScheduleTemplatesByOccurrenceId(occurrenceId) {
+  const { rows } = await db.query(
+    `
+    SELECT st.*
+    FROM schedule_occurrences so
+    LEFT JOIN schedule_templates st ON so.template_id = st.id
+    WHERE so.id = $1
+    `,
+    [occurrenceId]
+  );
+  return rows[0] || null;
+}
+
+
 async function createScheduleTemplate(data) {
   const {
     item_id,
@@ -73,11 +87,12 @@ async function createScheduleTemplate(data) {
     created_by,
     updated_by,
     updated_at,
+    item_unit_id,
   } = data;
 
   const { rows } = await db.query(
     `INSERT INTO schedule_templates (
-    item_id,
+      item_id,
       title,
       description,
       type,
@@ -89,8 +104,9 @@ async function createScheduleTemplate(data) {
       end_date,
       created_by,
       updated_by,
-      updated_at
-    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING id`,
+      updated_at,
+    item_unit_id
+    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) RETURNING id`,
     [
       item_id,
       title,
@@ -105,6 +121,7 @@ async function createScheduleTemplate(data) {
       created_by,
       updated_by,
       updated_at,
+      item_unit_id,
     ]
   );
   return { id: rows[0].id, ...data };
@@ -147,6 +164,7 @@ export {
   getAllScheduleTemplates,
   getScheduleTemplatesByID,
   getScheduleTemplatesByAssetID,
+  getScheduleTemplatesByOccurrenceId,
   createScheduleTemplate,
   updateScheduleTemplatesPartial,
   deleteScheduleTemplateByID,

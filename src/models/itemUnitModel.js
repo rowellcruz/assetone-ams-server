@@ -25,7 +25,21 @@ async function getAllItemUnits(filters = {}) {
             i.useful_life - EXTRACT(YEAR FROM AGE(CURRENT_DATE, iu.purchase_date))
           )
         ELSE NULL
-      END AS remaining_useful_life
+      END AS remaining_useful_life,
+      -- Calculate remaining value (purchase cost spread over remaining useful life)
+      CASE 
+        WHEN iu.purchase_cost IS NOT NULL 
+             AND iu.purchase_date IS NOT NULL 
+             AND i.useful_life IS NOT NULL 
+             AND i.useful_life > 0 THEN
+          ROUND(
+            iu.purchase_cost * 
+            GREATEST(0, i.useful_life - EXTRACT(YEAR FROM AGE(CURRENT_DATE, iu.purchase_date))) / 
+            i.useful_life,
+            2
+          )
+        ELSE iu.purchase_cost -- Return original cost if can't calculate depreciation
+      END AS remaining_value
     FROM item_units iu
     LEFT JOIN items i ON iu.item_id = i.id
     LEFT JOIN departments d ON iu.owner_department_id = d.id
@@ -79,6 +93,11 @@ async function getAllItemUnits(filters = {}) {
     conditions.push(`(iu.status = 'available' OR iu.status = 'in_use')`);
   }
 
+  if (filters.technicianDepartmentId !== undefined) {
+    conditions.push(`i.department_id = $${values.length + 1}`);
+    values.push(filters.technicianDepartmentId);
+  }
+
   if (conditions.length > 0) {
     query += " WHERE " + conditions.join(" AND ");
   }
@@ -124,8 +143,7 @@ async function getItemUnitByID(id) {
       rl.from_location_name,
       rl.from_sub_location_name,
       rl.to_location_name,
-      rl.to_sub_location_name,
-      CASE WHEN rl.status IS NOT NULL THEN 'under_relocation' ELSE 'available' END AS status
+      rl.to_sub_location_name
     FROM item_units iu
     LEFT JOIN items i ON iu.item_id = i.id
     LEFT JOIN departments d ON iu.owner_department_id = d.id
@@ -159,12 +177,37 @@ async function getItemUnitByID(id) {
       LIMIT 1
     ) rl ON TRUE
     WHERE iu.id = $1
+
     `,
     [id]
   );
 
   return rows[0] || null;
 }
+
+async function getItemByItemUnitId(id) {
+  const { rows } = await db.query(
+    `
+    SELECT i.*,
+    CASE 
+      WHEN iu.purchase_date IS NOT NULL AND i.useful_life IS NOT NULL THEN
+        GREATEST(
+          0, 
+          i.useful_life - EXTRACT(YEAR FROM AGE(CURRENT_DATE, iu.purchase_date))
+        )
+      ELSE NULL
+    END AS remaining_useful_life
+    FROM item_units iu
+    JOIN items i ON iu.item_id = i.id
+    WHERE iu.id = $1
+    `,
+    [id]
+  );
+
+  return rows[0] || null;
+}
+
+
 async function getItemUnitsByIds(ids) {
   if (!ids || ids.length === 0) return [];
 
@@ -184,7 +227,6 @@ async function getItemUnitsByIds(ids) {
       -- Relocation info
       rl.id AS relocation_log_id,
       rl.status AS relocation_status,
-      rl.created_at AS relocation_created_at,
       rl.from_location_name AS relocation_from_location_name,
       rl.from_sub_location_name AS relocation_from_sub_location_name,
       rl.to_location_name AS relocation_to_location_name,
@@ -199,7 +241,7 @@ async function getItemUnitsByIds(ids) {
       SELECT 
         rl.id,
         rl.status,
-        rl.created_at,
+        rl.requested_at,
         from_l.name AS from_location_name,
         from_sl.name AS from_sub_location_name,
         to_l.name AS to_location_name,
@@ -211,7 +253,7 @@ async function getItemUnitsByIds(ids) {
       LEFT JOIN locations to_l ON to_sl.location_id = to_l.id
       WHERE rl.item_unit_id = iu.id
         AND rl.status IN ('pending', 'in_progress')
-      ORDER BY rl.created_at DESC
+      ORDER BY rl.requested_at DESC
       LIMIT 1
     ) rl ON TRUE
     WHERE iu.id IN (${placeholders})
@@ -236,7 +278,7 @@ async function getItemUnitsByDepartmentId(departmentId) {
       sl.name AS sub_location_name,
       rl.id AS relocation_log_id,
       rl.status AS relocation_status,
-      rl.created_at AS relocation_created_at,
+      rl.requested_at AS relocation_created_at,
       rl.from_location_name AS relocation_from_location_name,
       rl.from_sub_location_name AS relocation_from_sub_location_name,
       rl.to_location_name AS relocation_to_location_name,
@@ -276,8 +318,10 @@ async function getItemUnitsByDepartmentId(departmentId) {
 
 async function getReportedItemDataById(id) {
   const { rows } = await db.query(
-    `SELECT id, item_id, unit_tag, sub_location_id
-     FROM item_units WHERE id = $1`,
+    `SELECT iu.id, iu.item_id, iu.unit_tag, iu.sub_location_id, i.name as item_name
+     FROM item_units iu
+     LEFT JOIN items i ON iu.item_id = i.id
+     WHERE iu.id = $1`,
     [id]
   );
   return rows[0] || null;
@@ -331,7 +375,6 @@ async function getMaintenanceLoad() {
   return rows[0];
 }
 
-
 async function getUtilization() {
   const query = `
     SELECT
@@ -348,7 +391,7 @@ async function createItemUnit(data) {
     item_id,
     brand,
     status,
-    condition =100,
+    condition = 100,
     unit_tag,
     serial_number,
     specifications,
@@ -470,6 +513,7 @@ export {
   getAllItemUnits,
   getItemUnitByID,
   getItemUnitsByDepartmentId,
+  getItemByItemUnitId,
   getReportedItemDataById,
   getItemUnitsByIds,
   getConditionCounts,

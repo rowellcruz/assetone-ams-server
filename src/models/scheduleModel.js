@@ -1,13 +1,27 @@
 import db from "../config/db.js";
 
 async function getAllSchedules(filters = {}) {
-  let query = "SELECT * FROM schedule_occurrences";
+  let query = `
+    SELECT 
+      so.*,
+      st.item_id,
+      i.department_id
+    FROM schedule_occurrences so
+    LEFT JOIN schedule_templates st ON so.template_id = st.id
+    LEFT JOIN items i ON st.item_id = i.id
+  `;
+
   const conditions = [];
   const values = [];
 
   if (filters.status) {
-    conditions.push(`status = $${values.length + 1}`);
+    conditions.push(`so.status = $${values.length + 1}`);
     values.push(filters.status);
+  }
+
+  if (filters.departmentId) {
+    conditions.push(`i.department_id = $${values.length + 1}`);
+    values.push(filters.departmentId);
   }
 
   if (conditions.length > 0) {
@@ -17,6 +31,7 @@ async function getAllSchedules(filters = {}) {
   const { rows } = await db.query(query, values);
   return rows;
 }
+
 
 async function getScheduleOccurrenceByID(id) {
   const { rows } = await db.query(
@@ -55,7 +70,9 @@ async function getAllSchedulesWithTemplates(filters = {}) {
   let query = `
     SELECT 
       so.*,
+      st.type,
       st.item_id,
+      st.item_unit_id,
       st.description AS template_description,
       i.name AS item_name,
       i.department_id AS department_id,
@@ -82,13 +99,19 @@ async function getAllSchedulesWithTemplates(filters = {}) {
     values.push(filters.departmentId);
   }
 
+  
+  if (filters.occurrenceId) {
+    conditions.push(`so.id = $${values.length + 1}`);
+    values.push(filters.occurrenceId);
+  }
+
   if (conditions.length > 0) {
     query += " WHERE " + conditions.join(" AND ");
   }
 
   query += `
     GROUP BY 
-      so.id, st.item_id, st.description, i.name, i.department_id
+      so.id, st.item_id, st.type, st.item_unit_id, st.description, i.name, i.department_id
   `;
 
   const { rows } = await db.query(query, values);

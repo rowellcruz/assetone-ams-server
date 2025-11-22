@@ -30,15 +30,11 @@ import errorHandler from "./middlewares/errorHandler.js";
 
 const app = express();
 
-// Allowed client URLs
-const allowedOrigins = process.env.CLIENT_URLS.split(","); 
-// Example: "https://assetone-client.vercel.app,http://localhost:5173"
+const allowedOrigins = process.env.CLIENT_URLS.split(",");
 
-// CORS middleware
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Allow requests with no origin (like mobile apps or Postman)
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
@@ -46,12 +42,11 @@ app.use(
       }
     },
     credentials: true,
-    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"], // explicitly allow preflight
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
-// Helmet with relaxed connect-src to allow client and server communication
 app.use(
   helmet({
     contentSecurityPolicy: {
@@ -73,7 +68,6 @@ app.use(
   })
 );
 
-// JSON parser
 app.use(express.json());
 
 import path from "path";
@@ -84,18 +78,13 @@ const __dirname = path.dirname(__filename);
 
 app.use("/api/uploads", express.static(path.join(__dirname, "../uploads")));
 
-// Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/items", itemRoutes);
 app.use("/api/item-units", itemUnitRoutes);
-app.use("/api/item-categories", itemCategoryRoutes);
-app.use("/api/items-for-distribution", itemDistributionRoutes);
 app.use("/api/schedule-templates", scheduleTemplateRoutes);
 app.use("/api/schedules", scheduleRoutes);
-app.use("/api/procurement-tasks", procurementTaskRoutes);
-app.use("/api/purchase-requests", purchaseRequestRoutes);
 app.use("/api/completion-requests", completionRequestRoutes);
 app.use("/api/maintenance-requests", maintenanceRequestRoutes);
 app.use("/api/item-requests", itemRequestRoutes);
@@ -109,7 +98,6 @@ app.use("/api/borrow-log", borrowLogRoutes);
 app.use("/api/relocation-log", relocationLogRoutes);
 app.use("/api/test", testRoute);
 
-// Error handler
 app.use(errorHandler);
 
 export default app;

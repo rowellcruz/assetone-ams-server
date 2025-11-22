@@ -49,7 +49,7 @@ export async function registerPending(userData) {
   // await mailer.sendNewRegistrationNotification(email, `${first_name} ${last_name}`, role);
 }
 
-export async function approveRegistration(pendingId, adminId, departmentId) {
+export async function approveRegistration(pendingId, adminId, departmentId, assignedRole) {
   const pending = await pendingRegistrationModel.getById(pendingId);
   if (!pending) throw new Error("Pending registration not found");
   if (pending.status !== 'pending') throw new Error("Registration already processed");
@@ -66,7 +66,7 @@ export async function approveRegistration(pendingId, adminId, departmentId) {
     last_name: pending.last_name,
     email: pending.email,
     password: hashedPassword, // hashed temporary password
-    role: pending.role,
+    role: assignedRole,
     department_id: departmentId,
     created_by: adminId
   };
@@ -77,7 +77,7 @@ export async function approveRegistration(pendingId, adminId, departmentId) {
   await pendingRegistrationModel.updateStatus(pendingId, 'approved', adminId);
 
   // Send approval email to user with temporary password
-  await mailer.sendRegistrationApproval(pending.email, pending.first_name, temporaryPassword);
+  await mailer.sendRegistrationApproval(pending.email, pending.first_name, temporaryPassword, assignedRole);
 
   return user;
 }
@@ -145,14 +145,14 @@ export async function changePassword(id, passwordData) {
   const user = await userModel.getUserDataById(id);
   if (!user) throw new Error("User not found");
 
-  // Check if the provided oldPassword matches the user's current password
-  console.log(user);
-  const isOldPasswordCorrect = await bcrypt.compare(passwordData.oldPassword, user.password);
-  if (!isOldPasswordCorrect) {
-    throw new Error("Current password is incorrect");
+  if (!passwordData.isNewAccount) {
+    const isOldPasswordCorrect = await bcrypt.compare(passwordData.oldPassword, user.password);
+    if (!isOldPasswordCorrect) {
+      throw new Error("Current password is incorrect");
+    }
   }
 
-  // Hash and update the new password
   const hashedNewPassword = await bcrypt.hash(passwordData.newPassword, 10);
   await userModel.updatePassword(user.id, hashedNewPassword);
+  await userModel.updateUserPartial(user.id, {is_password_updated: true});
 }

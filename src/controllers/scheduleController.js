@@ -1,22 +1,34 @@
 import * as scheduleService from "../services/scheduleService.js";
 
 export const getSchedules = async (req, res) => {
-  const filters = {
-    status: req.query.status,
-  };
+  const user = req.user;
+  const filters = {};
+  if (user.role === "technician") filters.departmentId = user.department_id;
+  if (user.role === "asset_administrator") filters.status = "completed";
+  if (req.query.status) filters.status = req.query.status;
 
   const schedules = await scheduleService.getAllSchedules(filters);
   res.json(schedules);
+};
+
+export const getScheduleById = async (req, res) => {
+  const { id } = req.params;
+  const schedule = await scheduleService.getScheduleById(id);
+
+  if (!schedule) {
+    res.status(404);
+    throw new Error("Schedule not found");
+  }
+
+  res.json(schedule);
 };
 
 export const getAllSchedulesWithTemplates = async (req, res) => {
   const user = req.user;
   const filters = {};
   if (req.query.status) filters.status = req.query.status;
-  if (user.role === "property_custodian")
-    filters.departmentId = user.department_id;
-  if (user.role === "asset_administrator")
-    filters.status = "completed";
+  if (user.role === "technician") filters.departmentId = user.department_id;
+  if (user.role === "asset_administrator") filters.status = "completed";
   const schedules = await scheduleService.getAllSchedulesWithTemplates(filters);
   res.json(schedules);
 };
@@ -29,7 +41,14 @@ export const getScheduleUnitsByTechnician = async (req, res) => {
 
 export const updateScheduleAssetStatus = async (req, res) => {
   const { id, unitId } = req.params;
-  const scheduleAsset = await scheduleService.updateScheduleAsset(id, unitId);
+  const { performanceRating, physicalRating, review } = req.body;
+  const scheduleAsset = await scheduleService.updateScheduleAsset(
+    id,
+    unitId,
+    performanceRating,
+    physicalRating,
+    review
+  );
   res.json(scheduleAsset);
 };
 
@@ -57,13 +76,14 @@ export const getScheduleOccurrencesByAssetUnitId = async (req, res) => {
 
 export const startScheduleOccurrence = async (req, res) => {
   const { id } = req.params;
-  const { started_by, technicians, asset_unit_ids } = req.body;
+  const { started_by, technicians } = req.body;
+  const departmentId = req.user.department_id;
 
   const updated = await scheduleService.startScheduleOccurrence(
     id,
     started_by,
     technicians,
-    asset_unit_ids
+    departmentId
   );
 
   if (!updated) {
@@ -112,6 +132,26 @@ export const skipScheduleOccurrence = async (req, res) => {
     id,
     skipped_by,
     reason
+  );
+
+  if (!updated) {
+    res.status(404);
+    throw new Error("Schedule not found");
+  }
+
+  res.json(updated);
+};
+
+export const finishSchedule = async (req, res) => {
+  const { id, unitId } = req.params;
+  const { performanceRating, physicalRating, review } = req.body;
+
+  const updated = await scheduleService.updateScheduleAsset(
+    id,
+    unitId,
+    performanceRating,
+    physicalRating,
+    review
   );
 
   if (!updated) {

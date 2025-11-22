@@ -10,6 +10,7 @@ router.get('/details', authenticate, asyncHandler(scheduleController.getSchedule
 router.get('/all', authenticate, asyncHandler(scheduleController.getAllSchedulesWithTemplates));
 
 router.get('/:id', authenticate, asyncHandler(scheduleController.getScheduleOccurrencesByTemplateId));
+router.get('/occurrence/:id', authenticate, asyncHandler(scheduleController.getScheduleById));
 router.get('/:id/assigned-assets', authenticate, asyncHandler(scheduleController.getAssignedAssetsByTemplateId));
 router.get('/asset-unit/:assetUnitId', authenticate, asyncHandler(scheduleController.getScheduleOccurrencesByAssetUnitId));
 

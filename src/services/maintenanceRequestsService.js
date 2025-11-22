@@ -4,9 +4,9 @@ export async function getMaintenanceRequests(filters = {}) {
   return await maintenanceRequestModel.getMaintenanceRequests(filters);
 }
 
-export async function getMaintenanceRequestsByItemUnitId(filters = {}) {
+export async function getMaintenanceRequestsByItemUnitId(id, status) {
   return await maintenanceRequestModel.getMaintenanceRequestsByItemUnitId(
-    filters
+    id, status
   );
 }
 
@@ -25,7 +25,21 @@ export async function createMaintenanceRequest(data) {
     error.status = 409;
     throw error;
   }
-  
+
   const request = await maintenanceRequestModel.createMaintenanceRequest(data);
   return request;
+}
+
+export async function approveIssueReport(data) {
+  const validStatuses = ["approved", "rejected"];
+  if (!validStatuses.includes(data.status)) {
+    throw new Error("Invalid report. Please try again.");
+  }
+
+  const updatedRows = await maintenanceRequestModel.updateMaintenanceRequest(
+    data.item_unit_id,
+    data.status
+  );
+
+  return updatedRows;
 }

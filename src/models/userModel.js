@@ -23,7 +23,8 @@ async function getAllUsers(filters = {}) {
       u.updated_at, 
       u.updated_by, 
       u.deleted_at, 
-      u.deleted_by
+      u.deleted_by,
+      u.is_password_updated
     FROM users u
     LEFT JOIN departments d ON u.department_id = d.id
   `;
@@ -93,7 +94,8 @@ async function getUserDataById(id) {
       u.updated_at, 
       u.updated_by,
       u.deleted_at, 
-      u.deleted_by
+      u.deleted_by,
+      u.is_password_updated
     FROM users u
     LEFT JOIN departments d ON u.department_id = d.id
     WHERE u.id = $1;
