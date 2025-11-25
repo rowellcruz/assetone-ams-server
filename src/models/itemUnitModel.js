@@ -17,6 +17,9 @@ async function getAllItemUnits(filters = {}) {
       uu.first_name || ' ' || uu.last_name AS updated_by_name,
       du.first_name || ' ' || du.last_name AS deleted_by_name,
       i.useful_life,
+      iu.purchase_cost,
+      iu.purchase_date,
+      iu.condition,
       -- Calculate remaining useful life
       CASE 
         WHEN iu.purchase_date IS NOT NULL AND i.useful_life IS NOT NULL THEN
@@ -26,19 +29,11 @@ async function getAllItemUnits(filters = {}) {
           )
         ELSE NULL
       END AS remaining_useful_life,
-      -- Calculate remaining value (purchase cost spread over remaining useful life)
+      -- Remaining value based on condition (1-100)
       CASE 
-        WHEN iu.purchase_cost IS NOT NULL 
-             AND iu.purchase_date IS NOT NULL 
-             AND i.useful_life IS NOT NULL 
-             AND i.useful_life > 0 THEN
-          ROUND(
-            iu.purchase_cost * 
-            GREATEST(0, i.useful_life - EXTRACT(YEAR FROM AGE(CURRENT_DATE, iu.purchase_date))) / 
-            i.useful_life,
-            2
-          )
-        ELSE iu.purchase_cost -- Return original cost if can't calculate depreciation
+        WHEN iu.purchase_cost IS NOT NULL AND iu.condition IS NOT NULL THEN
+          ROUND(iu.purchase_cost * (iu.condition / 100.0), 2)
+        ELSE iu.purchase_cost
       END AS remaining_value
     FROM item_units iu
     LEFT JOIN items i ON iu.item_id = i.id
@@ -60,12 +55,10 @@ async function getAllItemUnits(filters = {}) {
     conditions.push(`iu.item_id = $${values.length + 1}`);
     values.push(filters.itemId);
   }
-
   if (filters.ownerDepartmentId) {
     conditions.push(`iu.owner_department_id = $${values.length + 1}`);
     values.push(filters.ownerDepartmentId);
   }
-
   if (filters.subLocationId !== undefined) {
     if (filters.subLocationId === null) {
       conditions.push(`iu.sub_location_id IS NULL`);
@@ -74,7 +67,6 @@ async function getAllItemUnits(filters = {}) {
       values.push(filters.subLocationId);
     }
   }
-
   if (filters.departmentId !== undefined) {
     if (filters.departmentId === null) {
       conditions.push(`iu.department_id IS NULL`);
@@ -83,16 +75,13 @@ async function getAllItemUnits(filters = {}) {
       values.push(filters.departmentId);
     }
   }
-
   if (filters.status !== undefined) {
     conditions.push(`iu.status = $${values.length + 1}`);
     values.push(filters.status);
   }
-
   if (filters.unitsForMaintenance === true) {
     conditions.push(`(iu.status = 'available' OR iu.status = 'in_use')`);
   }
-
   if (filters.technicianDepartmentId !== undefined) {
     conditions.push(`i.department_id = $${values.length + 1}`);
     values.push(filters.technicianDepartmentId);
@@ -117,7 +106,6 @@ async function getItemUnitByID(id) {
       v.name AS vendor_name,
       v.contact_phone AS vendor_contact_number,
       v.address AS vendor_address,
-      l.name || ' - ' || sl.name AS full_location_name,
       l.name AS location_name,
       sl.name AS sub_location_name,
       pc.first_name || ' ' || pc.last_name AS property_custodian_name,
@@ -125,6 +113,9 @@ async function getItemUnitByID(id) {
       uu.first_name || ' ' || uu.last_name AS updated_by_name,
       du.first_name || ' ' || du.last_name AS deleted_by_name,
       i.useful_life,
+      iu.purchase_cost,
+      iu.purchase_date,
+      iu.condition,
       -- Calculate remaining useful life
       CASE 
         WHEN iu.purchase_date IS NOT NULL AND i.useful_life IS NOT NULL THEN
@@ -134,16 +125,12 @@ async function getItemUnitByID(id) {
           )
         ELSE NULL
       END AS remaining_useful_life,
-      -- Relocation info
-      rl.id AS relocation_log_id,
-      rl.status AS relocation_status,
-      rl.requested_at AS relocation_created_at,
-      rl.from_sub_location_id,
-      rl.to_sub_location_id,
-      rl.from_location_name,
-      rl.from_sub_location_name,
-      rl.to_location_name,
-      rl.to_sub_location_name
+      -- Remaining value based on condition (1-100)
+      CASE 
+        WHEN iu.purchase_cost IS NOT NULL AND iu.condition IS NOT NULL THEN
+          ROUND(iu.purchase_cost * (iu.condition / 100.0), 2)
+        ELSE iu.purchase_cost
+      END AS remaining_value
     FROM item_units iu
     LEFT JOIN items i ON iu.item_id = i.id
     LEFT JOIN departments d ON iu.owner_department_id = d.id
@@ -155,35 +142,14 @@ async function getItemUnitByID(id) {
     LEFT JOIN users cu ON iu.created_by = cu.id
     LEFT JOIN users uu ON iu.updated_by = uu.id
     LEFT JOIN users du ON iu.deleted_by = du.id
-    LEFT JOIN LATERAL (
-      SELECT 
-        r.id,
-        r.status,
-        r.requested_at,
-        r.from_sub_location_id,
-        r.to_sub_location_id,
-        from_sl.name AS from_sub_location_name,
-        from_l.name AS from_location_name,
-        to_sl.name AS to_sub_location_name,
-        to_l.name AS to_location_name
-      FROM relocation_log r
-      LEFT JOIN sub_locations from_sl ON r.from_sub_location_id = from_sl.id
-      LEFT JOIN locations from_l ON from_sl.location_id = from_l.id
-      LEFT JOIN sub_locations to_sl ON r.to_sub_location_id = to_sl.id
-      LEFT JOIN locations to_l ON to_sl.location_id = to_l.id
-      WHERE r.item_unit_id = iu.id
-        AND r.status IN ('pending','in_progress')
-      ORDER BY r.requested_at DESC
-      LIMIT 1
-    ) rl ON TRUE
     WHERE iu.id = $1
-
     `,
     [id]
   );
 
   return rows[0] || null;
 }
+
 
 async function getItemByItemUnitId(id) {
   const { rows } = await db.query(
@@ -206,7 +172,6 @@ async function getItemByItemUnitId(id) {
 
   return rows[0] || null;
 }
-
 
 async function getItemUnitsByIds(ids) {
   if (!ids || ids.length === 0) return [];
@@ -390,16 +355,10 @@ async function createItemUnit(data) {
   const {
     item_id,
     brand,
-    status,
-    condition = 100,
     unit_tag,
     serial_number,
-    specifications,
-    sub_location_id,
-    owner_department_id,
     purchase_date,
     purchase_cost,
-    is_legacy = false,
     vendor_id,
     created_by,
     updated_by,
@@ -410,35 +369,23 @@ async function createItemUnit(data) {
       (
         item_id,
         brand,
-        status,
-        condition,
         unit_tag,
         serial_number,
-        specifications,
-        sub_location_id,
-        owner_department_id,
         purchase_date,
         purchase_cost,
-        is_legacy,
         vendor_id,
         created_by,
         updated_by
       ) 
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
      RETURNING id`,
     [
       item_id,
-      brand || null,
-      status,
-      condition,
-      unit_tag || null,
-      serial_number || null,
-      specifications || null,
-      sub_location_id || null,
-      owner_department_id,
+      brand,
+      unit_tag,
+      serial_number,
       purchase_date,
       purchase_cost,
-      is_legacy,
       vendor_id,
       created_by,
       updated_by,
@@ -449,16 +396,10 @@ async function createItemUnit(data) {
     id: rows[0].id,
     item_id,
     brand,
-    status,
-    condition,
     unit_tag,
     serial_number,
-    specifications,
-    sub_location_id,
-    owner_department_id,
     purchase_date,
     purchase_cost,
-    is_legacy,
     vendor_id,
     created_by,
     updated_by,

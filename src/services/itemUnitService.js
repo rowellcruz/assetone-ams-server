@@ -3,9 +3,10 @@ import * as itemModel from "../models/itemModel.js";
 import * as itemDepreciationModel from "../models/itemDepreciationModel.js";
 import * as itemCostModel from "../models/itemCostModel.js";
 import * as relocationModel from "../models/relocationModel.js";
+import * as scheduleModel from "../models/scheduleModel.js";
 
 const CATEGORY_CODES = {
-  "Furniture": "FUR",
+  Furniture: "FUR",
   "Appliances / Electronics": "ELEC",
   "Tools / Equipment": "TOOL",
   "Machinery / Mechanical Assets": "MECH",
@@ -57,6 +58,18 @@ export async function createItemUnit(itemUnitData) {
   return "Successfully created item unit(s).";
 }
 
+export async function assignLocations({ itemIds = [], subLocationId }) {
+  const updatedUnits = [];
+  for (const itemId of itemIds) {
+    const itemUnit = await updateItemUnitPartial(itemId, {
+      sub_location_id: subLocationId,
+    });
+    updatedUnits.push(itemUnit);
+  }
+  return updatedUnits;
+}
+
+
 async function generateUnitTag({ department_code, category_code }) {
   const prefix = `${department_code.toUpperCase()}-${category_code.toUpperCase()}`;
 
@@ -90,7 +103,7 @@ export async function relocateItemUnit(id, user, data) {
   if (!itemUnit) {
     throw new Error("Item unit not found");
   }
-  
+
   return await relocationModel.logRelocation(
     id,
     from_sub_location_id,
@@ -103,6 +116,10 @@ export async function relocateItemUnit(id, user, data) {
 
 export async function itemUnitRelocationLog(id) {
   return await relocationModel.getRelocationLogsById(id);
+}
+
+export async function getMaintenanceHistory(id) {
+  return await scheduleModel.getItemUnitMaintenanceHistory(id);
 }
 
 export async function pendingRelocationLogs(department) {

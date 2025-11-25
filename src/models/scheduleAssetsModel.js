@@ -53,8 +53,8 @@ async function getAssignedAssetsByOccurrenceId(occurrenceId) {
        d.name AS department_name,
        CONCAT(l.name, ' - ', sl.name) AS location_name
      FROM schedule_units AS sa
-     JOIN item_units AS au ON sa.item_unit_id = au.id
-     JOIN departments AS d ON au.owner_department_id = d.id
+     LEFT JOIN item_units AS au ON sa.item_unit_id = au.id
+     LEFT JOIN departments AS d ON au.owner_department_id = d.id
      LEFT JOIN sub_locations AS sl ON au.sub_location_id = sl.id
      LEFT JOIN locations AS l ON sl.location_id = l.id
      WHERE sa.occurrence_id = $1`,
@@ -76,16 +76,18 @@ async function assignAssets(occurrence_id, item_unit_ids) {
   return { occurrence_id, item_unit_ids };
 }
 
-async function updateScheduleAssetStatus(occurrenceId, unitId, review) {
+async function updateScheduleAssetStatus(occurrenceId, unitId, review, condition) {
   const { rows } = await db.query(
     `
     UPDATE schedule_units
-    SET status = 'completed',
-    review = $3
+      SET status = 'completed',
+      review = $3,
+      condition = $4,
+      completed_at = NOW()
     WHERE occurrence_id = $1 AND item_unit_id = $2
     RETURNING *
     `,
-    [occurrenceId, unitId, review]
+    [occurrenceId, unitId, review, condition]
   );
 
   return rows[0] || null;

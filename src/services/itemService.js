@@ -1,6 +1,7 @@
 import PDFDocument from "pdfkit";
 import * as itemModel from "../models/itemModel.js";
 import * as itemUnitModel from "../models/itemUnitModel.js";
+import * as scheduleTemplateService from "../services/scheduleTemplateService.js";
 import QRCode from "qrcode";
 import { fileURLToPath } from "url";
 import path from "path";
@@ -149,7 +150,24 @@ export async function generateStickersPDF(unitIds) {
 export async function createItem(itemData) {
   const existingItem = await itemModel.getAllItems({ name: itemData.name });
   if (existingItem.length > 0) throw new Error("Asset name already exists");
-  return await itemModel.createItem(itemData);
+
+  const newItem = await itemModel.createItem(itemData);
+
+  const now = new Date();
+  const start_date = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+
+  const assessmentData = {
+    item_id: newItem.id,
+    description: `Monthly ${newItem.name} condition assessment`,
+    type: "ACA",
+    frequency_value: 1,
+    frequency_unit: "months",
+    start_date,
+  };
+
+  await scheduleTemplateService.createScheduleTemplate(assessmentData);
+
+  return newItem;
 }
 
 export async function updateItemPartial(id, fieldsToUpdate) {

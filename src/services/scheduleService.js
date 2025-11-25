@@ -3,6 +3,7 @@ import * as scheduleTemplateModel from "../models/scheduleTemplateModel.js";
 import * as scheduleAssetsModel from "../models/scheduleAssetsModel.js";
 import * as itemUnitModel from "../models/itemUnitModel.js";
 import * as scheduleTechnicianModel from "../models/scheduleTechnicianModel.js";
+import * as maintenanceRequestModel from "../models/maintenanceRequestModel.js";
 
 export async function getAllSchedules(filters = {}) {
   return await scheduleModel.getAllSchedules(filters);
@@ -116,9 +117,11 @@ export async function startScheduleOccurrence(
 
   let item_unit_ids;
 
+  // Fix: ACA should use PM logic for asset assignment
   if (template.type === "CM") {
     item_unit_ids = template.item_unit_id ? [template.item_unit_id] : [];
   } else {
+    // This covers both PM and ACA types
     const itemUnits = await itemUnitModel.getAllItemUnits({
       unitsForMaintenance: true,
       technicianDepartmentId: departmentId,
@@ -134,6 +137,10 @@ export async function startScheduleOccurrence(
 
   if (item_unit_ids.length > 0) {
     await scheduleAssetsModel.assignAssets(id, item_unit_ids);
+  } else {
+    throw new Error(
+      "Cannot start schedule because there are no asset units available."
+    );
   }
 
   if (!technicians || technicians.length === 0) {
@@ -150,14 +157,23 @@ export async function startScheduleOccurrence(
 
   await scheduleTechnicianModel.addTechniciansToOccurrence(id, technicians);
 
-  const unitStatus =
-    template.type === "CM" ? "under_repair" : "under_maintenance";
+  let unitStatus;
+  if (template.type === "CM") unitStatus = "under_repair";
+  else if (template.type === "PM") unitStatus = "under_maintenance";
+  else if (template.type === "ACA") unitStatus = "under_assessment";
+  else unitStatus = "unknown_status";
 
   for (const unitId of item_unit_ids) {
     await itemUnitModel.updateItemUnitPartial(unitId, {
       status: unitStatus,
       updated_at: new Date(),
     });
+
+    await maintenanceRequestModel.updateMaintenanceRequest(
+      unitId,
+      "approved",
+      "in_progress"
+    );
   }
 
   return updated;
@@ -177,10 +193,13 @@ export async function rejectScheduleOccurrence(id, scheduleData) {
   return updated;
 }
 
-export async function updateScheduleAsset(id, unitId, performanceRating, physicalRating, review) {
-
-  const updatedScheduledAsset = await scheduleAssetsModel.updateScheduleAssetStatus(id, unitId, review);
-
+export async function updateScheduleAsset(
+  id,
+  unitId,
+  performanceRating,
+  physicalRating,
+  review
+) {
   const item = await itemUnitModel.getItemUnitByID(unitId);
 
   const usefulLifeRating =
@@ -192,11 +211,25 @@ export async function updateScheduleAsset(id, unitId, performanceRating, physica
     ((performanceRating / 100 + physicalRating / 100 + usefulLifeRating) / 3) *
     100;
 
+  const updatedScheduledAsset =
+    await scheduleAssetsModel.updateScheduleAssetStatus(
+      id,
+      unitId,
+      review,
+      parseInt(newCondition)
+    );
+
   await itemUnitModel.updateItemUnitPartial(unitId, {
     status: "available",
     condition: parseInt(newCondition),
     updated_at: new Date(),
   });
+
+  await maintenanceRequestModel.updateMaintenanceRequest(
+    unitId,
+    "in_progress",
+    "resolved"
+  );
 
   return updatedScheduledAsset;
 }
@@ -210,19 +243,23 @@ export async function completeScheduleOccurrence(id, completedBy) {
     throw new Error("Only in-progress schedules can be completed");
   }
 
-  const template = await scheduleTemplateModel.getScheduleTemplatesByID(
-    occurrence.template_id
-  );
+  const template = await scheduleTemplateModel.getScheduleTemplatesByID({
+    templateId: occurrence.template_id,
+  });
 
   if (!template) throw new Error("Template not found");
 
-  if (template.type === "PM" && template.status === "active") {
-    await generateNextScheduleOccurrence(
-      template.id,
-      occurrence.scheduled_date,
-      template.frequency_value,
-      template.frequency_unit
-    );
+  if (template.status === "active") {
+    if (template.type === "PM") {
+      await generateNextScheduleOccurrence(
+        template.id,
+        occurrence.scheduled_date,
+        template.frequency_value,
+        template.frequency_unit
+      );
+    } else if (template.type === "ACA") {
+      await generateNextACASchedule(template.id, occurrence.scheduled_date);
+    }
   }
 
   const updated = await scheduleModel.updateScheduleOccurrencePartial(id, {
@@ -265,13 +302,19 @@ export async function skipScheduleOccurrence(id, skippedBy, reason) {
     skipped_reason: reason,
   });
 
-  if (template.type === "PM" && template.status === "active") {
-    await generateNextScheduleOccurrence(
-      template.id,
-      occurrence.scheduled_date,
-      template.frequency_value,
-      template.frequency_unit
-    );
+  if (template.status === "active") {
+    if (template.type === "PM") {
+      await generateNextScheduleOccurrence(
+        template.id,
+        occurrence.scheduled_date,
+        template.frequency_value,
+        template.frequency_unit
+      );
+    }
+
+    if (template.type === "ACA") {
+      await generateNextACASchedule(template.id, occurrence.scheduled_date);
+    }
   }
 
   return updated;
@@ -300,4 +343,14 @@ export async function generateNextScheduleOccurrence(
   }
 
   return await scheduleModel.createSchedule(templateId, nextDate);
+}
+
+async function generateNextACASchedule(templateId, previousDate) {
+  const nextDate = getNextMonthFirstDay(previousDate);
+  return await scheduleModel.createSchedule(templateId, nextDate);
+}
+
+function getNextMonthFirstDay(date) {
+  const d = new Date(date);
+  return new Date(d.getFullYear(), d.getMonth() + 1, 1);
 }

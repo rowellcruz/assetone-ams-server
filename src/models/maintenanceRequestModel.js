@@ -82,19 +82,18 @@ async function createMaintenanceRequest(data) {
   };
 }
 
-async function updateMaintenanceRequest(item_unit_id, status) {
-  if (!item_unit_id || !status) return null;
-
+async function updateMaintenanceRequest(item_unit_id, oldStatus, newStatus) {
   const query = `
     UPDATE maintenance_requests
-    SET status = $2
-    WHERE item_unit_id = $1 AND status = 'pending'
+    SET status = $3
+    WHERE item_unit_id = $1 AND status = $2
     RETURNING *;
   `;
 
-  const { rows } = await db.query(query, [item_unit_id, status]);
+  const { rows } = await db.query(query, [item_unit_id, oldStatus, newStatus]);
   return rows;
 }
+
 
 export {
   getMaintenanceRequests,

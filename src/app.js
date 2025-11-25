@@ -24,6 +24,7 @@ import authRoutes from "./routes/authRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import borrowLogRoutes from "./routes/borrowLogRoutes.js";
 import relocationLogRoutes from "./routes/relocationLogRoutes.js";
+import predictionRoutes from "./routes/predictionRoutes.js";
 import testRoute from "./routes/testRoute.js";
 
 import errorHandler from "./middlewares/errorHandler.js";
@@ -87,6 +88,7 @@ app.use("/api/schedule-templates", scheduleTemplateRoutes);
 app.use("/api/schedules", scheduleRoutes);
 app.use("/api/completion-requests", completionRequestRoutes);
 app.use("/api/maintenance-requests", maintenanceRequestRoutes);
+app.use("/api/predict", predictionRoutes);
 app.use("/api/item-requests", itemRequestRoutes);
 app.use("/api/reports", reportRoutes);
 app.use("/api/departments", departmentRoutes);

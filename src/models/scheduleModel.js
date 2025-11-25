@@ -24,6 +24,18 @@ async function getAllSchedules(filters = {}) {
     values.push(filters.departmentId);
   }
 
+  if (filters.type) {
+    conditions.push(`st.type = $${values.length + 1}`);
+    values.push(filters.type);
+  }
+
+  if (
+    filters.excludeConditionAssessment === true ||
+    filters.excludeConditionAssessment === "true"
+  ) {
+    conditions.push(`st.type != 'ACA'`);
+  }
+
   if (conditions.length > 0) {
     query += " WHERE " + conditions.join(" AND ");
   }
@@ -32,13 +44,64 @@ async function getAllSchedules(filters = {}) {
   return rows;
 }
 
-
 async function getScheduleOccurrenceByID(id) {
   const { rows } = await db.query(
     "SELECT * FROM schedule_occurrences WHERE id = $1",
     [id]
   );
   return rows[0] || null;
+}
+
+async function getItemUnitMaintenanceHistory(itemUnitId) {
+  const { rows } = await db.query(
+    `
+      SELECT 
+        su.*,
+        so.started_at,
+        st.type,
+        st.description,
+
+        su.condition AS new_condition,
+        COALESCE(
+          LAG(su.condition) OVER (
+            PARTITION BY su.item_unit_id 
+            ORDER BY so.started_at DESC
+          ),
+          100
+        ) AS last_condition,
+
+        COALESCE(
+            json_agg(
+                json_build_object(
+                    'technician_id', t.user_id,
+                    'name', tech.first_name || ' ' || tech.last_name,
+                    'email', tech.email
+                )
+            ) FILTER (WHERE t.user_id IS NOT NULL),
+            '[]'
+        ) AS technicians
+
+      FROM schedule_units su
+      JOIN schedule_occurrences so 
+        ON su.occurrence_id = so.id
+      JOIN schedule_templates st
+        ON so.template_id = st.id
+      LEFT JOIN schedule_technicians t
+        ON so.id = t.occurrence_id
+      LEFT JOIN users tech
+        ON t.user_id = tech.id
+
+      WHERE su.item_unit_id = $1
+        AND so.status = 'completed'
+
+      GROUP BY su.id, so.id, st.id
+
+      ORDER BY so.started_at DESC;
+    `,
+    [itemUnitId]
+  );
+
+  return rows;
 }
 
 async function getScheduleOccurrenceByTemplateId(id) {
@@ -70,6 +133,7 @@ async function getAllSchedulesWithTemplates(filters = {}) {
   let query = `
     SELECT 
       so.*,
+      st.status as template_status,
       st.type,
       st.item_id,
       st.item_unit_id,
@@ -99,10 +163,21 @@ async function getAllSchedulesWithTemplates(filters = {}) {
     values.push(filters.departmentId);
   }
 
-  
+  if (
+    filters.excludeConditionAssessment === true ||
+    filters.excludeConditionAssessment === "true"
+  ) {
+    conditions.push(`st.type != 'ACA'`);
+  }
+
   if (filters.occurrenceId) {
     conditions.push(`so.id = $${values.length + 1}`);
     values.push(filters.occurrenceId);
+  }
+
+  if (filters.type) {
+    conditions.push(`st.type = $${values.length + 1}`);
+    values.push(filters.type);
   }
 
   if (conditions.length > 0) {
@@ -111,7 +186,7 @@ async function getAllSchedulesWithTemplates(filters = {}) {
 
   query += `
     GROUP BY 
-      so.id, st.item_id, st.type, st.item_unit_id, st.description, i.name, i.department_id
+      so.id, st.item_id, st.status, st.type, st.item_unit_id, st.description, i.name, i.department_id
   `;
 
   const { rows } = await db.query(query, values);
@@ -239,6 +314,7 @@ export {
   getAllSchedulesWithTemplates,
   getScheduleOccurrenceByTemplateId,
   getScheduleOccurrencesByAssetUnitId,
+  getItemUnitMaintenanceHistory,
   createSchedule,
   updateScheduleOccurrencePartial,
   deleteScheduleOccurrenceByID,

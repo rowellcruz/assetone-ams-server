@@ -9,17 +9,7 @@ export async function getAllDepartments(filters = {}) {
 }
 
 export async function getDepartmentByID(id) {
-  const department = await departmentModel.getDepartmentByID(id);
-  if (!department) return null;
-
-  const users = await userModel.getUsersFromDepartment(department.id);
-  const units = await itemUnitModel.getAssetUnitsFromDepartment(department.id);
-
-  return {
-    ...department,
-    users,
-    units,
-  };
+  return await departmentModel.getDepartmentByID(id);
 }
 
 export async function createDepartment(departmentData) {

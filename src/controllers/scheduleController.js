@@ -3,9 +3,11 @@ import * as scheduleService from "../services/scheduleService.js";
 export const getSchedules = async (req, res) => {
   const user = req.user;
   const filters = {};
+  if (req.query.status) filters.status = req.query.status;
+  if (req.query.type) filters.type = req.query.type;
   if (user.role === "technician") filters.departmentId = user.department_id;
   if (user.role === "asset_administrator") filters.status = "completed";
-  if (req.query.status) filters.status = req.query.status;
+  if (req.query.excludeConditionAssessment) filters.excludeConditionAssessment = req.query.excludeConditionAssessment;
 
   const schedules = await scheduleService.getAllSchedules(filters);
   res.json(schedules);
@@ -27,8 +29,10 @@ export const getAllSchedulesWithTemplates = async (req, res) => {
   const user = req.user;
   const filters = {};
   if (req.query.status) filters.status = req.query.status;
+  if (req.query.type) filters.type = req.query.type;
   if (user.role === "technician") filters.departmentId = user.department_id;
   if (user.role === "asset_administrator") filters.status = "completed";
+  if (req.query.excludeConditionAssessment) filters.excludeConditionAssessment = req.query.excludeConditionAssessment;
   const schedules = await scheduleService.getAllSchedulesWithTemplates(filters);
   res.json(schedules);
 };

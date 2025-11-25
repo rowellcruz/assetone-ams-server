@@ -51,6 +51,11 @@ export const createItemUnit = async (req, res) => {
   res.status(201).json(createdItemUnit);
 };
 
+export const assignLocations = async (req, res) => {
+  const itemUnits = await itemUnitService.assignLocations(req.body);
+  res.status(201).json(itemUnits);
+};
+
 export const updateItemUnitPartial = async (req, res) => {
   const { id } = req.params;
   const updated = await itemUnitService.updateItemUnitPartial(id, req.body);
@@ -100,6 +105,16 @@ export const itemUnitRelocationLog = async (req, res) => {
     throw new Error("Item unit relocation log not found");
   }
   res.json({ message: "Item unit relocation log found" });
+};
+
+export const getMaintenanceHistory = async (req, res) => {
+  const { id } = req.params;
+  const history = await itemUnitService.getMaintenanceHistory(id);
+  if (!history) {
+    res.status(404);
+    throw new Error("Item unit maintenance history not found");
+  }
+  res.json(history);
 };
 
 export const pendingRelocationLogs = async (req, res) => {

@@ -7,8 +7,8 @@ import authenticate from '../middlewares/authMiddleware.js';
 const router = express.Router();
 
 router.get('/', authenticate, asyncHandler(maintenanceRequestController.getMaintenanceRequests));
-router.get('/:id/:status', authenticate, asyncHandler(maintenanceRequestController.getMaintenanceRequestsByItemUnitId));
 router.get('/:id/reported-asset', asyncHandler(itemUnitController.getReportedItemDataById));
+router.get('/:id/:status', authenticate, asyncHandler(maintenanceRequestController.getMaintenanceRequestsByItemUnitId));
 router.post('/', asyncHandler(maintenanceRequestController.createRequest));
 router.post('/update', authenticate, asyncHandler(maintenanceRequestController.handleReportApproval));
 

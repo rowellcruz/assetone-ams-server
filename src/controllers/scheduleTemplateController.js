@@ -42,7 +42,7 @@ export const createScheduleTemplate = async (req, res) => {
 
 export const updateScheduleTemplatePartial = async (req, res) => {
   const { id } = req.params;
-  const updated = await scheduleTemplateService.updateScheduleTemplatePartial(id, req.body);
+  const updated = await scheduleTemplateService.updateScheduleTemplatesPartial(id, req.body);
   if (!updated) {
     res.status(404);
     throw new Error("Schedule template not found");

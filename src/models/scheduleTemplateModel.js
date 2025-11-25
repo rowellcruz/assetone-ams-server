@@ -22,7 +22,7 @@ async function getAllScheduleTemplates(filters = {}) {
   return rows;
 }
 
-async function getScheduleTemplatesByID(id, filters = {}) {
+async function getScheduleTemplatesByID(filters = {}) {
   let query = `
     SELECT st.*, a.name as asset_name
     FROM schedule_templates st
@@ -32,8 +32,13 @@ async function getScheduleTemplatesByID(id, filters = {}) {
   const conditions = [];
   const values = [];
 
+  if (filters.templateId) {
+    conditions.push(`st.id = $${values.length + 1}`);
+    values.push(filters.templateId);
+  }
+
   if (filters.type) {
-    conditions.push(`st.type = $${values.length + 1}`);
+    conditions.push(`st.id = $${values.length + 1}`);
     values.push(filters.type);
   }
 

@@ -38,6 +38,7 @@ export async function approveIssueReport(data) {
 
   const updatedRows = await maintenanceRequestModel.updateMaintenanceRequest(
     data.item_unit_id,
+    "pending",
     data.status
   );
 
