@@ -60,6 +60,7 @@ async function getItemUnitMaintenanceHistory(itemUnitId) {
         so.started_at,
         st.type,
         st.description,
+        i.department_id,
 
         su.condition AS new_condition,
         COALESCE(
@@ -90,11 +91,12 @@ async function getItemUnitMaintenanceHistory(itemUnitId) {
         ON so.id = t.occurrence_id
       LEFT JOIN users tech
         ON t.user_id = tech.id
+      LEFT JOIN items i ON st.item_id = i.id
 
       WHERE su.item_unit_id = $1
         AND so.status = 'completed'
 
-      GROUP BY su.id, so.id, st.id
+      GROUP BY su.id, so.id, st.id, i.department_id
 
       ORDER BY so.started_at DESC;
     `,

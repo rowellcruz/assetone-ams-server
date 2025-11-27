@@ -22,7 +22,7 @@ export async function login(email, password) {
 }
 
 export async function registerPending(userData) {
-  const { first_name, last_name, email, role } = userData;
+  const { first_name, last_name, email } = userData;
   
   // Check if email already exists in users table
   const existingUser = await userModel.getUserDataByEmail(email);
@@ -41,12 +41,10 @@ export async function registerPending(userData) {
     first_name,
     last_name,
     email,
-    role,
     status: 'pending'
   });
 
-  // Optionally, send notification to admin about new registration
-  // await mailer.sendNewRegistrationNotification(email, `${first_name} ${last_name}`, role);
+  await mailer.sendNewRegistrationNotification(email, `${first_name} ${last_name}`);
 }
 
 export async function approveRegistration(pendingId, adminId, departmentId, assignedRole) {

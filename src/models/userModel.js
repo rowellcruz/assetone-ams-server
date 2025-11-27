@@ -7,6 +7,25 @@ async function getUserDataByEmail(email) {
   return rows[0];
 }
 
+async function getAvailableTechniciansFromDepartment(id) {
+  const { rows } = await db.query(
+    `
+      SELECT 
+        id,
+        first_name,
+        last_name,
+        (first_name || ' ' || last_name) AS name
+      FROM users
+      WHERE department_id = $1
+        AND role = 'technician'
+        AND status != 'in_operation'
+    `,
+    [id]
+  );
+  return rows;
+}
+
+
 async function getAllUsers(filters = {}) {
   let sql = `
     SELECT 
@@ -47,6 +66,11 @@ async function getAllUsers(filters = {}) {
     values.push(filters.role);
   }
 
+  if (filters.email) {
+    conditions.push(`u.email = $${values.length + 1}`);
+    values.push(filters.email);
+  }
+
   if (filters.departmentId === null) {
     conditions.push("u.department_id IS NULL");
   } else if (filters.departmentId) {
@@ -74,6 +98,19 @@ async function getUsersFromDepartment(departmentId) {
       id, first_name, last_name, role, status
     FROM users
     WHERE department_id = $1;
+    `,
+    [departmentId]
+  );
+  return rows;
+}
+
+async function getPropertyCustodianFromDepartment(departmentId) {
+  const { rows } = await db.query(
+    `
+    SELECT
+      id, first_name, last_name, role, status
+    FROM users
+    WHERE role = 'property_custodian' AND department_id = $1;
     `,
     [departmentId]
   );
@@ -171,6 +208,8 @@ export {
   getAllUsers,
   getUserDataById,
   getUsersFromDepartment,
+  getPropertyCustodianFromDepartment,
+  getAvailableTechniciansFromDepartment,
   createUser,
   updateFullUser,
   updateUserPartial,

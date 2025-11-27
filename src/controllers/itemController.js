@@ -1,9 +1,10 @@
 import * as itemService from "../services/itemService.js";
 
 export const getItems = async (req, res) => {
-  const filters = {
-    departmentId: req.query.departmentId,
-  };
+  const user = req.user;
+  const filters = {};
+  if (req.query.departmentId) filters.departmentId = req.query.departmentId;
+  if (user.role === "technician") filters.departmentId = user.department_id;
 
   const items = await itemService.getAllItems(filters);
   res.json(items);

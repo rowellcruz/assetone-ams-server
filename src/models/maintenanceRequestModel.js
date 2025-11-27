@@ -94,11 +94,43 @@ async function updateMaintenanceRequest(item_unit_id, oldStatus, newStatus) {
   return rows;
 }
 
+async function getActiveRequestsByUnit(item_unit_id) {
+  const { rows } = await db.query(
+    `
+    SELECT *
+    FROM maintenance_requests
+    WHERE item_unit_id = $1
+      AND status NOT IN ('resolved', 'rejected')
+    ORDER BY requested_at ASC
+    `,
+    [item_unit_id]
+  );
+
+  return rows;
+}
+
+
+async function resolveRequest(id) {
+  const { rows } = await db.query(
+    `
+    UPDATE maintenance_requests
+    SET status = 'resolved', resolved_at = NOW()
+    WHERE id = $1
+    RETURNING *;
+    `,
+    [id]
+  );
+
+  return rows[0];
+}
+
 
 export {
   getMaintenanceRequests,
+  getActiveRequestsByUnit,
   getMaintenanceRequestsByItemUnitId,
   getExistingMaintenanceRequestsByData,
   createMaintenanceRequest,
   updateMaintenanceRequest,
+  resolveRequest
 };

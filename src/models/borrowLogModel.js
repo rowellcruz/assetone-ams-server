@@ -26,6 +26,11 @@ async function getBorrowLogs(filters = {}) {
     values.push(filters.custodianId);
   }
 
+  if (filters.logId) {
+    conditions.push(`bl.id = $${values.length + 1}`);
+    values.push(filters.logId);
+  }
+
   if (conditions.length > 0) {
     query += " WHERE " + conditions.join(" AND ");
   }
@@ -67,6 +72,27 @@ async function getMostBorrowedAssets() {
   return rows;
 }
 
+async function getBorrowLogById(id) {
+  const { rows } = await db.query(
+    `SELECT 
+      bl.*,
+      i.name as item_name,
+      iu.unit_tag AS item_unit_tag,
+      CONCAT(u.first_name, ' ', u.last_name) AS lender_name,
+      CASE
+          WHEN bl.returned_at IS NOT NULL AND bl.returned_at > bl.due_date THEN true
+          WHEN bl.returned_at IS NULL AND NOW() > bl.due_date THEN true
+          ELSE false
+      END AS is_overdue
+    FROM borrow_logs bl
+    LEFT JOIN item_units iu ON bl.item_unit_id = iu.id
+    LEFT JOIN items i ON iu.item_id = i.id
+    LEFT JOIN users u ON bl.lend_by = u.id
+    WHERE bl.id = $1`,
+    [id]
+  );
+  return rows[0];
+}
 
 async function getItemUnitLastBorrowLog(item_unit_id) {
   const { rows } = await db.query(
@@ -99,11 +125,11 @@ async function logReturn(
 ) {
   const { rows } = await db.query(
     `UPDATE borrow_logs
-     SET returned_at = $1,
-         status = $2,
-         remarks = $3
-     WHERE id = $4
-     RETURNING *`,
+    SET returned_at = $1,
+      status = $2,
+      remarks = $3
+      WHERE id = $4
+    RETURNING *`,
     [returned_at, status, remarks, id]
   );
   return rows[0];
@@ -111,6 +137,7 @@ async function logReturn(
 
 export {
   getBorrowLogs,
+  getBorrowLogById,
   getItemUnitLastBorrowLog,
   getBorrowLogsByItemUnitId,
   getMostBorrowedAssets,

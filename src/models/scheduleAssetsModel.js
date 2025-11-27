@@ -76,18 +76,19 @@ async function assignAssets(occurrence_id, item_unit_ids) {
   return { occurrence_id, item_unit_ids };
 }
 
-async function updateScheduleAssetStatus(occurrenceId, unitId, review, condition) {
+async function updateScheduleAssetStatus(occurrenceId, unitId, review, condition, completedBy) {
   const { rows } = await db.query(
     `
     UPDATE schedule_units
       SET status = 'completed',
       review = $3,
       condition = $4,
-      completed_at = NOW()
+      completed_at = NOW(),
+      completed_by = $5
     WHERE occurrence_id = $1 AND item_unit_id = $2
     RETURNING *
     `,
-    [occurrenceId, unitId, review, condition]
+    [occurrenceId, unitId, review, condition, completedBy]
   );
 
   return rows[0] || null;

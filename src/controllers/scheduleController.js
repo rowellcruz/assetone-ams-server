@@ -7,7 +7,8 @@ export const getSchedules = async (req, res) => {
   if (req.query.type) filters.type = req.query.type;
   if (user.role === "technician") filters.departmentId = user.department_id;
   if (user.role === "asset_administrator") filters.status = "completed";
-  if (req.query.excludeConditionAssessment) filters.excludeConditionAssessment = req.query.excludeConditionAssessment;
+  if (req.query.excludeConditionAssessment)
+    filters.excludeConditionAssessment = req.query.excludeConditionAssessment;
 
   const schedules = await scheduleService.getAllSchedules(filters);
   res.json(schedules);
@@ -31,8 +32,8 @@ export const getAllSchedulesWithTemplates = async (req, res) => {
   if (req.query.status) filters.status = req.query.status;
   if (req.query.type) filters.type = req.query.type;
   if (user.role === "technician") filters.departmentId = user.department_id;
-  if (user.role === "asset_administrator") filters.status = "completed";
-  if (req.query.excludeConditionAssessment) filters.excludeConditionAssessment = req.query.excludeConditionAssessment;
+  if (req.query.excludeConditionAssessment)
+    filters.excludeConditionAssessment = req.query.excludeConditionAssessment;
   const schedules = await scheduleService.getAllSchedulesWithTemplates(filters);
   res.json(schedules);
 };
@@ -45,13 +46,15 @@ export const getScheduleUnitsByTechnician = async (req, res) => {
 
 export const updateScheduleAssetStatus = async (req, res) => {
   const { id, unitId } = req.params;
+  const user = req.user;
   const { performanceRating, physicalRating, review } = req.body;
   const scheduleAsset = await scheduleService.updateScheduleAsset(
     id,
     unitId,
     performanceRating,
     physicalRating,
-    review
+    review,
+    user.id
   );
   res.json(scheduleAsset);
 };

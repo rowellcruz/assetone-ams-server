@@ -10,6 +10,12 @@ export const getDepartments = async (req, res) => {
   res.json(departments);
 };
 
+export const getAvailableTechnicians = async (req, res) => {
+  const {id} = req.params;
+  const departments = await departmentService.getAvailableTechnicians(id);
+  res.json(departments);
+};
+
 export const getDepartmentByID = async (req, res) => {
   const { id } = req.params;
   const department = await departmentService.getDepartmentByID(id);

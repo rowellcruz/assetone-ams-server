@@ -5,6 +5,10 @@ export async function getBorrowLog(filters = {}) {
   return await borrowLogModel.getBorrowLogs(filters);
 }
 
+export async function getBorrowLogById(id) {
+  return await borrowLogModel.getBorrowLogById(id);
+}
+
 export async function getBorrowLogByItemUnitId(id) {
   return await borrowLogModel.getBorrowLogsByItemUnitId(id);
 }
@@ -40,21 +44,21 @@ export async function logBorrow(
   return log;
 }
 
-export async function logReturn(item_unit_id, remarks = null) {
-  const lastBorrowLog = await borrowLogModel.getItemUnitLastBorrowLog(
-    item_unit_id
-  );
-  if (!lastBorrowLog)
-    throw new Error("No active borrow record found for this item.");
+export async function logReturn(id, remarks = null) {
+  const log = await getBorrowLogById(id);
+  if (!log) throw new Error("No active borrow record found for this item.");
 
   const updatedLog = await borrowLogModel.logReturn(
-    lastBorrowLog.id,
+    id,
     new Date(),
     "returned",
     remarks
   );
 
-  await updateItemUnitPartial(item_unit_id, { status: "available" });
+  await updateItemUnitPartial(log.item_unit_id, {
+    status: "available",
+    updated_at: new Date(),
+  });
 
   return updatedLog;
 }

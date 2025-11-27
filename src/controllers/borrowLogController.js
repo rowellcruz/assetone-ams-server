@@ -3,7 +3,14 @@ import * as borrowLogService from "../services/borrowLogService.js";
 export const getBorrowLogs = async (req, res) => {
   const filters = {};
   if (req.query.custodianId) filters.custodianId = req.query.custodianId;
+  if (req.query.logId) filters.logId = req.query.logId;
   const log = await borrowLogService.getBorrowLog(filters);
+  res.status(201).json(log);
+};
+
+export const getBorrowLogById = async (req, res) => {
+  const { id } = req.params;
+  const log = await borrowLogService.getBorrowLogById(id);
   res.status(201).json(log);
 };
 
@@ -33,7 +40,8 @@ export const logBorrow = async (req, res) => {
 };
 
 export const logReturn = async (req, res) => {
-  const { item_unit_id, remarks } = req.body;
-  const log = await borrowLogService.logReturn(item_unit_id, remarks);
+  const { id } = req.params;
+  const { remarks } = req.params;
+  const log = await borrowLogService.logReturn(id, remarks);
   res.status(201).json(log);
 };

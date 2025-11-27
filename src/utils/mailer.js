@@ -1,6 +1,6 @@
 import nodemailer from "nodemailer";
 
-const senderName = "SAMMS - Smart Asset Maintenance and Monitoring System";
+const senderName = "AssetONE";
 const senderEmail = process.env.EMAIL_USER; // your Gmail address
 const clientUrl = process.env.VITE_URL;
 
@@ -44,7 +44,32 @@ export async function sendRegistrationApproval(email, firstName, temporaryPasswo
         <p><a href="${clientUrl}" target="_blank">${clientUrl}</a></p>
         <p><strong>For security reasons, change your password after your first login.</strong></p>
         <br>
-        <p>Best regards,<br>Asset Management Team</p>
+        <p>Best regards,<br>AssetONE Team</p>
+      `,
+    };
+
+    const info = await transporter.sendMail(mailOptions);
+    console.log(`Approval email sent to ${email}`, info.messageId);
+    return info;
+  } catch (error) {
+    console.error("Error sending approval email:", error.message);
+    throw error;
+  }
+}
+
+export async function sendUnitTransferMessage(email, firstName) {
+  try {
+    const mailOptions = {
+      from: `"${senderName}" <${senderEmail}>`,
+      to: email,
+      subject: "Asset Unit Transferred - AssetONE",
+      html: `
+        <h2>Unit Transffered</h2>
+        <p>Dear ${firstName},</p>
+        <p>New asset unit was issued to your department</p>
+        <p><a href="${clientUrl}/department-assets" target="_blank">${clientUrl}</a></p>
+        <br>
+        <p>Best regards,<br>AssetONE Team</p>
       `,
     };
 
@@ -70,7 +95,7 @@ export async function sendRegistrationRejection(email, firstName) {
         <p>Thank you for your interest in the Asset Management System.</p>
         <p>After review, we are unable to approve your registration request at this time.</p>
         <br>
-        <p>Best regards,<br>Asset Management Team</p>
+        <p>Best regards,<br>AssetONE Team</p>
       `,
     };
 
@@ -84,10 +109,11 @@ export async function sendRegistrationRejection(email, firstName) {
 }
 
 // Send new registration notification to admin
-export async function sendNewRegistrationNotification(email, fullName, role) {
+export async function sendNewRegistrationNotification(email, fullName) {
   try {
     const adminEmail = process.env.ADMIN_EMAIL;
     if (!adminEmail) throw new Error("ADMIN_EMAIL environment variable is not set");
+    const requestLink = `${clientUrl}/account-requests`;
 
     const mailOptions = {
       from: `"${senderName}" <${senderEmail}>`,
@@ -99,9 +125,9 @@ export async function sendNewRegistrationNotification(email, fullName, role) {
         <ul>
           <li><strong>Name:</strong> ${fullName}</li>
           <li><strong>Email:</strong> ${email}</li>
-          <li><strong>Requested Role:</strong> ${role}</li>
         </ul>
         <p>Please review and approve/reject this registration in the admin panel.</p>
+        <p><a href="${requestLink}/" target="_blank">${clientUrl}</a></p>
       `,
     };
 
@@ -132,7 +158,7 @@ export async function sendResetConfirmation(email, rawToken) {
         <br>
         <p><strong>Note:</strong> For security reasons, this link can only be used once.</p>
         <br>
-        <p>Best regards,<br>Asset Management Team</p>
+        <p>Best regards,<br>AssetONE Team</p>
       `,
     };
 

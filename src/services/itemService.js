@@ -152,23 +152,53 @@ export async function createItem(itemData) {
   if (existingItem.length > 0) throw new Error("Asset name already exists");
 
   const newItem = await itemModel.createItem(itemData);
+  const pmDescription = `Preventive Maintenance for ${newItem.name}`;
 
-  const now = new Date();
-  const start_date = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+  const today = new Date();
+  const firstMonday = getFirstMonday(today.getFullYear(), today.getMonth());
+  const thirdMonday = new Date(firstMonday);
+  thirdMonday.setDate(firstMonday.getDate() + 14);
 
-  const assessmentData = {
+  let pmDate;
+
+  if (today <= firstMonday) {
+    // Before or on first Monday → schedule on this month's first Monday
+    pmDate = firstMonday;
+  } else if (today <= thirdMonday) {
+    // After first Monday but before or on third Monday → schedule on this month's third Monday
+    pmDate = thirdMonday;
+  } else {
+    // After third Monday → schedule on next month's first Monday
+    const nextMonth = new Date(today.getFullYear(), today.getMonth() + 1, 1);
+    pmDate = getFirstMonday(nextMonth.getFullYear(), nextMonth.getMonth());
+  }
+
+  await scheduleTemplateService.createScheduleTemplate({
     item_id: newItem.id,
-    description: `Monthly ${newItem.name} condition assessment`,
-    type: "ACA",
-    frequency_value: 1,
-    frequency_unit: "months",
-    start_date,
-  };
+    type: "PM",
+    description: pmDescription,
+    start_date: pmDate,
+  });
 
-  await scheduleTemplateService.createScheduleTemplate(assessmentData);
+  const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+  await scheduleTemplateService.createScheduleTemplate({
+    item_id: newItem.id,
+    type: "ACA",
+    description: `Monthly ${newItem.name} condition assessment`,
+    start_date: firstDayOfMonth,
+  });
 
   return newItem;
 }
+
+function getFirstMonday(year, month) {
+  const date = new Date(year, month, 1);
+  while (date.getDay() !== 1) {
+    date.setDate(date.getDate() + 1);
+  }
+  return date;
+}
+
 
 export async function updateItemPartial(id, fieldsToUpdate) {
   return await itemModel.updateItemPartial(id, fieldsToUpdate);

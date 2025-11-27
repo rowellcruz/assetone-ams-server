@@ -10,6 +10,17 @@ export async function getPendingRegistrations(req, res) {
   }
 }
 
+export async function getPendingRegistrationById(req, res) {
+  const {id} = req.params;
+  try {
+    const pendingRegistrations = await adminService.getPendingRegistrationById(id);
+    res.status(200).json(pendingRegistrations);
+  } catch (err) {
+    console.log(err);
+    res.status(400).json({ error: err.message });
+  }
+}
+
 export async function approveRegistration(req, res) {
   try {
     const { pendingId, adminId, departmentId, assignedRole } = req.body;

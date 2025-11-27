@@ -76,17 +76,11 @@ async function getScheduleTemplatesByOccurrenceId(occurrenceId) {
   return rows[0] || null;
 }
 
-
 async function createScheduleTemplate(data) {
   const {
     item_id,
-    title,
     description,
     type,
-    frequency_value,
-    frequency_unit,
-    grace_period_value,
-    grace_period_unit,
     start_date,
     end_date,
     created_by,
@@ -98,29 +92,19 @@ async function createScheduleTemplate(data) {
   const { rows } = await db.query(
     `INSERT INTO schedule_templates (
       item_id,
-      title,
       description,
       type,
-      frequency_value,
-      frequency_unit,
-      grace_period_value,
-      grace_period_unit,
       start_date,
       end_date,
       created_by,
       updated_by,
       updated_at,
-    item_unit_id
-    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) RETURNING id`,
+      item_unit_id
+    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id`,
     [
       item_id,
-      title,
       description,
       type,
-      frequency_value,
-      frequency_unit,
-      grace_period_value,
-      grace_period_unit,
       start_date,
       end_date,
       created_by,

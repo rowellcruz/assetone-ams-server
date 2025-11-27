@@ -12,6 +12,10 @@ export async function getDepartmentByID(id) {
   return await departmentModel.getDepartmentByID(id);
 }
 
+export async function getAvailableTechnicians(id) {
+  return await userModel.getAvailableTechniciansFromDepartment(id);
+}
+
 export async function createDepartment(departmentData) {
   if (departmentData.code) {
     departmentData.code = departmentData.code.toUpperCase();

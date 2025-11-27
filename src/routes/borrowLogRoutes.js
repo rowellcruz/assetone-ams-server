@@ -7,9 +7,10 @@ const router = express.Router();
 const MODULE = 'itemCategories';
 
 router.get('/', authenticate, borrowLogController.getBorrowLogs);
+router.get('/:id', authenticate, borrowLogController.getBorrowLogById);
 router.get('/:item_unit_id', authenticate, borrowLogController.getBorrowLogByItemUnitId);
 
 router.post('/log-borrow', authenticate, asyncHandler(borrowLogController.logBorrow, MODULE));
-router.post('/log-return', authenticate, asyncHandler(borrowLogController.logReturn, MODULE));
+router.post('/:id/log-return', authenticate, asyncHandler(borrowLogController.logReturn, MODULE));
 
 export default router;

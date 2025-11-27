@@ -1,7 +1,7 @@
 import * as itemUnitModel from "../models/itemUnitModel.js";
 import * as itemModel from "../models/itemModel.js";
-import * as itemDepreciationModel from "../models/itemDepreciationModel.js";
-import * as itemCostModel from "../models/itemCostModel.js";
+import * as notificationSender from "../utils/notificationSender.js";
+import * as userModel from "../models/userModel.js";
 import * as relocationModel from "../models/relocationModel.js";
 import * as scheduleModel from "../models/scheduleModel.js";
 
@@ -69,7 +69,6 @@ export async function assignLocations({ itemIds = [], subLocationId }) {
   return updatedUnits;
 }
 
-
 async function generateUnitTag({ department_code, category_code }) {
   const prefix = `${department_code.toUpperCase()}-${category_code.toUpperCase()}`;
 
@@ -86,7 +85,27 @@ async function generateUnitTag({ department_code, category_code }) {
 }
 
 export async function updateItemUnitPartial(id, fieldsToUpdate) {
-  return await itemUnitModel.updateItemUnitPartial(id, fieldsToUpdate);
+  const itemUnit = await itemUnitModel.updateItemUnitPartial(
+    id,
+    fieldsToUpdate
+  );
+
+  if (fieldsToUpdate.owner_department_id != null) {
+    const propertyCustodians =
+      await userModel.getPropertyCustodianFromDepartment(
+        fieldsToUpdate.owner_department_id
+      );
+
+    const recipientIds = propertyCustodians.map((custodian) => custodian.id);
+
+    await notificationSender.sendNotification(
+      "item-unit",
+      "Item was transferred to your department",
+      recipientIds
+    );
+  }
+
+  return itemUnit;
 }
 
 export async function deleteItemUnitByID(id) {
@@ -98,19 +117,13 @@ export async function deleteItemUnitsByIDs(ids) {
 }
 
 export async function relocateItemUnit(id, user, data) {
-  const { from_sub_location_id, to_sub_location_id, requested_from } = data;
-  const itemUnit = await itemUnitModel.getItemUnitByID(id);
-  if (!itemUnit) {
-    throw new Error("Item unit not found");
-  }
+  const { from_sub_location_id, to_sub_location_id } = data;
 
   return await relocationModel.logRelocation(
     id,
     from_sub_location_id,
     to_sub_location_id,
     user.id,
-    requested_from,
-    itemUnit.item_department_id
   );
 }
 

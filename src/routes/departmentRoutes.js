@@ -9,6 +9,7 @@ const MODULE = 'departments';
 router.get('/', authenticate, departmentController.getDepartments);
 router.get('/:id', authenticate, departmentController.getDepartmentByID);
 router.get('/:id/requests', authenticate, departmentController.getPurchaseRequests);
+router.get('/:id/technicians', authenticate, departmentController.getAvailableTechnicians);
 
 router.post('/', authenticate, asyncHandler(departmentController.createDepartment, MODULE));
 router.post('/:departmentId', authenticate, asyncHandler(departmentController.createPurchaseRequest, MODULE));
