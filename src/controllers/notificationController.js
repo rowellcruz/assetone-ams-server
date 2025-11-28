@@ -5,14 +5,9 @@ export const receiveNotifications = async (req, res) => {
   const filters = {};
   if (req.query.status) filters.status = req.query.status;
   if (user) filters.userId = user.id;
-  try {
-    const notification = await notificationService.receiveNotifications(filters);
 
-    res.json(notification);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Failed to receive notification" });
-  }
+  const notification = await notificationService.receiveNotifications(filters);
+  res.json(notification);
 };
 
 export const createNotificationWithReceivers = async (req, res) => {
@@ -21,62 +16,35 @@ export const createNotificationWithReceivers = async (req, res) => {
     return res.status(400).json({ message: "Module, message, and at least one userId are required" });
   }
 
-  try {
-    const notification = await notificationService.createNotification(module, message);
+  const notification = await notificationService.createNotification(module, message);
+  const receivers = await notificationService.addReceivers(notification.id, userIds);
 
-    const receivers = await notificationService.addReceivers(notification.id, userIds);
-
-    res.json({
-      notification,
-      receivers,
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Failed to create notification and add receivers" });
-  }
+  res.json({
+    notification,
+    receivers,
+  });
 };
-
 
 export const addReceivers = async (req, res) => {
   const { id } = req.params;
   const { userIds } = req.body;
 
   if (!id || !Array.isArray(userIds) || userIds.length === 0) {
-    return res
-      .status(400)
-      .json({ message: "Invalid notification ID or user IDs" });
+    return res.status(400).json({ message: "Invalid notification ID or user IDs" });
   }
 
-  try {
-    const data = await notificationService.addReceivers(
-      id,
-      userIds
-    );
-    res.json(data);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Failed to add receivers" });
-  }
+  const data = await notificationService.addReceivers(id, userIds);
+  res.json(data);
 };
 
 export const markReceiverSeen = async (req, res) => {
   const { id } = req.params;
   const user = req.user;
 
-  if (!id || !user.id) {
-    return res
-      .status(400)
-      .json({ message: "Notification ID and user ID are required" });
+  if (!id || !user?.id) {
+    return res.status(400).json({ message: "Notification ID and user ID are required" });
   }
 
-  try {
-    const data = await notificationService.markReceiverSeen(
-      id,
-      user.id
-    );
-    res.json(data);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Failed to mark notification as seen" });
-  }
+  const data = await notificationService.markReceiverSeen(id, user.id);
+  res.json(data);
 };

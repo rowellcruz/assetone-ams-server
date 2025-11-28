@@ -13,8 +13,7 @@ export const getProcurementTaskByID = async (req, res) => {
   const { id } = req.params;
   const procurementTask = await procurementTaskService.getProcurementTaskByID(id);
   if (!procurementTask) {
-    res.status(404);
-    throw new Error("Procurement Task not found");
+    return res.status(404).json({ message: "Procurement Task not found" });
   }
   res.json(procurementTask);
 };
@@ -28,8 +27,7 @@ export const updateProcurementTaskPartial = async (req, res) => {
   const { id } = req.params;
   const updated = await procurementTaskService.updateProcurementTaskPartial(id, req.body);
   if (!updated) {
-    res.status(404);
-    throw new Error("Procurement Task not found");
+    return res.status(404).json({ message: "Procurement Task not found" });
   }
   res.json(updated);
 };
@@ -38,8 +36,7 @@ export const deleteProcurementTaskByID = async (req, res) => {
   const { id } = req.params;
   const deleted = await procurementTaskService.deleteProcurementTaskByID(id);
   if (!deleted) {
-    res.status(404);
-    throw new Error("Procurement Task not found");
+    return res.status(404).json({ message: "Procurement Task not found" });
   }
   res.json({ message: "Procurement Task deleted successfully" });
 };
@@ -47,61 +44,47 @@ export const deleteProcurementTaskByID = async (req, res) => {
 export const deleteProcurementTasksByIDs = async (req, res) => {
   const { ids } = req.body;
   if (!Array.isArray(ids) || ids.length === 0) {
-    res.status(400);
-    throw new Error("IDs array is required");
+    return res.status(400).json({ message: "IDs array is required" });
   }
   await procurementTaskService.deleteProcurementTasksByIDs(ids);
   res.json({ message: "Procurement Tasks deleted successfully" });
 };
 
-export async function uploadAttachment(req, res, next) {
-  try {
-    const { taskId, module } = req.params;
-    const uploadedBy = req.user.id;
-    const file = req.file;
+export const uploadAttachment = async (req, res) => {
+  const { taskId, module } = req.params;
+  const uploadedBy = req.user.id;
+  const file = req.file;
 
-    if (!file) {
-      return res.status(400).json({ message: "No file uploaded" });
-    }
-
-    const attachment = await procurementTaskService.addAttachment(taskId, file, uploadedBy, module);
-    res.status(201).json(attachment);
-  } catch (err) {
-    next(err);
+  if (!file) {
+    return res.status(400).json({ message: "No file uploaded" });
   }
-}
 
-export async function getAttachments(req, res, next) {
-  try {
-    const { taskId } = req.params;
-    const attachments = await procurementTaskService.listAttachments(taskId);
-    res.json(attachments);
-  } catch (err) {
-    next(err);
+  const attachment = await procurementTaskService.addAttachment(taskId, file, uploadedBy, module);
+  res.status(201).json(attachment);
+};
+
+export const getAttachments = async (req, res) => {
+  const { taskId } = req.params;
+  const attachments = await procurementTaskService.listAttachments(taskId);
+  res.json(attachments);
+};
+
+export const deleteAttachment = async (req, res) => {
+  const { id } = req.params;
+  const attachment = await procurementTaskService.removeAttachment(id);
+
+  if (!attachment) {
+    return res.status(404).json({ message: "Attachment not found" });
   }
-}
 
-export async function deleteAttachment(req, res, next) {
-  try {
-    const { id } = req.params;
-    const attachment = await procurementTaskService.removeAttachment(id);
-
-    if (!attachment) {
-      return res.status(404).json({ message: "Attachment not found" });
-    }
-
-    res.json({ message: "Attachment deleted", attachment });
-  } catch (err) {
-    next(err);
-  }
-}
+  res.json({ message: "Attachment deleted", attachment });
+};
 
 export const finalizeAcquisition = async (req, res) => {
   const { id } = req.params;
   const finalized = await procurementTaskService.finalizeAcquisitionAndCreateUnits(id, req.body, req.user.id);
   if (!finalized) {
-    res.status(404);
-    throw new Error("Procurement Task not found or cannot be finalized");
+    return res.status(404).json({ message: "Procurement Task not found or cannot be finalized" });
   }
   res.json(finalized);
-}
+};

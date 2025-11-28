@@ -6,6 +6,7 @@ export const getUsers = async (req, res) => {
     role: req.query.role,
     departmentId: req.query.departmentId,
     isActive: req.query.isActive,
+    status: req.query.status
   };
 
   if(user.role !== "system_administrator") {

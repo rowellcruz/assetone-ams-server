@@ -1,15 +1,16 @@
 import nodemailer from "nodemailer";
 
 const senderName = "AssetONE";
-const senderEmail = process.env.EMAIL_USER; // your Gmail address
+const senderEmail = process.env.BREVO_EMAIL; // Your Brevo sender email
 const clientUrl = process.env.VITE_URL;
 
-// Configure Nodemailer Gmail transporter
 const transporter = nodemailer.createTransport({
-  service: "gmail",
+  host: "smtp-relay.brevo.com",
+  port: 587,
+  secure: false,
   auth: {
-    user: process.env.EMAIL_USER,       // Gmail
-    pass: process.env.EMAIL_PASS,       // Gmail App Password
+    user: process.env.BREVO_SMTP_USER, // usually your Brevo login email
+    pass: process.env.BREVO_SMTP_KEY,  // your Brevo SMTP Key
   },
 });
 

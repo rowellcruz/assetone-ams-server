@@ -14,10 +14,10 @@ router.get('/occurrence/:id', authenticate, asyncHandler(scheduleController.getS
 router.get('/:id/assigned-assets', authenticate, asyncHandler(scheduleController.getAssignedAssetsByTemplateId));
 router.get('/asset-unit/:assetUnitId', authenticate, asyncHandler(scheduleController.getScheduleOccurrencesByAssetUnitId));
 
-router.post('/:id/start', authenticate, asyncHandler(scheduleController.startScheduleOccurrence, MODULE));
-router.post('/:id/asset-unit/:unitId', authenticate, asyncHandler(scheduleController.updateScheduleAssetStatus, MODULE));
-router.post('/:id/complete', authenticate, asyncHandler(scheduleController.completeScheduleOccurrence, MODULE));
-router.post('/:id/reject', authenticate, asyncHandler(scheduleController.rejectScheduleOccurrence, MODULE));
-router.post('/:id/skip', authenticate, asyncHandler(scheduleController.skipScheduleOccurrence, MODULE));
+router.post('/:id/start', authenticate, asyncHandler(scheduleController.startScheduleOccurrence, MODULE, "START"));
+router.post('/:id/asset-unit/:unitId', authenticate, asyncHandler(scheduleController.updateScheduleAssetStatus, MODULE, "UPDATE"));
+router.post('/:id/complete', authenticate, asyncHandler(scheduleController.completeScheduleOccurrence, MODULE, "COMPLETE"));
+router.post('/:id/reject', authenticate, asyncHandler(scheduleController.rejectScheduleOccurrence, MODULE, "REJECT"));
+router.post('/:id/skip', authenticate, asyncHandler(scheduleController.skipScheduleOccurrence, MODULE, "SKIP"));
 
 export default router;

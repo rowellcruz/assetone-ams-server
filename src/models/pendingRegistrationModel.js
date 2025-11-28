@@ -1,30 +1,53 @@
 import db from "../config/db.js";
 
 async function getById(id) {
-  const { rows } = await db.query("SELECT * FROM pending_registration WHERE id = $1", [id]);
+  const { rows } = await db.query(
+    "SELECT * FROM pending_registration WHERE id = $1",
+    [id]
+  );
   return rows[0];
 }
 
 async function getByEmail(email) {
-  const { rows } = await db.query("SELECT * FROM pending_registration WHERE email = $1", [email]);
+  const { rows } = await db.query(
+    "SELECT * FROM pending_registration WHERE email = $1",
+    [email]
+  );
   return rows[0];
 }
 
-async function getAllPending() {
-  const { rows } = await db.query(
-    "SELECT * FROM pending_registration ORDER BY created_at DESC"
-  );
+async function getAllPending(filters = {}) {
+  let query = "SELECT * FROM pending_registration";
+
+  const conditions = [];
+  const values = [];
+
+  if (filters.status) {
+    conditions.push(`status = $${values.length + 1}`);
+    values.push(filters.status);
+  }
+
+  if (conditions.length > 0) {
+    query += " WHERE " + conditions.join(" AND ");
+  }
+
+  query += ` ORDER BY created_at DESC`;
+
+  const { rows } = await db.query(query, values);
   return rows;
 }
 
 async function getPendingRegistrationById(id) {
-  const { rows } = await db.query("SELECT * FROM pending_registration WHERE id = $1", [id]);
+  const { rows } = await db.query(
+    "SELECT * FROM pending_registration WHERE id = $1",
+    [id]
+  );
   return rows[0];
 }
 
 async function create(registrationData) {
-  const { first_name, last_name, email,  status = 'pending' } = registrationData;
-  
+  const { first_name, last_name, email, status = "pending" } = registrationData;
+
   const { rows } = await db.query(
     `INSERT INTO pending_registration 
      (first_name, last_name, email, status) 
@@ -32,7 +55,7 @@ async function create(registrationData) {
      RETURNING *`,
     [first_name, last_name, email, status]
   );
-  
+
   return rows[0];
 }
 
@@ -44,12 +67,15 @@ async function updateStatus(id, status, adminId) {
      RETURNING *`,
     [status, id, adminId]
   );
-  
+
   return rows[0];
 }
 
 async function deleteById(id) {
-  const { rowCount } = await db.query("DELETE FROM pending_registration WHERE id = $1", [id]);
+  const { rowCount } = await db.query(
+    "DELETE FROM pending_registration WHERE id = $1",
+    [id]
+  );
   return rowCount > 0;
 }
 
@@ -60,5 +86,5 @@ export {
   getPendingRegistrationById,
   create,
   updateStatus,
-  deleteById
+  deleteById,
 };

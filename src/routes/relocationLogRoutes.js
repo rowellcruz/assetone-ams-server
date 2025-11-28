@@ -4,7 +4,7 @@ import asyncHandler from '../utils/asyncHandler.js';
 import authenticate from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
-const MODULE = 'itemCategories';
+const MODULE = 'relocationLog';
 
 router.get('/', authenticate, asyncHandler(relocationLogController.getRelocationLog));
 router.get('/:id/technician', authenticate, asyncHandler(relocationLogController.getRelocationLogByTechnicianId));

@@ -15,6 +15,7 @@ router.post('/', authenticate, asyncHandler(userController.createUser, MODULE));
 router.post('/bulk-delete', authenticate, asyncHandler(userController.deleteUsersByIDs, MODULE));
 router.put('/:id', authenticate, asyncHandler(userController.replaceUser, MODULE));
 router.patch('/:id', authenticate, asyncHandler(userController.updateUserPartial, MODULE));
+router.patch('/:id/status', authenticate, asyncHandler(userController.updateUserPartial));
 router.delete('/:id', authenticate, asyncHandler(userController.deleteUserByID, MODULE));
 
 export default router;

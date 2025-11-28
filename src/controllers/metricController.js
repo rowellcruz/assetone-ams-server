@@ -45,3 +45,13 @@ export const getAssetUtilization = async (req, res) => {
   const data = await metricService.getAssetUtilization();
   res.json(data);
 };
+
+export const getUserActivityWeeklyTrend = async (req, res) => {
+  const data = await metricService.getUserActivityWeeklyTrend();
+  res.json(data);
+};
+
+export const getTopModuleUsage = async (req, res) => {
+  const data = await metricService.getTopModuleUsage();
+  res.json(data);
+};

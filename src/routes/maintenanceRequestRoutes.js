@@ -5,11 +5,12 @@ import asyncHandler from '../utils/asyncHandler.js';
 import authenticate from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
+const MODULE = 'maintenanceRequest'
 
 router.get('/', authenticate, asyncHandler(maintenanceRequestController.getMaintenanceRequests));
 router.get('/:id/reported-asset', asyncHandler(itemUnitController.getReportedItemDataById));
 router.get('/:id/:status', authenticate, asyncHandler(maintenanceRequestController.getMaintenanceRequestsByItemUnitId));
 router.post('/', asyncHandler(maintenanceRequestController.createRequest));
-router.post('/update', authenticate, asyncHandler(maintenanceRequestController.handleReportApproval));
+router.post('/update', authenticate, asyncHandler(maintenanceRequestController.handleReportApproval, MODULE, "UPDATE"));
 
 export default router;

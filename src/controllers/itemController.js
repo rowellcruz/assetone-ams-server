@@ -20,23 +20,18 @@ export const getItemByID = async (req, res) => {
   res.json(item);
 };
 
-export const getUnitStickers = async (req, res, next) => {
-  try {
-    const { unitIds } = req.body;
-    if (!unitIds || !Array.isArray(unitIds) || unitIds.length === 0) {
-      return res.status(400).json({ message: "unitIds array is required" });
-    }
-
-    const pdfBuffer = await itemService.generateStickersPDF(unitIds);
-
-    res.setHeader("Content-Type", "application/pdf");
-    res.setHeader("Content-Disposition", "attachment; filename=stickers.pdf");
-    res.send(pdfBuffer);
-  } catch (err) {
-    next(err);
+export const getUnitStickers = async (req, res) => {
+  const { unitIds } = req.body;
+  if (!unitIds || !Array.isArray(unitIds) || unitIds.length === 0) {
+    return res.status(400).json({ message: "unitIds array is required" });
   }
-};
 
+  const pdfBuffer = await itemService.generateStickersPDF(unitIds);
+
+  res.setHeader("Content-Type", "application/pdf");
+  res.setHeader("Content-Disposition", "attachment; filename=stickers.pdf");
+  res.send(pdfBuffer);
+};
 
 export const createItem = async (req, res) => {
   const createdItem = await itemService.createItem(req.body);

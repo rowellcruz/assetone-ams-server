@@ -15,9 +15,9 @@ router.get('/relocation/:departmentId', authenticate, itemUnitsController.itemUn
 router.get('/by-items/:itemId', authenticate, itemUnitsController.getItemUnitsByItemID);
 
 router.post('/', authenticate, asyncHandler(itemUnitsController.createItemUnit, MODULE));
-router.post('/assign-location', authenticate, asyncHandler(itemUnitsController.assignLocations));
-router.post('/:id/receive', authenticate, asyncHandler(itemDistributionController.markAsReceived, MODULE));
-router.post('/:id/relocate', authenticate, asyncHandler(itemUnitsController.relocateItemUnit, MODULE));
+router.post('/assign-location', authenticate, asyncHandler(itemUnitsController.assignLocations, MODULE, "UPDATE"));
+router.post('/:id/receive', authenticate, asyncHandler(itemDistributionController.markAsReceived, MODULE, "RECEIVE"));
+router.post('/:id/relocate', authenticate, asyncHandler(itemUnitsController.relocateItemUnit, MODULE, "UPDATE"));
 router.post('/bulk-delete', authenticate, asyncHandler(itemUnitsController.deleteItemUnitsByIDs, MODULE));
 router.patch('/:id', authenticate, asyncHandler(itemUnitsController.updateItemUnitPartial, MODULE));
 router.delete('/:id', authenticate, asyncHandler(itemUnitsController.deleteItemUnitByID, MODULE));
