@@ -188,39 +188,12 @@ async function getItemUnitsByIds(ids) {
       d.name AS department_name,
       l.name || ' - ' || sl.name AS full_location_name,
       l.name AS location_name,
-      sl.name AS sub_location_name,
-      -- Relocation info
-      rl.id AS relocation_log_id,
-      rl.status AS relocation_status,
-      rl.from_location_name AS relocation_from_location_name,
-      rl.from_sub_location_name AS relocation_from_sub_location_name,
-      rl.to_location_name AS relocation_to_location_name,
-      rl.to_sub_location_name AS relocation_to_sub_location_name,
-      CASE WHEN rl.status IS NOT NULL THEN 'under_relocation' ELSE 'available' END AS status
+      sl.name AS sub_location_name
     FROM item_units iu
     LEFT JOIN items i ON iu.item_id = i.id
     LEFT JOIN departments d ON iu.owner_department_id = d.id
     LEFT JOIN sub_locations sl ON iu.sub_location_id = sl.id
     LEFT JOIN locations l ON sl.location_id = l.id
-    LEFT JOIN LATERAL (
-      SELECT 
-        rl.id,
-        rl.status,
-        rl.requested_at,
-        from_l.name AS from_location_name,
-        from_sl.name AS from_sub_location_name,
-        to_l.name AS to_location_name,
-        to_sl.name AS to_sub_location_name
-      FROM relocation_log rl
-      LEFT JOIN sub_locations from_sl ON rl.from_sub_location_id = from_sl.id
-      LEFT JOIN locations from_l ON from_sl.location_id = from_l.id
-      LEFT JOIN sub_locations to_sl ON rl.to_sub_location_id = to_sl.id
-      LEFT JOIN locations to_l ON to_sl.location_id = to_l.id
-      WHERE rl.item_unit_id = iu.id
-        AND rl.status IN ('pending', 'in_progress')
-      ORDER BY rl.requested_at DESC
-      LIMIT 1
-    ) rl ON TRUE
     WHERE iu.id IN (${placeholders})
     `,
     ids
@@ -240,39 +213,12 @@ async function getItemUnitsByDepartmentId(departmentId) {
       d.name AS department_name,
       l.name || ' - ' || sl.name AS full_location_name,
       l.name AS location_name,
-      sl.name AS sub_location_name,
-      rl.id AS relocation_log_id,
-      rl.status AS relocation_status,
-      rl.requested_at AS relocation_created_at,
-      rl.from_location_name AS relocation_from_location_name,
-      rl.from_sub_location_name AS relocation_from_sub_location_name,
-      rl.to_location_name AS relocation_to_location_name,
-      rl.to_sub_location_name AS relocation_to_sub_location_name,
-      CASE WHEN rl.status IS NOT NULL THEN 'under_relocation' ELSE 'available' END AS status
-    FROM item_units iu
+      sl.name AS sub_location_name
+      FROM item_units iu
     LEFT JOIN items i ON iu.item_id = i.id
     LEFT JOIN departments d ON iu.owner_department_id = d.id
     LEFT JOIN sub_locations sl ON iu.sub_location_id = sl.id
     LEFT JOIN locations l ON sl.location_id = l.id
-    LEFT JOIN LATERAL (
-      SELECT 
-        r.id,
-        r.status,
-        r.created_at,
-        from_l.name AS from_location_name,
-        from_sl.name AS from_sub_location_name,
-        to_l.name AS to_location_name,
-        to_sl.name AS to_sub_location_name
-      FROM relocation_log r
-      LEFT JOIN sub_locations from_sl ON r.from_sub_location_id = from_sl.id
-      LEFT JOIN locations from_l ON from_sl.location_id = from_l.id
-      LEFT JOIN sub_locations to_sl ON r.to_sub_location_id = to_sl.id
-      LEFT JOIN locations to_l ON to_sl.location_id = to_l.id
-      WHERE r.item_unit_id = iu.id
-        AND r.status IN ('pending', 'in_progress')
-      ORDER BY r.created_at DESC
-      LIMIT 1
-    ) rl ON TRUE
     WHERE iu.owner_department_id = $1
     `,
     [departmentId]
