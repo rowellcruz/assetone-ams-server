@@ -19,9 +19,13 @@ async function getAllSchedules(filters = {}) {
     values.push(filters.status);
   }
 
-  if (filters.departmentId) {
-    conditions.push(`i.department_id = $${values.length + 1}`);
-    values.push(filters.departmentId);
+  if (filters.departmentId !== undefined) {
+    if (filters.departmentId === null) {
+      conditions.push(`i.department_id IS NULL`);
+    } else {
+      conditions.push(`i.department_id = $${values.length + 1}`);
+      values.push(filters.departmentId);
+    }
   }
 
   if (filters.type) {
@@ -160,9 +164,13 @@ async function getAllSchedulesWithTemplates(filters = {}) {
     values.push(filters.status);
   }
 
-  if (filters.departmentId) {
-    conditions.push(`i.department_id = $${values.length + 1}`);
-    values.push(filters.departmentId);
+  if (filters.departmentId !== undefined) {
+    if (filters.departmentId === null) {
+      conditions.push(`i.department_id IS NULL`);
+    } else {
+      conditions.push(`i.department_id = $${values.length + 1}`);
+      values.push(filters.departmentId);
+    }
   }
 
   if (

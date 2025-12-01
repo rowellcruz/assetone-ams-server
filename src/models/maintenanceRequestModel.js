@@ -16,9 +16,13 @@ async function getMaintenanceRequests(filters = {}) {
   const conditions = [];
   const values = [];
 
-  if (filters.departmentId) {
-    conditions.push(`i.department_id = $${values.length + 1}`);
-    values.push(filters.departmentId);
+  if (filters.departmentId !== undefined) {
+    if (filters.departmentId === null) {
+      conditions.push(`i.department_id IS NULL`);
+    } else {
+      conditions.push(`i.department_id = $${values.length + 1}`);
+      values.push(filters.departmentId);
+    }
   }
 
   if (conditions.length > 0) {
@@ -109,7 +113,6 @@ async function getActiveRequestsByUnit(item_unit_id) {
   return rows;
 }
 
-
 async function resolveRequest(id) {
   const { rows } = await db.query(
     `
@@ -124,7 +127,6 @@ async function resolveRequest(id) {
   return rows[0];
 }
 
-
 export {
   getMaintenanceRequests,
   getActiveRequestsByUnit,
@@ -132,5 +134,5 @@ export {
   getExistingMaintenanceRequestsByData,
   createMaintenanceRequest,
   updateMaintenanceRequest,
-  resolveRequest
+  resolveRequest,
 };

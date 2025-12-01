@@ -11,9 +11,14 @@ export const getDepartments = async (req, res) => {
 };
 
 export const getAvailableTechnicians = async (req, res) => {
-  const {id} = req.params;
-  const departments = await departmentService.getAvailableTechnicians(id);
-  res.json(departments);
+  let { id } = req.params;
+
+  if (id === "null" || id === null) {
+    id = null;
+  }
+
+  const technicians = await departmentService.getAvailableTechnicians(id);
+  res.json(technicians);
 };
 
 export const getDepartmentByID = async (req, res) => {
@@ -41,12 +46,12 @@ export const createPurchaseRequest = async (req, res) => {
   const { departmentId } = req.params;
   const requestData = { ...req.body, department_id: departmentId };
 
-  const createdPurchaseRequest =
-    await requestService.createRequest(requestData);
+  const createdPurchaseRequest = await requestService.createRequest(
+    requestData
+  );
 
   res.status(201).json(createdPurchaseRequest);
 };
-
 
 export const deleteDepartmentsByIDs = async (req, res) => {
   const { ids } = req.body;

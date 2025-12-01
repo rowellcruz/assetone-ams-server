@@ -8,20 +8,27 @@ async function getUserDataByEmail(email) {
 }
 
 async function getAvailableTechniciansFromDepartment(id) {
-  const { rows } = await db.query(
-    `
-      SELECT 
-        id,
-        first_name,
-        last_name,
-        (first_name || ' ' || last_name) AS name
-      FROM users
-      WHERE department_id = $1
-        AND role = 'technician'
-        AND status != 'in_operation'
-    `,
-    [id]
-  );
+  let query = `
+    SELECT 
+      id,
+      first_name,
+      last_name,
+      (first_name || ' ' || last_name) AS name
+    FROM users
+    WHERE role = 'technician'
+      AND status != 'in_operation'
+  `;
+  
+  const values = [];
+
+  if (id === null) {
+    query += ` AND department_id IS NULL`;
+  } else if (id !== undefined) {
+    query += ` AND department_id = $1`;
+    values.push(id);
+  }
+
+  const { rows } = await db.query(query, values);
   return rows;
 }
 

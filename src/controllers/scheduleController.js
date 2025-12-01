@@ -5,8 +5,9 @@ export const getSchedules = async (req, res) => {
   const filters = {};
   if (req.query.status) filters.status = req.query.status;
   if (req.query.type) filters.type = req.query.type;
-  if (user.role === "technician") filters.departmentId = user.department_id;
-  if (user.role === "asset_administrator") filters.status = "completed";
+  if (user.department_id === null || user.department_id === undefined)
+    filters.departmentId = null;
+  if (user.department_id) filters.departmentId = user.department_id;
   if (req.query.excludeConditionAssessment)
     filters.excludeConditionAssessment = req.query.excludeConditionAssessment;
 
@@ -31,7 +32,9 @@ export const getAllSchedulesWithTemplates = async (req, res) => {
   const filters = {};
   if (req.query.status) filters.status = req.query.status;
   if (req.query.type) filters.type = req.query.type;
-  if (user.role === "technician") filters.departmentId = user.department_id;
+  if (user.department_id === null || user.department_id === undefined)
+    filters.departmentId = null;
+  if (user.department_id) filters.departmentId = user.department_id;
   if (req.query.excludeConditionAssessment)
     filters.excludeConditionAssessment = req.query.excludeConditionAssessment;
   const schedules = await scheduleService.getAllSchedulesWithTemplates(filters);

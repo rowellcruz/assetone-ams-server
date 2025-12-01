@@ -1,8 +1,10 @@
 import db from "../config/db.js";
 
-async function getAllDepartments(filters) {
+async function getAllDepartments(filters = {}) {
   const { rows } = await db.query("SELECT * FROM departments");
-  return rows;
+
+  const defaultRow = { id: null, name: "General Services Office - Default", code: "GSO", updated_at: new Date() };
+  return [defaultRow, ...rows];
 }
 
 async function getDepartmentByID(id) {
@@ -13,8 +15,7 @@ async function getDepartmentByID(id) {
 }
 
 async function createDepartment(departmentData) {
-  const { name, code, created_by, updated_by } =
-    departmentData;
+  const { name, code, created_by, updated_by } = departmentData;
   const { rows } = await db.query(
     "INSERT INTO departments (name, code, created_by, updated_by) VALUES ($1, $2, $3, $4, $5) RETURNING id",
     [name, code, created_by, updated_by]
