@@ -76,8 +76,16 @@ async function getAllItemUnits(filters = {}) {
     }
   }
   if (filters.status !== undefined) {
-    conditions.push(`iu.status = $${values.length + 1}`);
-    values.push(filters.status);
+    if (Array.isArray(filters.status)) {
+      const placeholders = filters.status.map(
+        (_, i) => `$${values.length + i + 1}`
+      );
+      conditions.push(`iu.status IN (${placeholders.join(", ")})`);
+      values.push(...filters.status);
+    } else {
+      conditions.push(`iu.status = $${values.length + 1}`);
+      values.push(filters.status);
+    }
   }
   if (filters.unitsForMaintenance === true) {
     conditions.push(`(iu.status = 'available' OR iu.status = 'in_use')`);
@@ -149,7 +157,6 @@ async function getItemUnitByID(id) {
 
   return rows[0] || null;
 }
-
 
 async function getItemByItemUnitId(id) {
   const { rows } = await db.query(

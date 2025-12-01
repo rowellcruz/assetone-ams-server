@@ -7,7 +7,7 @@ export const getItemUnits = async (req, res) => {
   if (req.query.ownerDepartmentId)
     filters.ownerDepartmentId = req.query.ownerDepartmentId;
 
-  if(req.user.role === 'property_custodian') filters.ownerDepartmentId = req.user.departmentId;
+  if(req.user.role === 'property_custodian') filters.ownerDepartmentId = req.user.department_id;
 
   const itemUnits = await itemUnitService.getAllItemUnits(filters);
   res.json(itemUnits);

@@ -6,9 +6,7 @@ export const getItems = async (filters = {}) => {
   let query = `
     SELECT 
         i.name AS "Item",
-        COUNT(iu.id) AS "Unit Count",
-        CONCAT(u_created.first_name, ' ', u_created.last_name) AS "Created By",
-        i.created_at AS "Created At"
+        COUNT(iu.id) AS "Unit Count"
     FROM items i
     LEFT JOIN item_units iu ON iu.item_id = i.id
   `;
@@ -31,7 +29,7 @@ export const getItems = async (filters = {}) => {
   if (where.length) query += ` WHERE ${where.join(" AND ")}`;
 
   query += `
-    GROUP BY i.id, i.name, u_created.first_name, u_created.last_name, i.created_at
+    GROUP BY i.id, i.name
     ORDER BY i.created_at DESC
   `;
 
@@ -44,11 +42,10 @@ export const getItems = async (filters = {}) => {
 export const getItemUnits = async (filters = {}, limit = 50) => {
   let query = `
     SELECT 
-      iu.unit_tag AS Unit Tag,
-      iu.brand AS Brand,
-      iu.status AS Status,
-      iu.acquisition_date AS Purchase Date,
-      d.name AS Department Name
+      iu.unit_tag AS "Unit Tag",
+      iu.status AS "Status",
+      iu.purchase_date AS "Purchase Date",
+      d.name AS "Issued Department"
     FROM item_units iu
     LEFT JOIN departments d ON iu.owner_department_id = d.id
   `;
@@ -69,12 +66,12 @@ export const getItemUnits = async (filters = {}, limit = 50) => {
   if (filters.from && filters.to) {
     values.push(filters.from, filters.to);
     conditions.push(
-      `iu.acquisition_date BETWEEN $${values.length - 1} AND $${values.length}`
+      `iu.purchase_date BETWEEN $${values.length - 1} AND $${values.length}`
     );
   }
 
   if (conditions.length) query += " WHERE " + conditions.join(" AND ");
-  query += " ORDER BY iu.acquisition_date DESC";
+  query += " ORDER BY iu.purchase_date DESC";
   query += ` LIMIT ${limit}`;
 
   const { rows } = await db.query(query, values);
@@ -86,7 +83,7 @@ export const getItemUnits = async (filters = {}, limit = 50) => {
 export const getMaintenanceSchedules = async (filters = {}) => {
   let query = `
     SELECT 
-      st.title AS "Title",
+      st.description AS "Title",
       so.scheduled_date AS "Scheduled Date",
       so.status,
       so.completed_at AS "Completion Date"

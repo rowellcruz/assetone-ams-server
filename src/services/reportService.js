@@ -3,8 +3,8 @@ import * as userModel from "../models/userModel.js";
 import { generatePDF } from "../utils/pdfGenerator.js";
 
 export const generateReport = async (reportType, filters, userId) => {
-  if(!userId) {
-    throw new Error ("Invalid UID");
+  if (!userId) {
+    throw new Error("Invalid UID");
   }
   const user = await userModel.getUserDataById(userId);
 
@@ -44,7 +44,13 @@ export const generateReport = async (reportType, filters, userId) => {
     default:
       throw new Error("Unknown report type");
   }
-  
-  const pdfBuffer = await generatePDF(reportType, data, user);
+
+  const reportParams = {
+    fromDate: filters.from,
+    toDate: filters.to,
+  };
+
+  const pdfBuffer = await generatePDF(reportType, data, user, reportParams);
+
   return pdfBuffer;
 };
