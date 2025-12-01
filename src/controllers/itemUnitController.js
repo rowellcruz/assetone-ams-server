@@ -7,7 +7,8 @@ export const getItemUnits = async (req, res) => {
   if (req.query.ownerDepartmentId)
     filters.ownerDepartmentId = req.query.ownerDepartmentId;
 
-  if(req.user.role === 'property_custodian') filters.ownerDepartmentId = req.user.department_id;
+  if (req.user.role === "property_custodian")
+    filters.ownerDepartmentId = req.user.department_id;
 
   const itemUnits = await itemUnitService.getAllItemUnits(filters);
   res.json(itemUnits);
@@ -75,7 +76,7 @@ export const deleteItemUnitByID = async (req, res) => {
     res.status(404);
     throw new Error("Item unit not found");
   }
-  res.json({ message: "Item unit deleted successfully" });
+  res.json(deleted);
 };
 
 export const deleteItemUnitsByIDs = async (req, res) => {
@@ -89,14 +90,14 @@ export const deleteItemUnitsByIDs = async (req, res) => {
 };
 
 export const relocateItemUnit = async (req, res) => {
-  const id = parseInt(req.params.id, 10); 
+  const id = parseInt(req.params.id, 10);
   const user = req.user;
   const relocate = await itemUnitService.relocateItemUnit(id, user, req.body);
   if (!relocate) {
     res.status(404);
     throw new Error("Item unit not found");
   }
-  res.json({ message: "Item unit relocated successfully" });
+  res.json(relocate);
 };
 
 export const itemUnitRelocationLog = async (req, res) => {
@@ -106,7 +107,7 @@ export const itemUnitRelocationLog = async (req, res) => {
     res.status(404);
     throw new Error("Item unit relocation log not found");
   }
-  res.json({ message: "Item unit relocation log found" });
+  res.json(relocate);
 };
 
 export const getMaintenanceHistory = async (req, res) => {
@@ -126,5 +127,5 @@ export const pendingRelocationLogs = async (req, res) => {
     res.status(404);
     throw new Error("Item unit relocation log not found");
   }
-  res.json({ message: "Item unit relocation log found" });
+  res.json(relocate);
 };
