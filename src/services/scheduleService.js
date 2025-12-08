@@ -115,6 +115,11 @@ export async function startScheduleOccurrence(id, startedBy, technicians = []) {
   let item_unit_ids;
 
   const item = await itemModel.getItemByID(template.item_id);
+  console.log({
+    unitsForMaintenance: true,
+    technicianDepartmentId: item.department_id,
+    itemId: template.item_id,
+  });
 
   // Fix: ACA should use PM logic for asset assignment
   if (template.type === "CM") {

@@ -56,11 +56,13 @@ export async function createVendor(vendorData) {
 
 export async function deleteVendorsByIDs(ids) {
   if (!Array.isArray(ids) || ids.length === 0) return 0;
+
   const placeholders = ids.map((_, i) => `$${i + 1}`).join(", ");
   const result = await db.query(
     `DELETE FROM vendors WHERE id IN (${placeholders})`,
     ids
   );
+
   return result.rowCount;
 }
 
@@ -96,9 +98,6 @@ export async function updateFullVendor(id, vendorData) {
 }
 
 export async function updateVendorPartial(id, fields) {
-  const offerIds = fields.asset_category_ids;
-  delete fields.asset_category_ids;
-
   const keys = Object.keys(fields);
 
   if (keys.length > 0) {
@@ -112,86 +111,10 @@ export async function updateVendorPartial(id, fields) {
     );
   }
 
-  if (Array.isArray(offerIds)) {
-    const uniqueOfferIds = [...new Set(offerIds.map(Number))];
-    if (uniqueOfferIds.length === 0) return { id, ...fields };
-
-    await db.query(`DELETE FROM vendor_offers WHERE vendor_id = $1`, [id]);
-
-    if (uniqueOfferIds.length > 0) {
-      const values = [];
-      const placeholders = uniqueOfferIds
-        .map((catId, i) => {
-          values.push(id, catId);
-          return `($${values.length - 1}, $${values.length})`;
-        })
-        .join(", ");
-
-      await db.query(
-        `INSERT INTO vendor_offers (vendor_id, item_category_id)
-          VALUES ${placeholders}`,
-        values
-      );
-    }
-  }
-
-  return { id, ...fields, ...(offerIds ? { offers: offerIds } : {}) };
+  return { id, ...fields };
 }
 
 export async function deleteVendorByID(id) {
   const result = await db.query("DELETE FROM vendors WHERE id = $1", [id]);
   return result.rowCount > 0;
-}
-
-export async function clearVendorOffers(vendorId) {
-  await db.query("DELETE FROM vendor_offers WHERE vendor_id = $1", [vendorId]);
-}
-
-export async function insertVendorOffers(vendorId, assetIds) {
-  if (!Array.isArray(assetIds) || assetIds.length === 0) return;
-
-  const uniqueAssetIds = [...new Set(assetIds)];
-
-  const values = [];
-  const placeholders = uniqueAssetIds
-    .map((assetId, i) => {
-      values.push(vendorId, assetId);
-      return `($${values.length - 1}, $${values.length})`;
-    })
-    .join(", ");
-
-  await db.query(
-    `INSERT INTO vendor_offers (vendor_id, item_category_id)
-      VALUES ${placeholders}`,
-    values
-  );
-}
-
-export async function getVendorOffers(vendorId) {
-  const result = await db.query(
-    `SELECT ac.id AS id, ac.name
-     FROM vendor_offers vo
-     JOIN item_categories ac ON vo.item_category_id = ac.id
-     WHERE vo.vendor_id = $1`,
-    [vendorId]
-  );
-  return result.rows;
-}
-
-export async function getAllVendorOffersMap() {
-  const result = await db.query(
-    `SELECT vo.vendor_id, ac.id AS asset_category_id, ac.name AS asset_category_name
-     FROM vendor_offers vo
-     JOIN item_categories ac ON vo.item_category_id = ac.id`
-  );
-
-  const offersMap = {};
-  for (const row of result.rows) {
-    if (!offersMap[row.vendor_id]) offersMap[row.vendor_id] = [];
-    offersMap[row.vendor_id].push({
-      id: row.asset_category_id,
-      name: row.asset_category_name,
-    });
-  }
-  return offersMap;
 }

@@ -25,8 +25,21 @@ export const getMaintenanceRequestsByItemUnitId = async (req, res) => {
 };
 
 export const createRequest = async (req, res) => {
-  const createdRequest =
-    await maintenanceRequestsService.createMaintenanceRequest(req.body);
+  const { requested_by } = req.body;
+
+  if (!requested_by) {
+    return res.status(400).json({ message: "requested_by is required" });
+  }
+
+  const email = requested_by.trim().toLowerCase();
+  const allowedDomains = ["gmail.com", "hotmail.com", "outlook.com", "dyci.edu.ph"];
+  const domain = email.split("@")[1];
+
+  if (!domain || !allowedDomains.includes(domain)) {
+    return res.status(400).json({ message: "Email not allowed" });
+  }
+
+  const createdRequest = await maintenanceRequestsService.createMaintenanceRequest(req.body);
   res.status(201).json(createdRequest);
 };
 

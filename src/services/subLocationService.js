@@ -1,5 +1,4 @@
 import * as subLocationModel from "../models/subLocationModel.js";
-import * as subLocationAssetModel from "../models/subLocationAssetModel.js";
 import * as itemUnitModel from "../models/itemUnitModel.js";
 
 export async function getAllSubLocations(filters = {}) {
@@ -14,23 +13,12 @@ export async function getSubLocationsByLocationID(locationId) {
   return await subLocationModel.getAllSubLocations({ locationId });
 }
 
-export async function getAssetRequestByLocationId(subLocationId) {
-  return await subLocationAssetModel.getSubLocationAssetsByID(subLocationId);
-}
-
 export async function createSubLocation(subLocationData) {
   return await subLocationModel.createSubLocation(subLocationData);
 }
 
 export async function updateSubLocationPartial(id, fieldsToUpdate) {
   return await subLocationModel.updateSubLocationPartial(id, fieldsToUpdate);
-}
-
-export async function updateSubLocationAssetPartial(id, fieldsToUpdate) {
-  return await subLocationAssetModel.updateSubLocationAssetPartial(
-    id,
-    fieldsToUpdate
-  );
 }
 
 export async function deliverUnits(id, subLocationData) {

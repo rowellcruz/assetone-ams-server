@@ -1,6 +1,5 @@
 import express from 'express';
 import * as itemUnitsController from '../controllers/itemUnitController.js';
-import * as itemDistributionController from '../controllers/itemDistributionController.js';
 import asyncHandler from '../utils/asyncHandler.js';
 import authenticate from '../middlewares/authMiddleware.js';
 
@@ -16,7 +15,6 @@ router.get('/by-items/:itemId', authenticate, itemUnitsController.getItemUnitsBy
 
 router.post('/', authenticate, asyncHandler(itemUnitsController.createItemUnit, MODULE));
 router.post('/assign-location', authenticate, asyncHandler(itemUnitsController.assignLocations, MODULE, "UPDATE"));
-router.post('/:id/receive', authenticate, asyncHandler(itemDistributionController.markAsReceived, MODULE, "RECEIVE"));
 router.post('/:id/relocate', authenticate, asyncHandler(itemUnitsController.relocateItemUnit, MODULE, "UPDATE"));
 router.post('/bulk-delete', authenticate, asyncHandler(itemUnitsController.deleteItemUnitsByIDs, MODULE));
 router.patch('/:id', authenticate, asyncHandler(itemUnitsController.updateItemUnitPartial, MODULE));

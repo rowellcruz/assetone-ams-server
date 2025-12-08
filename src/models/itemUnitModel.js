@@ -69,9 +69,9 @@ async function getAllItemUnits(filters = {}) {
   }
   if (filters.departmentId !== undefined) {
     if (filters.departmentId === null) {
-      conditions.push(`iu.department_id IS NULL`);
+      conditions.push(`iu.owner_department_id IS NULL`);
     } else {
-      conditions.push(`iu.department_id = $${values.length + 1}`);
+      conditions.push(`iu.owner_department_id = $${values.length + 1}`);
       values.push(filters.departmentId);
     }
   }
@@ -91,8 +91,12 @@ async function getAllItemUnits(filters = {}) {
     conditions.push(`(iu.status = 'available' OR iu.status = 'in_use')`);
   }
   if (filters.technicianDepartmentId !== undefined) {
-    conditions.push(`i.department_id = $${values.length + 1}`);
-    values.push(filters.technicianDepartmentId);
+    if (filters.technicianDepartmentId === null) {
+      conditions.push(`i.department_id IS NULL`);
+    } else {
+      conditions.push(`i.department_id = $${values.length + 1}`);
+      values.push(filters.technicianDepartmentId);
+    }
   }
 
   if (conditions.length > 0) {

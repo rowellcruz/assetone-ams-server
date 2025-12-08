@@ -46,7 +46,7 @@ export async function backupData() {
   const backupFilePath = path.join(BACKUP_DIR, backupFileName);
   
   // Get database URL from environment variable
-  const databaseUrl = process.env.DATABASE_URL || "postgresql://assetone_ams_db_5esl_user:ufkqNdzG2sExwrSOAn67Dm3i5pCWQ6L2@dpg-d455aohr0fns73dhcdig-a.oregon-postgres.render.com/assetone_ams_db_5esl";
+  const databaseUrl = process.env.DATABASE_URL;
   
   // Determine pg_dump path based on platform
   let pgDumpCommand = 'pg_dump';

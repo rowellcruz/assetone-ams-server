@@ -1,6 +1,14 @@
 {
   "backups": [
     {
+      "id": "1764676801185",
+      "fileName": "assetone_backup_2025-12-02T11-59-22-197Z.sql",
+      "filePath": "C:\\Users\\ACER\\Documents\\Rowell Cruz\\capstone-project-research\\assetone-campus-asset-management-system\\server\\backups\\assetone_backup_2025-12-02T11-59-22-197Z.sql",
+      "timestamp": "2025-12-02T12:00:01.185Z",
+      "size": 138930,
+      "createdAt": "2025-12-02T12:00:01.185Z"
+    },
+    {
       "id": "1764639788715",
       "fileName": "assetone_backup_2025-12-02T01-42-30-907Z.sql",
       "filePath": "C:\\Users\\ACER\\Documents\\Rowell Cruz\\capstone-project-research\\assetone-campus-asset-management-system\\server\\backups\\assetone_backup_2025-12-02T01-42-30-907Z.sql",
@@ -18,11 +26,11 @@
     }
   ],
   "latest": {
-    "id": "1764639788715",
-    "fileName": "assetone_backup_2025-12-02T01-42-30-907Z.sql",
-    "filePath": "C:\\Users\\ACER\\Documents\\Rowell Cruz\\capstone-project-research\\assetone-campus-asset-management-system\\server\\backups\\assetone_backup_2025-12-02T01-42-30-907Z.sql",
-    "timestamp": "2025-12-02T01:43:08.715Z",
-    "size": 136056,
-    "createdAt": "2025-12-02T01:43:08.715Z"
+    "id": "1764676801185",
+    "fileName": "assetone_backup_2025-12-02T11-59-22-197Z.sql",
+    "filePath": "C:\\Users\\ACER\\Documents\\Rowell Cruz\\capstone-project-research\\assetone-campus-asset-management-system\\server\\backups\\assetone_backup_2025-12-02T11-59-22-197Z.sql",
+    "timestamp": "2025-12-02T12:00:01.185Z",
+    "size": 138930,
+    "createdAt": "2025-12-02T12:00:01.185Z"
   }
 }
