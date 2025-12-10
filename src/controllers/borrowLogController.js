@@ -1,9 +1,16 @@
 import * as borrowLogService from "../services/borrowLogService.js";
 
 export const getBorrowLogs = async (req, res) => {
+  
+  const user = req.user;
   const filters = {};
-  if (req.query.custodianId) filters.custodianId = req.query.custodianId;
   if (req.query.logId) filters.logId = req.query.logId;
+  if (req.query.custodianId) filters.custodianId = req.query.custodianId;
+  if (req.query.status) filters.status = req.query.status;
+  if (user.department_id === null || user.department_id === undefined)
+    filters.custodianId = null;
+  if (user.department_id) filters.custodianId = user.department_id;
+
   const log = await borrowLogService.getBorrowLog(filters);
   res.status(201).json(log);
 };

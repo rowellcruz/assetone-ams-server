@@ -50,13 +50,14 @@ export const getScheduleUnitsByTechnician = async (req, res) => {
 export const updateScheduleAssetStatus = async (req, res) => {
   const { id, unitId } = req.params;
   const user = req.user;
-  const { performanceRating, physicalRating, review } = req.body;
+  const { performanceRating, physicalRating, review, isBroken } = req.body;
   const scheduleAsset = await scheduleService.updateScheduleAsset(
     id,
     unitId,
     performanceRating,
     physicalRating,
     review,
+    isBroken,
     user.id
   );
   res.json(scheduleAsset);

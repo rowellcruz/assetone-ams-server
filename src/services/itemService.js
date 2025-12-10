@@ -148,8 +148,8 @@ export async function generateStickersPDF(unitIds) {
 }
 
 export async function createItem(itemData) {
-  const existingItem = await itemModel.getAllItems({ name: itemData.name });
-  if (existingItem.length > 0) throw new Error("Asset name already exists");
+  const existingItem = await itemModel.getItemByName(itemData.name.toLowerCase());
+  if (existingItem) throw new Error("Asset name already exists");
 
   const newItem = await itemModel.createItem(itemData);
   const pmDescription = `Preventive Maintenance for ${newItem.name}`;

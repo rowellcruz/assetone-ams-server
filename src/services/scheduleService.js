@@ -209,6 +209,7 @@ export async function updateScheduleAsset(
   performanceRating,
   physicalRating,
   review,
+  isBroken,
   completedBy
 ) {
   const item = await itemUnitModel.getItemUnitByID(unitId);
@@ -241,7 +242,7 @@ export async function updateScheduleAsset(
   }
 
   await itemUnitModel.updateItemUnitPartial(unitId, {
-    status: "available",
+    status: isBroken ? "broken" : "available",
     condition: parseInt(newCondition),
     updated_at: new Date(),
   });

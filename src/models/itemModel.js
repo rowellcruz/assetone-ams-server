@@ -29,7 +29,7 @@ async function getAllItems(filters = {}) {
     values.push(filters.departmentId);
     conditions.push(`i.department_id = $${values.length}`);
   }
-  
+
   if (filters.name) {
     values.push(filters.name);
     conditions.push(`i.name = $${values.length}`);
@@ -64,10 +64,19 @@ async function getItemByID(id) {
   return rows[0] || null;
 }
 
+async function getItemByName(name) {
+  if (!name) return null;
+
+  const { rows } = await db.query(
+    "SELECT * FROM items WHERE LOWER(name) = LOWER($1)",
+    [name]
+  );
+  return rows[0];
+}
+
 // Create a new item
 async function createItem(data) {
-  const { name, category, department_id, created_by, updated_by } =
-    data;
+  const { name, category, department_id, created_by, updated_by } = data;
   const { rows } = await db.query(
     `INSERT INTO items (name, category, department_id, created_by, updated_by)
      VALUES ($1, $2, $3, $4, $5)
@@ -120,6 +129,7 @@ async function deleteItemsByIDs(ids) {
 export {
   getAllItems,
   getItemByID,
+  getItemByName,
   createItem,
   updateItemPartial,
   deleteItemByID,

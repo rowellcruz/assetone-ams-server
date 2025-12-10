@@ -11,7 +11,16 @@ export async function getLocationByID(id) {
 export async function createLocation(locationData) {
   const { sublocations = [] } = locationData;
 
-  const normalized = sublocations.map(s => s.trim().toLowerCase());
+  const existingLocation = await locationModel.getLocationByName(
+    locationData.name.toLowerCase()
+  );
+
+  if (existingLocation)
+    throw new Error(
+      `Location with name "${locationData.name}" already exists.`
+    );
+
+  const normalized = sublocations.map((s) => s.trim().toLowerCase());
 
   const duplicates = normalized.filter((s, i) => normalized.indexOf(s) !== i);
   if (duplicates.length > 0) {
@@ -21,7 +30,6 @@ export async function createLocation(locationData) {
 
   return await locationModel.createLocation(locationData);
 }
-
 
 export async function deleteLocationsByIDs(ids) {
   return await locationModel.deleteLocationsByIDs(ids);

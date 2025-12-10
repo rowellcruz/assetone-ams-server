@@ -14,9 +14,29 @@ export async function getAvailableTechnicians(id) {
 }
 
 export async function createDepartment(departmentData) {
-  if (departmentData.code) {
-    departmentData.code = departmentData.code.toUpperCase();
+  const normalizedName = departmentData.name.toLowerCase();
+  const normalizedCode = departmentData.code?.toUpperCase();
+
+  const existingByName = await departmentModel.getDepartmentByName(
+    normalizedName
+  );
+  if (existingByName)
+    throw new Error(
+      `Department with name "${departmentData.name}" already exists.`
+    );
+
+  if (normalizedCode) {
+    const existingByCode = await departmentModel.getDepartmentByCode(
+      normalizedCode
+    );
+    if (existingByCode)
+      throw new Error(
+        `Department with code "${normalizedCode}" already exists.`
+      );
+    departmentData.code = normalizedCode;
   }
+
+  departmentData.name = normalizedName;
 
   return await departmentModel.createDepartment(departmentData);
 }
