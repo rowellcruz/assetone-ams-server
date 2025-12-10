@@ -255,7 +255,7 @@ export async function updateScheduleAsset(
   for (const req of activeRequests) {
     await maintenanceRequestModel.resolveRequest(req.id);
 
-    await mailer.sendNewRegistrationNotification(
+    await mailer.sendResolveMessage(
       req.requested_by,
       `${req.requestor_name}`,
       `${item.item_name} - ${item.unit_tag}`
