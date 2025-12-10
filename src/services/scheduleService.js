@@ -6,6 +6,7 @@ import * as itemUnitModel from "../models/itemUnitModel.js";
 import * as itemModel from "../models/itemModel.js";
 import * as scheduleTechnicianModel from "../models/scheduleTechnicianModel.js";
 import * as maintenanceRequestModel from "../models/maintenanceRequestModel.js";
+import * as mailer from "../utils/mailer.js";
 
 export async function getAllSchedules(filters = {}) {
   return await scheduleModel.getAllSchedules(filters);
@@ -253,6 +254,12 @@ export async function updateScheduleAsset(
 
   for (const req of activeRequests) {
     await maintenanceRequestModel.resolveRequest(req.id);
+
+    await mailer.sendNewRegistrationNotification(
+      req.requested_by,
+      `${req.requestor_name}`,
+      `${item.item_name} - ${item.unit_tag}`
+    );
   }
 
   return updatedScheduledAsset;

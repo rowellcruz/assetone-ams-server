@@ -77,6 +77,18 @@ export async function sendNewRegistrationNotification(email, fullName) {
   return sendEmail(process.env.ADMIN_EMAIL, "New Registration Request - Asset Management System", html);
 }
 
+export async function sendResolveMessage(email, fullName, issueTitle) {
+  const html = `
+    <h2>Your reported issue has been resolved</h2>
+    <p>Hi ${fullName},</p>
+    <p>The issue you reported regarding to <strong>"${issueTitle}"</strong> has been resolved.</p>
+    <p>If you have further concerns or the issue persists, please contact the support team.</p>
+    <p>Thank you for using Asset Management System.</p>
+  `;
+
+  return sendEmail(email, "Issue Resolved - Asset Management System", html);
+}
+
 export async function sendResetConfirmation(email, rawToken) {
   const resetLink = `${clientUrl}/reset-password?token=${rawToken}`;
   const html = `
