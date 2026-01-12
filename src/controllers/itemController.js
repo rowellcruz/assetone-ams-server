@@ -38,6 +38,11 @@ export const createItem = async (req, res) => {
   res.status(201).json(createdItem);
 };
 
+export const importItems = async (req, res) => {
+  const result = await itemService.importItems(req.file, req.user);
+  res.status(201).json(result);
+};
+
 export const updateItemPartial = async (req, res) => {
   const { id } = req.params;
   const updated = await itemService.updateItemPartial(id, req.body);

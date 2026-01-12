@@ -40,3 +40,8 @@ export const getTopModuleUsage = async (req, res) => {
   const data = await metricService.getTopModuleUsage();
   res.json(data);
 };
+
+export const getAssetValues = async (req, res) => {
+  const data = await metricService.getAssetValues();
+  res.json(data);
+}

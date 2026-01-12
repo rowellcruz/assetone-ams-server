@@ -18,7 +18,7 @@ async function getAvailableTechniciansFromDepartment(id) {
     WHERE role = 'technician'
       AND status != 'in_operation'
   `;
-  
+
   const values = [];
 
   if (id === null) {
@@ -31,7 +31,6 @@ async function getAvailableTechniciansFromDepartment(id) {
   const { rows } = await db.query(query, values);
   return rows;
 }
-
 
 async function getAllUsers(filters = {}) {
   let sql = `
@@ -78,7 +77,12 @@ async function getAllUsers(filters = {}) {
     values.push(filters.email);
   }
 
-  if (filters.departmentId === null) {
+  if (
+    filters.departmentId === null ||
+    filters.departmentId === "null" ||
+    filters.departmentId === 0 ||
+    filters.departmentId === "0"
+  ) {
     conditions.push("u.department_id IS NULL");
   } else if (filters.departmentId) {
     conditions.push(`u.department_id = $${values.length + 1}`);

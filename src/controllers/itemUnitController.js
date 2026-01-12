@@ -54,6 +54,11 @@ export const createItemUnit = async (req, res) => {
   res.status(201).json(createdItemUnit);
 };
 
+export const importItemUnits = async (req, res) => {
+  const result = await itemUnitService.importItemUnits(req.file, req.user);
+  res.status(201).json(result);
+};
+
 export const assignLocations = async (req, res) => {
   const itemUnits = await itemUnitService.assignLocations(req.body);
   res.status(201).json(itemUnits);

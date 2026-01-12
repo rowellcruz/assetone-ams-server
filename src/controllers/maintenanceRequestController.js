@@ -4,7 +4,7 @@ export const getMaintenanceRequests = async (req, res) => {
   const user = req.user;
   const filters = {};
   if (req.query.status) filters.status = req.query.status;
-  if (user.department_id === null || user.department_id === undefined)
+  if (user.department_id === null || user.department_id === undefined || user.department_id === 0)
     filters.departmentId = null;
   if (user.department_id) filters.departmentId = user.department_id;
 

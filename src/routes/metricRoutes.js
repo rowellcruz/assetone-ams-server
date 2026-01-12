@@ -13,5 +13,6 @@ router.get("/maintenance-workload", authenticate, asyncHandler(metricController.
 router.get("/asset-utilization", authenticate, asyncHandler(metricController.getAssetUtilization));
 router.get("/weekly-activity-trend", authenticate, asyncHandler(metricController.getUserActivityWeeklyTrend));
 router.get("/top-module-usage", authenticate, asyncHandler(metricController.getTopModuleUsage));
+router.get("/asset-values", authenticate, asyncHandler(metricController.getAssetValues));
 
 export default router;

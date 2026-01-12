@@ -31,6 +31,14 @@ async function getSubLocationByID(id) {
   return rows[0] || null;
 }
 
+async function getSubLocationByName(name, locationId) {
+  const { rows } = await db.query(
+    "SELECT * FROM sub_locations WHERE LOWER(name) = LOWER($1) AND location_id = $2",
+    [name, locationId]
+  );
+  return rows[0];
+}
+
 async function createSubLocation(data) {
   const { rows } = await db.query(
     "INSERT INTO sub_locations (name, location_id) VALUES ($1, $2) RETURNING *",
@@ -70,6 +78,7 @@ async function deleteSubLocationsByIDs(ids) {
 export {
   getAllSubLocations,
   getSubLocationByID,
+  getSubLocationByName,
   createSubLocation,
   updateSubLocationPartial,
   deleteSubLocationByID,

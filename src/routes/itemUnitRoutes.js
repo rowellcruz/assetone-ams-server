@@ -2,6 +2,7 @@ import express from 'express';
 import * as itemUnitsController from '../controllers/itemUnitController.js';
 import asyncHandler from '../utils/asyncHandler.js';
 import authenticate from '../middlewares/authMiddleware.js';
+import upload from '../middlewares/uploadMiddleware.js';
 
 const router = express.Router();
 const MODULE = 'itemUnits';
@@ -14,6 +15,7 @@ router.get('/relocation/:departmentId', authenticate, itemUnitsController.itemUn
 router.get('/by-items/:itemId', authenticate, itemUnitsController.getItemUnitsByItemID);
 
 router.post('/', authenticate, asyncHandler(itemUnitsController.createItemUnit, MODULE));
+router.post('/import-file', authenticate, upload.single("file"), asyncHandler(itemUnitsController.importItemUnits, MODULE));
 router.post('/assign-location', authenticate, asyncHandler(itemUnitsController.assignLocations, MODULE, "UPDATE"));
 router.post('/:id/relocate', authenticate, asyncHandler(itemUnitsController.relocateItemUnit, MODULE, "UPDATE"));
 router.post('/bulk-delete', authenticate, asyncHandler(itemUnitsController.deleteItemUnitsByIDs, MODULE));

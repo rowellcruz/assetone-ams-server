@@ -1,12 +1,38 @@
 import * as departmentModel from "../models/departmentModel.js";
 import * as userModel from "../models/userModel.js";
+import * as itemUnitModel from "../models/itemUnitModel.js";
 
 export async function getAllDepartments(filters = {}) {
   return await departmentModel.getAllDepartments(filters);
 }
 
 export async function getDepartmentByID(id) {
-  return await departmentModel.getDepartmentByID(id);
+  if (id === "null" || id === null || id === 0) {
+    return {
+      id: null,
+      name: "General Services Office - Default",
+      code: "GSO",
+      updated_at: new Date(),
+    };
+  }
+
+  const dept = await departmentModel.getDepartmentByID(id);
+  if (!dept) {
+    return {
+      id: null,
+      name: "General Services Office - Default",
+      code: "GSO",
+      updated_at: new Date(),
+    };
+  }
+
+  return dept;
+}
+
+export async function getItemUnitsByDepartmentId(id) {
+  if (id === "null" || id === null || id === 0 || id === "0") {
+    return await itemUnitModel.getAllItemUnits({ ownerDepartmentId: null });
+  } else return await itemUnitModel.getAllItemUnits({ ownerDepartmentId: id });
 }
 
 export async function getAvailableTechnicians(id) {

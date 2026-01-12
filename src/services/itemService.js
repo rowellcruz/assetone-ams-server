@@ -5,6 +5,7 @@ import * as scheduleTemplateService from "../services/scheduleTemplateService.js
 import QRCode from "qrcode";
 import { fileURLToPath } from "url";
 import path from "path";
+import * as XLSX from "xlsx";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -147,8 +148,70 @@ export async function generateStickersPDF(unitIds) {
   );
 }
 
+export async function importItems(file, user) {
+  const workbook = XLSX.read(file.buffer, { type: "buffer" });
+  const sheet = workbook.Sheets[workbook.SheetNames[0]];
+  const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+
+  const categoryRow = rows[0];
+
+  const categoryMap = {};
+  for (let i = 0; i < categoryRow.length; i += 3) {
+    if (categoryRow[i]) {
+      categoryMap[i] = String(categoryRow[i]).trim();
+    }
+  }
+
+  const headerRow = rows[1];
+  const dataRows = rows.slice(2);
+
+  const groups = [];
+  for (let i = 0; i < headerRow.length; i += 3) {
+    groups.push({
+      codeIndex: i,
+      nameIndex: i + 1,
+    });
+  }
+
+  const created = [];
+  const errors = [];
+
+  for (const row of dataRows) {
+    for (const g of groups) {
+      const code = row[g.codeIndex];
+      const name = row[g.nameIndex];
+
+      if (!code || !name) continue;
+
+      const itemData = {
+        code: String(code).trim(),
+        name: String(name).trim(),
+        category: categoryMap[g.codeIndex],
+        department_id: user.department_id,
+        created_by: user.id,
+        updated_by: user.id,
+      };
+
+      try {
+        const item = await createItem(itemData);
+        created.push(item);
+      } catch (e) {
+        errors.push({ code, name, error: e.message });
+      }
+    }
+  }
+
+  return {
+    createdCount: created.length,
+    errorCount: errors.length,
+    errors,
+  };
+}
+
 export async function createItem(itemData) {
-  const existingItem = await itemModel.getItemByName(itemData.name.toLowerCase());
+  const existingItem = await itemModel.getItemByName(
+    itemData.name.toLowerCase()
+  );
   if (existingItem) throw new Error("Asset name already exists");
 
   const newItem = await itemModel.createItem(itemData);
@@ -162,13 +225,10 @@ export async function createItem(itemData) {
   let pmDate;
 
   if (today <= firstMonday) {
-    // Before or on first Monday → schedule on this month's first Monday
     pmDate = firstMonday;
   } else if (today <= thirdMonday) {
-    // After first Monday but before or on third Monday → schedule on this month's third Monday
     pmDate = thirdMonday;
   } else {
-    // After third Monday → schedule on next month's first Monday
     const nextMonth = new Date(today.getFullYear(), today.getMonth() + 1, 1);
     pmDate = getFirstMonday(nextMonth.getFullYear(), nextMonth.getMonth());
   }
@@ -198,7 +258,6 @@ function getFirstMonday(year, month) {
   }
   return date;
 }
-
 
 export async function updateItemPartial(id, fieldsToUpdate) {
   return await itemModel.updateItemPartial(id, fieldsToUpdate);

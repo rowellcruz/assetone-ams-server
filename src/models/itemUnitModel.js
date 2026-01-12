@@ -55,10 +55,15 @@ async function getAllItemUnits(filters = {}) {
     conditions.push(`iu.item_id = $${values.length + 1}`);
     values.push(filters.itemId);
   }
-  if (filters.ownerDepartmentId) {
-    conditions.push(`iu.owner_department_id = $${values.length + 1}`);
-    values.push(filters.ownerDepartmentId);
+  if (filters.ownerDepartmentId !== undefined) {
+    if (filters.ownerDepartmentId === null) {
+      conditions.push(`iu.owner_department_id IS NULL`);
+    } else {
+      conditions.push(`iu.owner_department_id = $${values.length + 1}`);
+      values.push(filters.ownerDepartmentId);
+    }
   }
+
   if (filters.subLocationId !== undefined) {
     if (filters.subLocationId === null) {
       conditions.push(`iu.sub_location_id IS NULL`);
@@ -317,6 +322,7 @@ async function createItemUnit(data) {
     purchase_date,
     purchase_cost,
     vendor_id,
+    sub_location_id = null,
     created_by,
     updated_by,
   } = data;
@@ -331,10 +337,11 @@ async function createItemUnit(data) {
         purchase_date,
         purchase_cost,
         vendor_id,
+        sub_location_id,
         created_by,
         updated_by
       ) 
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
      RETURNING id`,
     [
       item_id,
@@ -344,6 +351,7 @@ async function createItemUnit(data) {
       purchase_date,
       purchase_cost,
       vendor_id,
+      sub_location_id,
       created_by,
       updated_by,
     ]
@@ -358,6 +366,7 @@ async function createItemUnit(data) {
     purchase_date,
     purchase_cost,
     vendor_id,
+    sub_location_id,
     created_by,
     updated_by,
   };
@@ -407,6 +416,36 @@ async function getLastUnitTag(prefix) {
   return rows[0];
 }
 
+async function getItemUnitValues() {
+  const query = `
+    SELECT
+      ROUND(SUM(iu.purchase_cost), 2) AS total_original_value,
+      ROUND(
+        SUM(
+          CASE
+            WHEN iu.purchase_date IS NOT NULL AND i.useful_life IS NOT NULL THEN
+              iu.purchase_cost * LEAST(EXTRACT(YEAR FROM AGE(CURRENT_DATE, iu.purchase_date)) / i.useful_life, 1)
+            ELSE 0
+          END
+        ), 2
+      ) AS total_depreciated_value,
+      ROUND(
+        SUM(
+          CASE
+            WHEN iu.purchase_date IS NOT NULL AND i.useful_life IS NOT NULL THEN
+              iu.purchase_cost * GREATEST(1 - EXTRACT(YEAR FROM AGE(CURRENT_DATE, iu.purchase_date)) / i.useful_life, 0)
+            ELSE iu.purchase_cost
+          END
+        ), 2
+      ) AS total_remaining_value
+    FROM item_units iu
+    LEFT JOIN items i ON iu.item_id = i.id
+  `;
+
+  const { rows } = await db.query(query);
+  return rows[0];
+}
+
 export {
   getAllItemUnits,
   getItemUnitByID,
@@ -419,6 +458,7 @@ export {
   getUtilization,
   getItemUnitsFromDepartment,
   getLastUnitTag,
+  getItemUnitValues,
   createItemUnit,
   updateItemUnitPartial,
   deleteItemUnitByID,

@@ -74,17 +74,28 @@ async function getItemByName(name) {
   return rows[0];
 }
 
+async function getItemByCode(code) {
+  if (!code) return null;
+
+  const { rows } = await db.query(
+    "SELECT * FROM items WHERE LOWER(code) = LOWER($1)",
+    [code]
+  );
+  return rows[0];
+}
+
 // Create a new item
 async function createItem(data) {
-  const { name, category, department_id, created_by, updated_by } = data;
+  const { code, name, category, department_id, created_by, updated_by } = data;
   const { rows } = await db.query(
-    `INSERT INTO items (name, category, department_id, created_by, updated_by)
-     VALUES ($1, $2, $3, $4, $5)
+    `INSERT INTO items (code, name, category, department_id, created_by, updated_by)
+     VALUES ($1, $2, $3, $4, $5, $6)
      RETURNING id`,
-    [name, category, department_id, created_by, updated_by]
+    [code, name, category, department_id, created_by, updated_by]
   );
   return {
     id: rows[0].id,
+    code: rows[0].code,
     name,
     category,
     department_id,
@@ -130,6 +141,7 @@ export {
   getAllItems,
   getItemByID,
   getItemByName,
+  getItemByCode,
   createItem,
   updateItemPartial,
   deleteItemByID,

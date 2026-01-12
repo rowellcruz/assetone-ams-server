@@ -114,3 +114,7 @@ export async function getUserActivityWeeklyTrend() {
 export async function getTopModuleUsage(filters = {}) {
   return await activityLogModel.getTopModuleUsage(filters);
 }
+
+export async function getAssetValues() {
+  return await itemUnitModel.getItemUnitValues();
+}
