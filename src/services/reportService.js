@@ -41,6 +41,9 @@ export const generateReport = async (reportType, filters, userId) => {
     case "vendor":
       data = await reportModel.getVendors(filters);
       break;
+    case "department-assets":
+      data = await reportModel.getDepartmentAssetsReportData(filters);
+      break;
     default:
       throw new Error("Unknown report type");
   }

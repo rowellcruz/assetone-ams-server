@@ -27,6 +27,18 @@ export const getItemUnitsByDepartmentId = async (req, res) => {
   res.json(departments);
 };
 
+export const downloadDepartmentAssetsReport = async (req, res) => {
+  const { id } = req.params;
+  const pdfBuffer = await departmentService.generateDepartmentAssetsReport(id);
+
+  res.setHeader("Content-Type", "application/pdf");
+  res.setHeader(
+    "Content-Disposition",
+    `attachment; filename=department_${id}_assets_report.pdf`
+  );
+  res.send(pdfBuffer);
+}
+
 export const getDepartmentByID = async (req, res) => {
   const { id } = req.params;
   const department = await departmentService.getDepartmentByID(id);

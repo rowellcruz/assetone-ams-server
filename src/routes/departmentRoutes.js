@@ -10,6 +10,7 @@ router.get('/', authenticate, departmentController.getDepartments);
 router.get('/:id', authenticate, departmentController.getDepartmentByID);
 router.get('/:id/technicians', authenticate, departmentController.getAvailableTechnicians);
 router.get('/:id/item-units', authenticate, departmentController.getItemUnitsByDepartmentId);
+router.get('/:id/assets/report', authenticate, departmentController.downloadDepartmentAssetsReport);
 
 router.post('/', authenticate, asyncHandler(departmentController.createDepartment, MODULE));
 router.post('/bulk-delete', authenticate, asyncHandler(departmentController.deleteDepartmentsByIDs, MODULE));

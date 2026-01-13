@@ -23,7 +23,9 @@ export const getItems = async (filters = {}) => {
   const where = [];
   if (filters.from && filters.to) {
     values.push(filters.from, filters.to);
-    where.push(`i.created_at BETWEEN $${values.length - 1} AND $${values.length}`);
+    where.push(
+      `i.created_at BETWEEN $${values.length - 1} AND $${values.length}`
+    );
   }
 
   if (where.length) query += ` WHERE ${where.join(" AND ")}`;
@@ -36,7 +38,6 @@ export const getItems = async (filters = {}) => {
   const { rows } = await db.query(query, values);
   return rows;
 };
-
 
 // 2. Item Units
 export const getItemUnits = async (filters = {}, limit = 50) => {
@@ -77,7 +78,6 @@ export const getItemUnits = async (filters = {}, limit = 50) => {
   const { rows } = await db.query(query, values);
   return rows;
 };
-
 
 // 3. Maintenance Schedules
 export const getMaintenanceSchedules = async (filters = {}) => {
@@ -371,6 +371,43 @@ export const getVendors = async (filters = {}) => {
 
   if (conditions.length) query += " WHERE " + conditions.join(" AND ");
   query += " ORDER BY v.created_at DESC";
+
+  const { rows } = await db.query(query, values);
+  return rows;
+};
+
+export const getDepartmentAssetsReportData = async (filters = {}) => {
+  let query = `
+    SELECT
+      iu.unit_tag AS "Unit Tag",
+      i.name AS "Item Name",
+      iu.status AS "Status",
+      iu.purchase_date AS "Purchase Date"
+    FROM item_units iu
+    LEFT JOIN items i ON iu.item_id = i.id
+  `;
+
+  const conditions = [];
+  const values = [];
+
+  if (filters.departmentId !== undefined) {
+    if ([null, "null", 0, "0"].includes(filters.departmentId)) {
+      conditions.push(`iu.owner_department_id IS NULL`);
+    } else {
+      conditions.push(`iu.owner_department_id = $${values.length + 1}`);
+      values.push(filters.departmentId);
+    }
+  }
+
+  if (filters.from && filters.to) {
+    values.push(filters.from, filters.to);
+    conditions.push(
+      `iu.created_at BETWEEN $${values.length - 1} AND $${values.length}`
+    );
+  }
+
+  if (conditions.length) query += " WHERE " + conditions.join(" AND ");
+  query += " ORDER BY iu.created_at DESC";
 
   const { rows } = await db.query(query, values);
   return rows;

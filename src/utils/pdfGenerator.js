@@ -33,6 +33,7 @@ export const generatePDF = async (reportType, data = [], user = {}, reportParams
     department: "DEPARTMENTS REPORT",
     location: "LOCATIONS REPORT",
     vendor: "VENDORS REPORT",
+    "department-assets": "DEPARTMENT ASSETS REPORT",
   };
 
   const logoPath = path.resolve(__dirname, "../assets/dycilogocircle.jpeg");

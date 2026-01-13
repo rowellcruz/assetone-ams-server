@@ -35,6 +35,15 @@ export async function getItemUnitsByDepartmentId(id) {
   } else return await itemUnitModel.getAllItemUnits({ ownerDepartmentId: id });
 }
 
+export async function generateDepartmentAssetsReport(id) {
+  const itemUnits = await getItemUnitsByDepartmentId(id);
+  const pdfBuffer = await departmentModel.generateDepartmentAssetsReport(
+    id,
+    itemUnits
+  );
+  return pdfBuffer;
+} 
+
 export async function getAvailableTechnicians(id) {
   return await userModel.getAvailableTechniciansFromDepartment(id);
 }
