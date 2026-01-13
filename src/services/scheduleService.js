@@ -7,6 +7,7 @@ import * as itemModel from "../models/itemModel.js";
 import * as scheduleTechnicianModel from "../models/scheduleTechnicianModel.js";
 import * as maintenanceRequestModel from "../models/maintenanceRequestModel.js";
 import * as mailer from "../utils/mailer.js";
+import * as notificationSender from "../utils/notificationSender.js";
 
 export async function getAllSchedules(filters = {}) {
   return await scheduleModel.getAllSchedules(filters);
@@ -233,6 +234,8 @@ export async function updateScheduleAsset(
       completedBy
     );
 
+  const itemUnitData = await itemUnitModel.getItemUnitByID(unitId);
+
   const occurrenceAssets =
     await scheduleAssetsModel.getAssignedAssetsByOccurrenceId(id);
 
@@ -248,6 +251,19 @@ export async function updateScheduleAsset(
     updated_at: new Date(),
   });
 
+  if (parseInt(newCondition) <= 40) {
+    const assetAdmins = await userModel.getAllUsers({
+      role: "asset_administrator",
+    });
+    const recipientIds = assetAdmins.map((admin) => admin.id);
+
+    await notificationSender.sendNotification(
+      "Item-unit",
+      `Asset ${item.item_name} (Unit: ${item.unit_tag}) is in low condition. Please check it.`,
+      recipientIds
+    );
+  }
+
   const activeRequests = await maintenanceRequestModel.getActiveRequestsByUnit(
     unitId
   );
@@ -261,7 +277,6 @@ export async function updateScheduleAsset(
       `${item.item_name} - ${item.unit_tag}`
     );
   }
-
   return updatedScheduledAsset;
 }
 

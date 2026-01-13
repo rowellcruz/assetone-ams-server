@@ -4,6 +4,7 @@ import * as vendorModel from "../models/vendorModel.js";
 import * as notificationSender from "../utils/notificationSender.js";
 import * as userModel from "../models/userModel.js";
 import * as relocationModel from "../models/relocationModel.js";
+import * as transferLogModel from "../models/transferLogModel.js";
 import * as scheduleModel from "../models/scheduleModel.js";
 import * as locationModel from "../models/locationModel.js";
 import * as subLocationModel from "../models/subLocationModel.js";
@@ -263,8 +264,23 @@ export async function relocateItemUnit(id, user, data) {
   );
 }
 
+export async function transferItemUnit(id, user, data) {
+  const { from_department_id, to_department_id } = data;
+
+  return await transferLogModel.logTransfer(
+    id,
+    from_department_id,
+    to_department_id,
+    user.id
+  );
+}
+
 export async function itemUnitRelocationLog(id) {
   return await relocationModel.getRelocationLogsById(id);
+}
+
+export async function itemUnitTransferLog(id) {
+  return await transferLogModel.getTransferLogsById(id);
 }
 
 export async function getMaintenanceHistory(id) {

@@ -105,6 +105,17 @@ export const relocateItemUnit = async (req, res) => {
   res.json(relocate);
 };
 
+export const transferItemUnit = async (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  const user = req.user;
+  const transfer = await itemUnitService.transferItemUnit(id, user, req.body);
+  if (!transfer) {
+    res.status(404);
+    throw new Error("Item unit not found");
+  }
+  res.json(transfer);
+};
+
 export const itemUnitRelocationLog = async (req, res) => {
   const { id } = req.params;
   const relocate = await itemUnitService.itemUnitRelocationLog(id);
@@ -114,6 +125,19 @@ export const itemUnitRelocationLog = async (req, res) => {
   }
   res.json(relocate);
 };
+
+export const itemUnitTransferLog = async (req, res) => {
+  const { id } = req.params;
+  const transfer = await itemUnitService.itemUnitTransferLog(id);
+
+  if (!transfer) {
+    res.status(404);
+    throw new Error("Item unit transfer log not found");
+  }
+
+  res.json(transfer);
+};
+
 
 export const getMaintenanceHistory = async (req, res) => {
   const { id } = req.params;
