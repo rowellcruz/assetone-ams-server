@@ -20,7 +20,7 @@ export async function getAllSchedulesWithTemplates(filters = {}) {
     schedules.map(async (schedule) => {
       const [assigned_technicians, assigned_assets] = await Promise.all([
         scheduleTechnicianModel.getScheduleTechniciansByOccurrenceId(
-          schedule.id
+          schedule.id,
         ),
         scheduleAssetsModel.getAssignedAssetsByOccurrenceId(schedule.id),
       ]);
@@ -30,7 +30,7 @@ export async function getAllSchedulesWithTemplates(filters = {}) {
         assigned_technicians,
         assigned_assets,
       };
-    })
+    }),
   );
 
   return schedulesWithDetails;
@@ -64,21 +64,20 @@ export async function getScheduleOccurrencesByAssetUnitId(assetUnitId) {
 }
 
 export async function getScheduleByTemplateId(templateId) {
-  const occurrences = await scheduleModel.getScheduleOccurrenceByTemplateId(
-    templateId
-  );
+  const occurrences =
+    await scheduleModel.getScheduleOccurrenceByTemplateId(templateId);
 
   const occurrencesWithTechnicians = await Promise.all(
     occurrences.map(async (occurrence) => {
       const assigned_technicians =
         await scheduleTechnicianModel.getScheduleTechniciansByOccurrenceId(
-          occurrence.id
+          occurrence.id,
         );
       return {
         ...occurrence,
         assigned_technicians,
       };
-    })
+    }),
   );
 
   return occurrencesWithTechnicians;
@@ -98,13 +97,13 @@ export async function updateScheduleOccurrencePartial(id, fieldsToUpdate) {
 
   if (occurrence.status === "completed") {
     throw new Error(
-      "Schedule is already completed. No further changes are allowed."
+      "Schedule is already completed. No further changes are allowed.",
     );
   }
 
   return await scheduleModel.updateScheduleOccurrencePartial(
     id,
-    fieldsToUpdate
+    fieldsToUpdate,
   );
 }
 
@@ -117,12 +116,6 @@ export async function startScheduleOccurrence(id, startedBy, technicians = []) {
   let item_unit_ids;
 
   const item = await itemModel.getItemByID(template.item_id);
-  console.log({
-    unitsForMaintenance: true,
-    technicianDepartmentId: item.department_id,
-    itemId: template.item_id,
-  });
-
   // Fix: ACA should use PM logic for asset assignment
   if (template.type === "CM") {
     item_unit_ids = template.item_unit_id ? [template.item_unit_id] : [];
@@ -145,13 +138,13 @@ export async function startScheduleOccurrence(id, startedBy, technicians = []) {
     await scheduleAssetsModel.assignAssets(id, item_unit_ids);
   } else {
     throw new Error(
-      "Cannot start schedule because there are no asset units available."
+      "Cannot start schedule because there are no asset units available.",
     );
   }
 
   if (!technicians || technicians.length === 0) {
     throw new Error(
-      "At least one technician must be assigned to start a schedule"
+      "At least one technician must be assigned to start a schedule",
     );
   }
 
@@ -165,8 +158,8 @@ export async function startScheduleOccurrence(id, startedBy, technicians = []) {
 
   await Promise.all(
     technicians.map((techId) =>
-      userModel.updateUserPartial(techId, { status: "in_operation" })
-    )
+      userModel.updateUserPartial(techId, { status: "in_operation" }),
+    ),
   );
 
   let unitStatus;
@@ -175,17 +168,34 @@ export async function startScheduleOccurrence(id, startedBy, technicians = []) {
   else if (template.type === "ACA") unitStatus = "under_assessment";
   else unitStatus = "unknown_status";
 
+  const itemUnitData = await itemUnitModel.getItemUnitByID(
+        request.item_unit_id
+      );
+
   for (const unitId of item_unit_ids) {
+    // Update item unit status
     await itemUnitModel.updateItemUnitPartial(unitId, {
       status: unitStatus,
       updated_at: new Date(),
     });
 
+    // Update maintenance request status
     await maintenanceRequestModel.updateMaintenanceRequest(
       unitId,
       "approved",
-      "in_progress"
+      "in_progress",
     );
+
+    const activeRequests =
+      await maintenanceRequestModel.getActiveRequestsByUnit(unitId);
+
+    for (const req of activeRequests) {
+      await mailer.sendInProgressMessage(
+        req.requested_by,
+        req.requestor_name,
+        `${item.item_name} - ${item.unit_tag}`,
+      );
+    }
   }
 
   return updated;
@@ -212,7 +222,7 @@ export async function updateScheduleAsset(
   physicalRating,
   review,
   isBroken,
-  completedBy
+  completedBy,
 ) {
   const item = await itemUnitModel.getItemUnitByID(unitId);
 
@@ -231,7 +241,7 @@ export async function updateScheduleAsset(
       unitId,
       review,
       parseInt(newCondition),
-      completedBy
+      completedBy,
     );
 
   const itemUnitData = await itemUnitModel.getItemUnitByID(unitId);
@@ -260,13 +270,12 @@ export async function updateScheduleAsset(
     await notificationSender.sendNotification(
       "Item-unit",
       `Asset ${item.item_name} (Unit: ${item.unit_tag}) is in low condition. Please check it.`,
-      recipientIds
+      recipientIds,
     );
   }
 
-  const activeRequests = await maintenanceRequestModel.getActiveRequestsByUnit(
-    unitId
-  );
+  const activeRequests =
+    await maintenanceRequestModel.getActiveRequestsByUnit(unitId);
 
   for (const req of activeRequests) {
     await maintenanceRequestModel.resolveRequest(req.id);
@@ -274,7 +283,7 @@ export async function updateScheduleAsset(
     await mailer.sendResolveMessage(
       req.requested_by,
       `${req.requestor_name}`,
-      `${item.item_name} - ${item.unit_tag}`
+      `${item.item_name} - ${item.unit_tag}`,
     );
   }
   return updatedScheduledAsset;
@@ -287,12 +296,12 @@ export async function skipScheduleOccurrence(id, skippedBy, reason) {
   const skippableStatus = ["pending", "overdue"];
   if (!skippableStatus.includes(occurrence.status)) {
     throw new Error(
-      "Schedule cannot be skipped. Only pending and overdue schedules can be skipped."
+      "Schedule cannot be skipped. Only pending and overdue schedules can be skipped.",
     );
   }
 
   const template = await scheduleTemplateModel.getScheduleTemplatesByID(
-    occurrence.template_id
+    occurrence.template_id,
   );
 
   if (!template) throw new Error("Template not found");
@@ -310,7 +319,7 @@ export async function skipScheduleOccurrence(id, skippedBy, reason) {
         template.id,
         occurrence.scheduled_date,
         template.frequency_value,
-        template.frequency_unit
+        template.frequency_unit,
       );
     }
 
@@ -341,8 +350,8 @@ export async function completeScheduleOccurrence(id, completedBy) {
 
   await Promise.all(
     technicians.map((t) =>
-      userModel.updateUserPartial(t.id, { status: "inactive" })
-    )
+      userModel.updateUserPartial(t.id, { status: "inactive" }),
+    ),
   );
 
   // Complete the occurrence

@@ -95,6 +95,48 @@ export async function sendResolveMessage(email, fullName, issueTitle) {
   return sendEmail(email, "Issue Resolved - AssetONE", html);
 }
 
+export async function sendInProgressMessage(email, fullName, issueTitle) {
+  const html = `
+    <h2>Issue Update: In Progress</h2>
+    <p>Hi ${fullName},</p>
+    <p>Your reported issue regarding <strong>"${issueTitle}"</strong> in 
+    <strong>AssetONE: DYCI's Web-Based Asset Monitoring and Maintenance System</strong> 
+    is now being reviewed and addressed by the technicians.</p>
+    <br>
+    <p>Thank you.</p>
+    <p><em>This is an automated message. Please do not reply to this email.</em></p>
+  `;
+  return sendEmail(email, "Report Update - In Progress (AssetONE)", html);
+}
+
+
+export async function sendSuccessReportMessage(email, fullName, itemUnitName) {
+  const html = `
+    <h2>New Issue Reported</h2>
+    <p>Hi ${fullName},</p>
+    <p>The issue you reported regarding <strong>"${itemUnitName}"</strong> in <strong>AssetONE: DYCI's Web-app Asset Monitoring and Maintenance Tracker</strong> has been reported.</p>
+    <p>Thank you for using AssetONE.</p>
+    <br>
+    <p><em>This is an automated message. Please do not reply.</em></p>
+  `;
+  return sendEmail(email, "New Issue Reported - AssetONE", html);
+}
+
+export async function sendReportMessage(email, fullName, itemUnitName) {
+  const html = `
+    <h2>New Issue Reported</h2>
+    <p>Hi ${fullName},</p>
+    <p>An issue has been reported for the asset unit <strong>"${itemUnitName}"</strong> in <strong>AssetONE: DYCI's Web-Based Asset Monitoring and Maintenance System</strong>.</p>
+    <p>Please log in to the system to review the details and take the necessary action.</p>
+    <p>If you require further clarification, coordinate through the system's support module.</p>
+    <br>
+    <p>Thank you.</p>
+    <p><em>This is an automated message. Please do not reply to this email.</em></p>
+  `;
+  return sendEmail(email, "New Issue Reported - AssetONE", html);
+}
+
+
 export async function sendResetConfirmation(email, rawToken) {
   const resetLink = `${clientUrl}/reset-password?token=${rawToken}`;
   const html = `

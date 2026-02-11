@@ -7,6 +7,21 @@ async function getUserDataByEmail(email) {
   return rows[0];
 }
 
+async function getTechniciansAndAdminsByDepartment(departmentId) {
+  const { rows } = await db.query(
+    `
+    SELECT 
+      id, first_name, last_name, email, role, status
+    FROM users
+    WHERE (role = 'technician' OR role = 'asset_administrator')
+      AND (department_id = $1 OR department_id IS NULL)
+      AND status != 'in_operation';
+    `,
+    [departmentId]
+  );
+  return rows;
+}
+
 async function getAvailableTechniciansFromDepartment(id) {
   let query = `
     SELECT 
@@ -216,6 +231,7 @@ async function deleteUsersByIDs(ids) {
 
 export {
   getUserDataByEmail,
+  getTechniciansAndAdminsByDepartment,
   getAllUsers,
   getUserDataById,
   getUsersFromDepartment,
